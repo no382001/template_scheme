@@ -4,23 +4,49 @@
 #include <string>
 #include <regex>
 
-void pretty_print(const char* str) {
+
+template <typename T>
+constexpr auto demangle() -> std::string
+{
+#if defined(__clang__)
+    constexpr auto prefix = std::string_view{"[T = "};
+    constexpr auto suffix = "]";
+    constexpr auto function = std::string_view{__PRETTY_FUNCTION__};
+#elif defined(__GNUC__)
+    constexpr auto prefix = std::string_view{"with T = "};
+    constexpr auto suffix = "; ";
+    constexpr auto function = std::string_view{__PRETTY_FUNCTION__};
+#elif defined(_MSC_VER)
+    constexpr auto prefix = std::string_view{"get_type_name<"};
+    constexpr auto suffix = ">(void)";
+    constexpr auto function = std::string_view{__FUNCSIG__};
+#else
+# error Unsupported compiler
+#endif
+
+    const auto start = function.find(prefix) + prefix.size();
+    const auto end = function.find(suffix);
+    const auto size = end - start;
+
+    return std::string(function.substr(start, size)).data();
+}
+
+void pretty_print(std::string str) {
 
 	// delete all instances of struct and any whitespace in the string
 	auto clean = std::regex_replace(str, std::regex(R"((struct )|( ))"), "");
 
-    std::string indent_ = std::string("\n");
+    std::string indent_list = std::string("\n");
     size_t token = 0;
-    std::string indent = "  ";
     while ((token = clean.find_first_of("<>,", token)) != std::string::npos) {
         switch (clean[token]) {
-        case '<': indent_.append(indent);
-        case ',': clean.insert(token + 1, indent_);
+        case '<': indent_list.append(" ");
+        case ',': clean.insert(token + 1, indent_list);
             break;
-        case '>': indent_.erase(indent_.size() - indent.size());
-            clean.insert(token, indent_);
+        case '>': indent_list.erase(indent_list.size() - 1);
+            clean.insert(token, indent_list);
         }
-        token += indent_.size() + 1;
+        token += indent_list.size() + 1;
         const size_t nw = clean.find_first_not_of(" ", token);
         if (nw != std::string::npos) {
             clean.erase(token, nw - token);
