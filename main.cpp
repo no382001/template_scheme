@@ -74,6 +74,13 @@ auto constexpr e_add(integer<A>, Rest... r) {
 	else
 		return A;
 }
+template< typename ...Args,typename ...Rest>
+auto constexpr e_add(list<Args...> l, Rest...) { // nested expression overload
+	auto constexpr x = handle_prefix(l);
+	return e_add(integer<x>{}, Rest{}...);
+}
+
+
 template<int A, typename ...Rest>
 auto constexpr e_sub(integer<A>, Rest... r) {
 	if constexpr (sizeof...(Rest) > 0)
@@ -81,6 +88,12 @@ auto constexpr e_sub(integer<A>, Rest... r) {
 	else
 		return A;
 }
+template< typename ...Args, typename ...Rest>
+auto constexpr e_sub(list<Args...> l, Rest...) {
+	auto constexpr x = handle_prefix(l);
+	return e_sub(integer<x>{}, Rest{}...);
+}
+
 template<int A, typename ...Rest>
 auto constexpr e_mul(integer<A>, Rest... r) {
 	if constexpr (sizeof...(Rest) > 0)
@@ -88,6 +101,12 @@ auto constexpr e_mul(integer<A>, Rest... r) {
 	else
 		return A;
 }
+template< typename ...Args, typename ...Rest>
+auto constexpr e_mul(list<Args...> l, Rest...) {
+	auto constexpr x = handle_prefix(l);
+	return e_mul(integer<x>{}, Rest{}...);
+}
+
 template<int A, typename ...Rest>
 auto constexpr e_div(integer<A>, Rest... r) {
 	if constexpr (sizeof...(Rest) > 0)
@@ -95,13 +114,17 @@ auto constexpr e_div(integer<A>, Rest... r) {
 	else
 		return A;
 }
+template< typename ...Args, typename ...Rest>
+auto constexpr e_div(list<Args...> l, Rest...) {
+	auto constexpr x = handle_prefix(l);
+	return e_div(integer<x>{}, Rest{}...);
+}
 // ---------------------------------------- number ops
 
 template <typename A, typename ...Rest>
-auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {	
-	/**/
+auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {
 	if constexpr (sizeof...(Rest) > 0) {
-		if constexpr (is_same_type<A, plus>) { // if operator
+		if constexpr (is_same_type<A, plus>) { // if the prefix is valid
 			return e_add(Rest{}...); // pass the rest of the parameters to the evaluator
 		}
 		else if constexpr (is_same_type<A, minus>) {
@@ -114,7 +137,6 @@ auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {
 			return e_div(Rest{}...);
 		}
 	}
-	/**/
 };
 
 // the outer layer
@@ -123,6 +145,7 @@ auto constexpr parse(token_list< A, Rest... >) {
 	// extract the first argument of token_list
 	if constexpr (sizeof...(Rest) >= 0) {
 		return handle_prefix(A{});
+		//return define_atom(constexpr_string("abcd")) == A;
 	}
 	else {
 		return 0;
@@ -130,13 +153,17 @@ auto constexpr parse(token_list< A, Rest... >) {
 }
 
 
+
+
 int main()
 {
 
-	auto x = constexpr_string("(+ 32 3 2)");
+	auto x = constexpr_string("(+ 3 (* 3 (+ 2 2) 2))");
+	//auto x = constexpr_string("( abcd )");
+	
 	using tokens = decltype(tokenize(x));
-
 	auto constexpr res = parse(tokens{});
 		
 	pretty_print(typeid(tokens).name());
+	std::cout << ";; " << res;
 }

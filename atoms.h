@@ -182,3 +182,15 @@ constexpr auto find_end_of_list(Lambda lambda)
 	}
 }
 
+template <typename Lambda, int Index = 0>
+constexpr auto define_atom(Lambda lambda) {
+	constexpr auto str = lambda();
+	if constexpr (Index < str.size()) {
+		using curr = decltype(deduce_token_type< str[Index] >());
+		using second = decltype(define_atom< Lambda, Index + 1>(lambda));
+		return make_c_list(curr{}, second{});
+	}
+	else {
+		return make_c_list();
+	}
+}
