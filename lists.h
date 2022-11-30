@@ -68,6 +68,7 @@ auto constexpr make_c_list()->c_list<>;
 template < typename ...Types >
 struct list
 {
+
 	static constexpr auto append(list<>)->list< Types... >;
 
 	// append A to the end
@@ -86,6 +87,7 @@ struct list
 		using curr = decltype(list::append(A{}));
 		return decltype(curr::append(list< B, Args... >{})){};
 	}
+
 };
 
 template < typename T, typename ...Rest>

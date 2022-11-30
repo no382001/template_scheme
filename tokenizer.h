@@ -1,3 +1,4 @@
+#pragma once
 
 #include <string_view>
 #include <type_traits>
@@ -5,8 +6,6 @@
 #include "atoms.h"
 #include "utils.h"
 #include "lists.h"
-#include "pretty_print.h"
-
 
 template <typename Lambda, size_t Index = 0>
 //pass a stringview return type lambda that passes the arguments with __VA_ARGS__
@@ -52,10 +51,6 @@ constexpr auto tokenize(Lambda str_lambda)
 				return make_token_list(curr{}, second{});
 			}
 		}
-		else if constexpr (is_same_type<curr,whitespace>) {
-			// if its not a specially handled token
-			return tokenize< Lambda, Index + 1 >(str_lambda);
-		}
 		else {
 			// if its not a specially handled token
 			using next = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
@@ -65,78 +60,4 @@ constexpr auto tokenize(Lambda str_lambda)
 	else {
 		return make_token_list();
 	}
-}
-// ---------------------------------------- number ops
-template<int A, typename ...Rest>
-auto constexpr e_add(integer<A>, Rest... r) {
-	if constexpr (sizeof...(Rest) > 0)
-		return A + e_add(r...);
-	else
-		return A;
-}
-template<int A, typename ...Rest>
-auto constexpr e_sub(integer<A>, Rest... r) {
-	if constexpr (sizeof...(Rest) > 0)
-		return A - e_sub(r...);
-	else
-		return A;
-}
-template<int A, typename ...Rest>
-auto constexpr e_mul(integer<A>, Rest... r) {
-	if constexpr (sizeof...(Rest) > 0)
-		return A * e_mul(r...);
-	else
-		return A;
-}
-template<int A, typename ...Rest>
-auto constexpr e_div(integer<A>, Rest... r) {
-	if constexpr (sizeof...(Rest) > 0)
-		return A / e_div(r...);
-	else
-		return A;
-}
-// ---------------------------------------- number ops
-
-template <typename A, typename ...Rest>
-auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {	
-	/**/
-	if constexpr (sizeof...(Rest) > 0) {
-		if constexpr (is_same_type<A, plus>) { // if operator
-			return e_add(Rest{}...); // pass the rest of the parameters to the evaluator
-		}
-		else if constexpr (is_same_type<A, minus>) {
-			return e_sub(Rest{}...);
-		}
-		else if constexpr (is_same_type<A, mul>) {
-			return e_mul(Rest{}...);
-		}
-		else if constexpr (is_same_type<A, div_>) {
-			return e_div(Rest{}...);
-		}
-	}
-	/**/
-};
-
-// the outer layer
-template < typename A, typename ...Rest >
-auto constexpr parse(token_list< A, Rest... >) {
-	// extract the first argument of token_list
-	if constexpr (sizeof...(Rest) >= 0) {
-		return handle_prefix(A{});
-	}
-	else {
-		return 0;
-	}
-}
-
-
-int main()
-{
-
-	auto x = constexpr_string("(+ 32 3 2)");
-	using tokens = decltype(tokenize(x));
-
-	auto constexpr res = parse(tokens{});
-		
-	pretty_print(typeid(tokens).name());
 }

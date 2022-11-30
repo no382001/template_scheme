@@ -26,14 +26,9 @@ struct integer
 {
 
 	template < int A >
-	static constexpr auto merge(integer<A>)->integer< _pow((Value * 10), (_log(10, A) + 1)) + A >; //https://mathworld.wolfram.com/Concatenation.html
+	static constexpr auto merge(integer<A>)->integer< _pow((Value * 10), (_log(10, A) + 1)) + A >; // int concatenation
 
 	static constexpr auto merge(non_integer)->integer<Value>;
-
-	constexpr operator int() const
-	{
-		return Value;
-	}
 };
 
 template <int C>
@@ -83,10 +78,12 @@ constexpr auto deduce_token_type()
 	{
 		return div_{};
 	}
+	/**/
 	else if constexpr (C == ' ')
 	{
 		return whitespace{};
 	}
+	/**/
 }
 
 
@@ -185,14 +182,3 @@ constexpr auto find_end_of_list(Lambda lambda)
 	}
 }
 
-
-
-
-template <typename Lambda, size_t Index, size_t end_of_list>
-//pass a stringview return type lambda that passes the arguments with __VA_ARGS__
-constexpr auto tokenize_list(Lambda str_lambda)
-{
-		using curr = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
-
-		return make_list(curr{});
-}
