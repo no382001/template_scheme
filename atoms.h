@@ -169,3 +169,30 @@ constexpr auto tokenize_char_list(Lambda str_lambda)
 		return make_c_list();
 	}
 }
+
+template < int Index, typename Lambda >
+constexpr auto find_end_of_list(Lambda lambda)
+{
+	constexpr auto str = lambda();
+	using type = decltype(deduce_token_type< str[Index] >());
+	if constexpr (!is_same_type<type,list_end>)
+	{
+		return find_end_of_list< Index + 1 >(lambda);
+	}
+	else
+	{
+		return Index;
+	}
+}
+
+
+
+
+template <typename Lambda, size_t Index, size_t end_of_list>
+//pass a stringview return type lambda that passes the arguments with __VA_ARGS__
+constexpr auto tokenize_list(Lambda str_lambda)
+{
+		using curr = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
+
+		return make_list(curr{});
+}

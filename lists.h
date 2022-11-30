@@ -64,3 +64,31 @@ template < typename T, typename ...Rest>
 auto constexpr make_c_list(T, Rest...) -> decltype(c_list< T >::append(c_list< Rest... >{}));
 
 auto constexpr make_c_list()->c_list<>;
+
+template < typename ...Types >
+struct list
+{
+	static constexpr auto append(list<>)->list< Types... >;
+
+	// append A to the end
+	template < typename A >
+	static constexpr auto append(A)->list< Types..., A >;
+
+	template < typename A >
+	static constexpr auto append(list< A >)
+	{
+		return decltype(append(A{})){};
+	}
+
+	template < typename A, typename B, typename ...Args >
+	static constexpr auto append(list< A, B, Args... >)
+	{
+		using curr = decltype(list::append(A{}));
+		return decltype(curr::append(list< B, Args... >{})){};
+	}
+};
+
+template < typename T, typename ...Rest>
+auto constexpr make_list(T, Rest...) -> decltype(list< T >::append(list< Rest... >{}));
+
+auto constexpr make_list()->list<>;
