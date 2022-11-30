@@ -1,5 +1,6 @@
 #pragma once
 #include "utils.h"
+#include "lists.h"
 
 struct list_start {};
 struct list_end {};
@@ -12,12 +13,10 @@ struct div_ {};
 struct term {};
 struct whitespace {};
 struct non_integer {};
+struct non_character {};
 
-template <int Value>
-struct lower_case {};
-
-template <int Value>
-struct upper_case {};
+template <auto Value>
+struct c {};
 
 template <int Value>
 struct special_character {};
@@ -54,11 +53,11 @@ constexpr auto deduce_token_type()
 	}
 	else if constexpr (C >= 'a' && C <= 'z')
 	{
-		return lower_case<C>{};
+		return c<C>{};
 	}
 	else if constexpr (C >= 'A' && C <= 'Z')
 	{
-		return upper_case< C >{};
+		return c<C>{};
 	}
 	else if constexpr (C == '"')
 	{
@@ -89,6 +88,24 @@ constexpr auto deduce_token_type()
 		return whitespace{};
 	}
 }
+
+
+template < int Index, typename Lambda >
+constexpr auto find_end_of_char_list(Lambda lambda)
+{
+	constexpr auto str = lambda();
+	using type = decltype(deduce_token_type< str[Index] >());
+	if constexpr (!is_char_v<type>)
+	{
+		return Index;
+	}
+	else
+	{
+		return find_end_of_char_list< Index + 1 >(lambda);
+	}
+}
+
+
 // --------------------------------------------- INTEGER START
 
 template< typename Test, template < int... > class Type >
@@ -99,6 +116,9 @@ struct is_templated_int_collection< Type< Args... >, Type > : std::true_type {};
 
 template < typename T >
 constexpr inline bool is_integer_v = is_templated_int_collection< T, integer >::value;
+
+template <typename T>
+constexpr inline bool is_char_v = is_templated_int_collection< T, c >::value;
 
 template < int Index, typename Lambda >
 constexpr auto find_first_non_integer(Lambda lambda)
@@ -132,3 +152,20 @@ constexpr auto make_integer(Lambda str_lambda)
 
 
 // --------------------------------------------- INTEGER END
+
+template <typename Lambda, size_t Index = 0, size_t end_of_char_list>
+//pass a stringview return type lambda that passes the arguments with __VA_ARGS__
+constexpr auto tokenize_char_list(Lambda str_lambda)
+{
+	constexpr auto str = str_lambda();
+	if constexpr (Index < end_of_char_list) {
+
+		using curr = decltype(deduce_token_type< str[Index] >());
+		using second = decltype(tokenize_char_list< Lambda, Index + 1, end_of_char_list >(str_lambda));
+
+		return make_c_list(curr{}, second{});
+	}
+	else {
+		return make_c_list();
+	}
+}
