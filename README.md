@@ -29,7 +29,7 @@ using res = decltype(tokenize(x));
 ```
 ### evaluating simple expressions
 ```cpp
-auto x = constexpr_string("(+ 3 (* 3 (+ 2 2) 2))");
+auto x = constexpr_string("(+ 3 (* 3 2 (/ 2 1)))");
 using tokens = decltype(tokenize(x));
 auto constexpr res = parse(tokens{});	
 pretty_print(typeid(tokens).name());
@@ -44,22 +44,20 @@ token_list<
       list<
         token_list<
           mul,
-          integer<3>,
+          integer< 3>,
+          integer<2>,
           list<
             token_list<
-              plus,
-              integer<2>,
-              integer<2>
+              div_,
+              integer< 2>,
+              integer<1>
             >
-          >,
-          integer<2>
+          >
         >
-      >,
-      integer<2>
+      >
     >
-  >,
-  integer<2>
+  >
 >
-;; 29
+;; 15
 /**/
 ```
