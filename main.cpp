@@ -23,20 +23,18 @@ auto constexpr parse(token_list< A, Rest... >) {
 }
 
 int main(){
-	auto x = constexpr_string("(+ 3 (+ 3 (+ 2 2) 2))");
+
+	static_assert(10 == parse(decltype(tokenize(constexpr_string("(+ 3 (+ 3 (+ 2 2)))"))){}),"fail");
+	static_assert(12 == parse(decltype(tokenize(constexpr_string("(+ 3 (+ 3 (+ 2 2)) 2)"))){}),"fail");
+	static_assert(12 == parse(decltype(tokenize(constexpr_string("(+ 3 (+ 3 (+ 2 2) 2))"))){}),"fail");
+
+	auto x = constexpr_string("(+ 3 (+ 3 (+ 2 2)))");
 	//auto x = constexpr_string("( abcd )");
 	using tokens = decltype(tokenize(x));
 	auto constexpr res = parse(tokens{});
 	//pretty_print(typeid(tokens).name());
 	std::cout << ";; " << res << "\n";
 
-	/** /
-	auto y = constexpr_string("(+ 3 (+ 2 2) 2)");
-	using tokens2 = decltype(tokenize(y));
-	auto constexpr res2 = parse(tokens2{});
-	//pretty_print(typeid(tokens).name());
-	std::cout << ";; " << res2 << "\n";
-	/**/
 }
 
 

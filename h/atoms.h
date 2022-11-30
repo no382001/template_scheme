@@ -15,7 +15,7 @@ struct whitespace {};
 struct non_integer {};
 struct non_character {};
 
-template <auto Value>
+template <int Value>
 struct c_ {};
 
 template <int Value>
