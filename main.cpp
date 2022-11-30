@@ -5,7 +5,7 @@
 #include "atoms.h"
 #include "utils.h"
 #include "lists.h"
-#include "pretty_print.h"
+//#include "pretty_print.h"
 
 
 template <typename Lambda, size_t Index = 0>
@@ -164,6 +164,13 @@ int main()
 	using tokens = decltype(tokenize(x));
 	auto constexpr res = parse(tokens{});
 		
-	pretty_print(typeid(tokens).name());
-	std::cout << ";; " << res;
+	//pretty_print(typeid(tokens).name());
+	//std::cout << ";; " << res;
 }
+
+
+
+
+// clang++ -std=c++20 -S -emit-llvm main.cpp -o - | opt -analyze -dot-callgraph
+// dot -Tpng -ocallgraph.png callgraph.dot
+// https://stackoverflow.com/questions/5373714/how-to-generate-a-calling-graph-for-c-code

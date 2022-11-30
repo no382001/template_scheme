@@ -1,0 +1,78 @@
+\hypertarget{utils_8h}{}\doxysection{utils.\+h File Reference}
+\label{utils_8h}\index{utils.h@{utils.h}}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=231pt]{utils_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{utils_8h_a31e8186685ef087c4682d1dc360fc152}{constexpr\+\_\+string}}(...)~(\mbox{[}$\,$\mbox{]}() constexpr -\/$>$ std\+::string\+\_\+view \{ return \+\_\+\+\_\+\+VA\+\_\+\+ARGS\+\_\+\+\_\+; \})
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+constexpr int \mbox{\hyperlink{utils_8h_af86ae616d9f05751fd941ae90f7916f0}{\+\_\+pow}} (int base, int exp, int result=1)
+\item 
+constexpr int \mbox{\hyperlink{utils_8h_ae16aa352a98e60f093b8a94c0598c517}{\+\_\+log}} (int b, int n)
+\item 
+{\footnotesize template$<$typename Lambda , size\+\_\+t Index, size\+\_\+t end\+\_\+of\+\_\+list$>$ }\\constexpr auto \mbox{\hyperlink{utils_8h_a1c81dd98f27dbde69df01f1d48cacc64}{tokenize\+\_\+list}} (Lambda str\+\_\+lambda)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename A , typename B $>$ }\\constexpr bool \mbox{\hyperlink{utils_8h_ae9cea607a075d94f4b7a15f68228d9c1}{is\+\_\+same\+\_\+type}} = std\+::is\+\_\+same$<$A, B$>$\+::value
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{utils_8h_a31e8186685ef087c4682d1dc360fc152}\label{utils_8h_a31e8186685ef087c4682d1dc360fc152}} 
+\index{utils.h@{utils.h}!constexpr\_string@{constexpr\_string}}
+\index{constexpr\_string@{constexpr\_string}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{constexpr\_string}{constexpr\_string}}
+{\footnotesize\ttfamily \#define constexpr\+\_\+string(\begin{DoxyParamCaption}\item[{}]{... }\end{DoxyParamCaption})~(\mbox{[}$\,$\mbox{]}() constexpr -\/$>$ std\+::string\+\_\+view \{ return \+\_\+\+\_\+\+VA\+\_\+\+ARGS\+\_\+\+\_\+; \})}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{utils_8h_ae16aa352a98e60f093b8a94c0598c517}\label{utils_8h_ae16aa352a98e60f093b8a94c0598c517}} 
+\index{utils.h@{utils.h}!\_log@{\_log}}
+\index{\_log@{\_log}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{\_log()}{\_log()}}
+{\footnotesize\ttfamily constexpr int \+\_\+log (\begin{DoxyParamCaption}\item[{int}]{b,  }\item[{int}]{n }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+\mbox{\Hypertarget{utils_8h_af86ae616d9f05751fd941ae90f7916f0}\label{utils_8h_af86ae616d9f05751fd941ae90f7916f0}} 
+\index{utils.h@{utils.h}!\_pow@{\_pow}}
+\index{\_pow@{\_pow}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{\_pow()}{\_pow()}}
+{\footnotesize\ttfamily constexpr int \+\_\+pow (\begin{DoxyParamCaption}\item[{int}]{base,  }\item[{int}]{exp,  }\item[{int}]{result = {\ttfamily 1} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+\mbox{\Hypertarget{utils_8h_a1c81dd98f27dbde69df01f1d48cacc64}\label{utils_8h_a1c81dd98f27dbde69df01f1d48cacc64}} 
+\index{utils.h@{utils.h}!tokenize\_list@{tokenize\_list}}
+\index{tokenize\_list@{tokenize\_list}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{tokenize\_list()}{tokenize\_list()}}
+{\footnotesize\ttfamily template$<$typename Lambda , size\+\_\+t Index, size\+\_\+t end\+\_\+of\+\_\+list$>$ \\
+constexpr auto tokenize\+\_\+list (\begin{DoxyParamCaption}\item[{Lambda}]{str\+\_\+lambda }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=246pt]{utils_8h_a1c81dd98f27dbde69df01f1d48cacc64_cgraph}
+\end{center}
+\end{figure}
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{utils_8h_ae9cea607a075d94f4b7a15f68228d9c1}\label{utils_8h_ae9cea607a075d94f4b7a15f68228d9c1}} 
+\index{utils.h@{utils.h}!is\_same\_type@{is\_same\_type}}
+\index{is\_same\_type@{is\_same\_type}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{is\_same\_type}{is\_same\_type}}
+{\footnotesize\ttfamily template$<$typename A , typename B $>$ \\
+constexpr bool is\+\_\+same\+\_\+type = std\+::is\+\_\+same$<$A, B$>$\+::value\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [constexpr]}}
+

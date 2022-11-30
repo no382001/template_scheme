@@ -10,7 +10,6 @@ struct token_list
 	// append A to the end
 	template < typename A >
 	static constexpr auto append(A)->token_list< Types..., A >;
-
 	template < typename A >
 	static constexpr auto append(token_list< A >)
 	{

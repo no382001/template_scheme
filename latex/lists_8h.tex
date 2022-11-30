@@ -1,0 +1,134 @@
+\hypertarget{lists_8h}{}\doxysection{lists.\+h File Reference}
+\label{lists_8h}\index{lists.h@{lists.h}}
+{\ttfamily \#include \char`\"{}atoms.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}utils.\+h\char`\"{}}\newline
+Include dependency graph for lists.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=154pt]{lists_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=229pt]{lists_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structtoken__list}{token\+\_\+list$<$ Types $>$}}
+\item 
+struct \mbox{\hyperlink{structc__list}{c\+\_\+list$<$ Types $>$}}
+\item 
+struct \mbox{\hyperlink{structlist}{list$<$ Types $>$}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename ... Types$>$ }\\using \mbox{\hyperlink{lists_8h_a83821a97a39d887c3752e9fcd1d253f5}{make\+\_\+token\+\_\+list\+\_\+t}} = decltype(\mbox{\hyperlink{lists_8h_ae81477c5957afdeda6f897b3895a626e}{make\+\_\+token\+\_\+list}}(Types\{\}...))
+\item 
+{\footnotesize template$<$typename ... Types$>$ }\\using \mbox{\hyperlink{lists_8h_acb9cde90e911ac1882e55c2533541fe6}{token\+\_\+list\+\_\+t}} = decltype(\mbox{\hyperlink{lists_8h_ae81477c5957afdeda6f897b3895a626e}{make\+\_\+token\+\_\+list}}())
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename T , typename ... Rest$>$ }\\constexpr auto \mbox{\hyperlink{lists_8h_a265e4b870631d27325b72a342880e363}{make\+\_\+token\+\_\+list}} (T, Rest...) -\/$>$ decltype(\mbox{\hyperlink{structtoken__list}{token\+\_\+list}}$<$ T $>$\+::append(\mbox{\hyperlink{structtoken__list}{token\+\_\+list}}$<$ Rest... $>$\{\}))
+\item 
+constexpr auto \mbox{\hyperlink{lists_8h_ae81477c5957afdeda6f897b3895a626e}{make\+\_\+token\+\_\+list}} () -\/$>$ \mbox{\hyperlink{structtoken__list}{token\+\_\+list}}$<$$>$
+\item 
+{\footnotesize template$<$typename T , typename ... Rest$>$ }\\constexpr auto \mbox{\hyperlink{lists_8h_afe7f3b65ba2b89ab7469ef2253f1cc43}{make\+\_\+c\+\_\+list}} (T, Rest...) -\/$>$ decltype(\mbox{\hyperlink{structc__list}{c\+\_\+list}}$<$ T $>$\+::append(\mbox{\hyperlink{structc__list}{c\+\_\+list}}$<$ Rest... $>$\{\}))
+\item 
+constexpr auto \mbox{\hyperlink{lists_8h_a47a30c66daeed317cc3c56679e650949}{make\+\_\+c\+\_\+list}} () -\/$>$ \mbox{\hyperlink{structc__list}{c\+\_\+list}}$<$$>$
+\item 
+{\footnotesize template$<$typename T , typename ... Rest$>$ }\\constexpr auto \mbox{\hyperlink{lists_8h_a2f476c17d647885e20019170174516c7}{make\+\_\+list}} (T, Rest...) -\/$>$ decltype(\mbox{\hyperlink{structlist}{list}}$<$ T $>$\+::append(\mbox{\hyperlink{structlist}{list}}$<$ Rest... $>$\{\}))
+\item 
+constexpr auto \mbox{\hyperlink{lists_8h_a1676f699856697756c403b52d946e0de}{make\+\_\+list}} () -\/$>$ \mbox{\hyperlink{structlist}{list}}$<$$>$
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{lists_8h_a83821a97a39d887c3752e9fcd1d253f5}\label{lists_8h_a83821a97a39d887c3752e9fcd1d253f5}} 
+\index{lists.h@{lists.h}!make\_token\_list\_t@{make\_token\_list\_t}}
+\index{make\_token\_list\_t@{make\_token\_list\_t}!lists.h@{lists.h}}
+\doxysubsubsection{\texorpdfstring{make\_token\_list\_t}{make\_token\_list\_t}}
+{\footnotesize\ttfamily template$<$typename ... Types$>$ \\
+using \mbox{\hyperlink{lists_8h_a83821a97a39d887c3752e9fcd1d253f5}{make\+\_\+token\+\_\+list\+\_\+t}} =  decltype(\mbox{\hyperlink{lists_8h_ae81477c5957afdeda6f897b3895a626e}{make\+\_\+token\+\_\+list}}(Types\{\}...))}
+
+\mbox{\Hypertarget{lists_8h_acb9cde90e911ac1882e55c2533541fe6}\label{lists_8h_acb9cde90e911ac1882e55c2533541fe6}} 
+\index{lists.h@{lists.h}!token\_list\_t@{token\_list\_t}}
+\index{token\_list\_t@{token\_list\_t}!lists.h@{lists.h}}
+\doxysubsubsection{\texorpdfstring{token\_list\_t}{token\_list\_t}}
+{\footnotesize\ttfamily template$<$typename ... Types$>$ \\
+using \mbox{\hyperlink{lists_8h_acb9cde90e911ac1882e55c2533541fe6}{token\+\_\+list\+\_\+t}} =  decltype(\mbox{\hyperlink{lists_8h_ae81477c5957afdeda6f897b3895a626e}{make\+\_\+token\+\_\+list}}())}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{lists_8h_a47a30c66daeed317cc3c56679e650949}\label{lists_8h_a47a30c66daeed317cc3c56679e650949}} 
+\index{lists.h@{lists.h}!make\_c\_list@{make\_c\_list}}
+\index{make\_c\_list@{make\_c\_list}!lists.h@{lists.h}}
+\doxysubsubsection{\texorpdfstring{make\_c\_list()}{make\_c\_list()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily constexpr auto make\+\_\+c\+\_\+list (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) -\/$>$  \mbox{\hyperlink{structc__list}{c\+\_\+list}}$<$$>$\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+\mbox{\Hypertarget{lists_8h_afe7f3b65ba2b89ab7469ef2253f1cc43}\label{lists_8h_afe7f3b65ba2b89ab7469ef2253f1cc43}} 
+\index{lists.h@{lists.h}!make\_c\_list@{make\_c\_list}}
+\index{make\_c\_list@{make\_c\_list}!lists.h@{lists.h}}
+\doxysubsubsection{\texorpdfstring{make\_c\_list()}{make\_c\_list()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename T , typename ... Rest$>$ \\
+constexpr auto make\+\_\+c\+\_\+list (\begin{DoxyParamCaption}\item[{T}]{,  }\item[{Rest...}]{ }\end{DoxyParamCaption}) -\/$>$  decltype(\mbox{\hyperlink{structc__list}{c\+\_\+list}}$<$ T $>$\+::append(\mbox{\hyperlink{structc__list}{c\+\_\+list}}$<$ Rest... $>$\{\}))\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=282pt]{lists_8h_afe7f3b65ba2b89ab7469ef2253f1cc43_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{lists_8h_a1676f699856697756c403b52d946e0de}\label{lists_8h_a1676f699856697756c403b52d946e0de}} 
+\index{lists.h@{lists.h}!make\_list@{make\_list}}
+\index{make\_list@{make\_list}!lists.h@{lists.h}}
+\doxysubsubsection{\texorpdfstring{make\_list()}{make\_list()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily constexpr auto make\+\_\+list (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) -\/$>$  \mbox{\hyperlink{structlist}{list}}$<$$>$\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+\mbox{\Hypertarget{lists_8h_a2f476c17d647885e20019170174516c7}\label{lists_8h_a2f476c17d647885e20019170174516c7}} 
+\index{lists.h@{lists.h}!make\_list@{make\_list}}
+\index{make\_list@{make\_list}!lists.h@{lists.h}}
+\doxysubsubsection{\texorpdfstring{make\_list()}{make\_list()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename T , typename ... Rest$>$ \\
+constexpr auto make\+\_\+list (\begin{DoxyParamCaption}\item[{T}]{,  }\item[{Rest...}]{ }\end{DoxyParamCaption}) -\/$>$  decltype(\mbox{\hyperlink{structlist}{list}}$<$ T $>$\+::append(\mbox{\hyperlink{structlist}{list}}$<$ Rest... $>$\{\}))\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=246pt]{lists_8h_a2f476c17d647885e20019170174516c7_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{lists_8h_ae81477c5957afdeda6f897b3895a626e}\label{lists_8h_ae81477c5957afdeda6f897b3895a626e}} 
+\index{lists.h@{lists.h}!make\_token\_list@{make\_token\_list}}
+\index{make\_token\_list@{make\_token\_list}!lists.h@{lists.h}}
+\doxysubsubsection{\texorpdfstring{make\_token\_list()}{make\_token\_list()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily constexpr auto make\+\_\+token\+\_\+list (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) -\/$>$  \mbox{\hyperlink{structtoken__list}{token\+\_\+list}}$<$$>$\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+\mbox{\Hypertarget{lists_8h_a265e4b870631d27325b72a342880e363}\label{lists_8h_a265e4b870631d27325b72a342880e363}} 
+\index{lists.h@{lists.h}!make\_token\_list@{make\_token\_list}}
+\index{make\_token\_list@{make\_token\_list}!lists.h@{lists.h}}
+\doxysubsubsection{\texorpdfstring{make\_token\_list()}{make\_token\_list()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename T , typename ... Rest$>$ \\
+constexpr auto make\+\_\+token\+\_\+list (\begin{DoxyParamCaption}\item[{T}]{,  }\item[{Rest...}]{ }\end{DoxyParamCaption}) -\/$>$  decltype(\mbox{\hyperlink{structtoken__list}{token\+\_\+list}}$<$ T $>$\+::append(\mbox{\hyperlink{structtoken__list}{token\+\_\+list}}$<$ Rest... $>$\{\}))\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=333pt]{lists_8h_a265e4b870631d27325b72a342880e363_icgraph}
+\end{center}
+\end{figure}

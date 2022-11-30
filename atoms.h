@@ -86,7 +86,7 @@ constexpr auto deduce_token_type()
 	/**/
 }
 
-
+/*
 template < int Index, typename Lambda >
 constexpr auto find_end_of_char_list(Lambda lambda)
 {
@@ -101,7 +101,7 @@ constexpr auto find_end_of_char_list(Lambda lambda)
 		return find_end_of_char_list< Index + 1 >(lambda);
 	}
 }
-
+*/
 
 // --------------------------------------------- INTEGER START
 
