@@ -51,6 +51,10 @@ constexpr auto tokenize(Lambda str_lambda)
 				return make_token_list(curr{}, second{});
 			}
 		}
+		else if constexpr (is_same_type<curr,whitespace>) {
+			// if its not a specially handled token
+			return tokenize< Lambda, Index + 1 >(str_lambda);
+		}
 		else {
 			// if its not a specially handled token
 			using next = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
