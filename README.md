@@ -1,4 +1,8 @@
-## current capabilities
+- [current capabilities](#capab)
+- [how](#how)
+
+
+# <a name="capab">current capabilities</a>
 ### parsing char* in constexpr
 
 ``` cpp
@@ -29,7 +33,8 @@ using res = decltype(tokenize(x));
 ```
 ### evaluating simple expressions
 ```cpp
-auto x = constexpr_string("(+ 3 (* 3 2 (/ 2 1)))");
+auto x = constexpr_string("(+ 3 (* 3 2 (/ 2 1)))");#define constexpr_string(...) ([]() constexpr -> std::string_view { return __VA_ARGS__; })
+
 using tokens = decltype(tokenize(x));
 auto constexpr res = parse(tokens{});	
 pretty_print(typeid(tokens).name());
@@ -60,4 +65,18 @@ token_list<
 >
 ;; 15
 /**/
+```
+# <a name="how">traversing a string in constexpr, how?</a>
+how? very easy, since we cant really manipulate or even look at std::string or char* in constexpr (they only work in runtime which is not our thing now) our only option is std::string_view which basically is just a constexpr char ptr, for our case anyways. <br><br>
+using this macro, we have our lambda object that returns its arguments in constexpr
+```cpp
+#define constexpr_string(...) ([]() constexpr -> std::string_view { return __VA_ARGS__; })
+```
+by initializing the object and indexing after, we can get the character we are looking for, all in constexpr 
+
+```cpp
+auto x = constexpr_string("abc");
+
+static_assert('a' == x()[0]);
+static_assert('b' == x()[1]);
 ```
