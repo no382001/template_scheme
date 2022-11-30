@@ -16,7 +16,7 @@ struct non_integer {};
 struct non_character {};
 
 template <auto Value>
-struct c {};
+struct c_ {};
 
 template <int Value>
 struct special_character {};
@@ -48,11 +48,11 @@ constexpr auto deduce_token_type()
 	}
 	else if constexpr (C >= 'a' && C <= 'z')
 	{
-		return c<C>{};
+		return c_<C>{};
 	}
 	else if constexpr (C >= 'A' && C <= 'Z')
 	{
-		return c<C>{};
+		return c_<C>{};
 	}
 	else if constexpr (C == '"')
 	{
@@ -115,7 +115,7 @@ template < typename T >
 constexpr inline bool is_integer_v = is_templated_int_collection< T, integer >::value;
 
 template <typename T>
-constexpr inline bool is_char_v = is_templated_int_collection< T, c >::value;
+constexpr inline bool is_char_v = is_templated_int_collection< T, c_ >::value;
 
 template < int Index, typename Lambda >
 constexpr auto find_first_non_integer(Lambda lambda)
