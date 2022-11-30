@@ -12,6 +12,7 @@
 *.a
 *.out
 .vscode/*
+gentemp/*
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
