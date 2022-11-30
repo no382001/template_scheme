@@ -9,8 +9,7 @@
 
 template <typename Lambda, size_t Index = 0>
 //pass a stringview return type lambda that passes the arguments with __VA_ARGS__
-constexpr auto tokenize(Lambda str_lambda)
-{
+constexpr auto tokenize(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
 
 	if constexpr (Index < str.size()) {

@@ -22,18 +22,14 @@ template <int Value>
 struct special_character {};
 
 template <int Value>
-struct integer
-{
-
+struct integer{
 	template < int A >
 	static constexpr auto merge(integer<A>)->integer< _pow((Value * 10), (_log(10, A) + 1)) + A >; // int concatenation
-
 	static constexpr auto merge(non_integer)->integer<Value>;
 };
 
 template <int C>
-constexpr auto deduce_token_type()
-{
+constexpr auto deduce_token_type() {
 	if constexpr (C == '(')
 	{
 		return list_start{};
@@ -86,23 +82,6 @@ constexpr auto deduce_token_type()
 	/**/
 }
 
-/*
-template < int Index, typename Lambda >
-constexpr auto find_end_of_char_list(Lambda lambda)
-{
-	constexpr auto str = lambda();
-	using type = decltype(deduce_token_type< str[Index] >());
-	if constexpr (!is_char_v<type>)
-	{
-		return Index;
-	}
-	else
-	{
-		return find_end_of_char_list< Index + 1 >(lambda);
-	}
-}
-*/
-
 // --------------------------------------------- INTEGER START
 
 template< typename Test, template < int... > class Type >
@@ -118,23 +97,19 @@ template <typename T>
 constexpr inline bool is_char_v = is_templated_int_collection< T, c_ >::value;
 
 template < int Index, typename Lambda >
-constexpr auto find_first_non_integer(Lambda lambda)
-{
+constexpr auto find_first_non_integer(Lambda lambda) {
 	constexpr auto str = lambda();
 	using type = decltype(deduce_token_type< str[Index] >());
-	if constexpr (!is_integer_v<type>)
-	{
+	if constexpr (!is_integer_v<type>) {
 		return Index;
 	}
-	else
-	{
+	else {
 		return find_first_non_integer< Index + 1 >(lambda);
 	}
 }
 
 template < int Start, int End, typename Lambda >
-constexpr auto make_integer(Lambda str_lambda)
-{
+constexpr auto make_integer(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
 	if constexpr (Start < End)
 	{
@@ -146,20 +121,15 @@ constexpr auto make_integer(Lambda str_lambda)
 	}
 }
 
-
-
 // --------------------------------------------- INTEGER END
 
 template <typename Lambda, size_t Index = 0, size_t end_of_char_list>
 //pass a stringview return type lambda that passes the arguments with __VA_ARGS__
-constexpr auto tokenize_char_list(Lambda str_lambda)
-{
+constexpr auto tokenize_char_list(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
 	if constexpr (Index < end_of_char_list) {
-
 		using curr = decltype(deduce_token_type< str[Index] >());
 		using second = decltype(tokenize_char_list< Lambda, Index + 1, end_of_char_list >(str_lambda));
-
 		return make_c_list(curr{}, second{});
 	}
 	else {
@@ -167,18 +137,23 @@ constexpr auto tokenize_char_list(Lambda str_lambda)
 	}
 }
 
-template < int Index, typename Lambda >
-constexpr auto find_end_of_list(Lambda lambda)
-{
+template < int Index, int layer = 0, typename Lambda>
+constexpr auto find_end_of_list(Lambda lambda){
 	constexpr auto str = lambda();
 	using type = decltype(deduce_token_type< str[Index] >());
-	if constexpr (!is_same_type<type,list_end>)
-	{
-		return find_end_of_list< Index + 1 >(lambda);
+	if constexpr (is_same_type<type,list_start>){
+		return find_end_of_list<Index+1, layer+1>(lambda);
 	}
-	else
-	{
-		return Index;
+	else if constexpr (is_same_type<type,list_end>) {
+		if constexpr (layer - 1 <= 0){
+			return Index;
+		}
+		else {
+			return find_end_of_list< Index + 1 , layer - 1>(lambda);
+		}
+	}
+	else {
+		return find_end_of_list< Index + 1 , layer>(lambda);
 	}
 }
 

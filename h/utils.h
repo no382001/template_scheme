@@ -13,12 +13,9 @@ constexpr int _log(int b, int n) {
 template <typename A, typename B>
 constexpr inline bool is_same_type = std::is_same<A, B>::value;
 
-
 template <typename Lambda, size_t Index, size_t end_of_list>
 //pass a stringview return type lambda that passes the arguments with __VA_ARGS__
-constexpr auto tokenize_list(Lambda str_lambda)
-{
+constexpr auto tokenize_list(Lambda str_lambda) {
 	using curr = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
-
 	return make_list(curr{});
 }

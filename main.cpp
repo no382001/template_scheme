@@ -8,9 +8,7 @@
 #include "h/number_operations.h"
 #include "h/pretty_print.h"
 #include <iostream>
-
 #include <string_view>
-
 
 // the outer layer
 template < typename A, typename ...Rest >
@@ -26,12 +24,20 @@ auto constexpr parse(token_list< A, Rest... >) {
 }
 
 int main(){
-
-	static_assert(10 == parse(decltype(tokenize(constexpr_string("(+ 3 (+ 3 (+ 2 2)))"))){}),"fail");
-	//static_assert(12 == parse(decltype(tokenize(constexpr_string("(+ 3 (+ 3 (+ 2 2)) 2)"))){}),"fail");
-	//static_assert(12 == parse(decltype(tokenize(constexpr_string("(+ 3 (+ 3 (+ 2 2) 2))"))){}),"fail");
-
-	auto x = constexpr_string("(+ 3 (+ 3 (+ 2 2)))");
+	static_assert(10 == parse(decltype(tokenize(constexpr_string("(+ 3 (+ 3 (+ 2 2)))"))){}),"LL fail");
+	static_assert(2 == parse(decltype(tokenize(constexpr_string("(+ 1 1)"))){}),"LL fail");
+	static_assert(3 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1))"))){}),"LL fail");
+	static_assert(1 == parse(decltype(tokenize(constexpr_string("(+ (- 1 1) 1)"))){}),"");
+	static_assert(2 == parse(decltype(tokenize(constexpr_string("(+ (- (+ 1 1) 1) 1)"))){}),"");
+	static_assert(4 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) 1)"))){}),"");
+	static_assert(5 == parse(decltype(tokenize(constexpr_string("(+ (+ (+ 1 0) 1 (+ 2 0)) 1)"))){}),"");
+	static_assert(6 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) (+ 1 1) 1)"))){}),"");
+	static_assert(6 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) 1 (+ 1 1))"))){}),"");
+	static_assert(6 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) 1 (+ 1 1))"))){}),"");
+	static_assert(4 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 (+ 1 0)) 1)"))){}),"nested LR");
+	static_assert(5 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 (+ 1 0) 1) 1)"))){}),"nested LR");
+	
+	auto x = constexpr_string("(+ 3 (+ 3 (+ 2 2) 2))");
 	//auto x = constexpr_string("( abcd )");
 	using tokens = decltype(tokenize(x));
 	auto constexpr res = parse(tokens{});
