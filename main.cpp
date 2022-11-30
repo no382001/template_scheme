@@ -5,7 +5,7 @@
 #include "atoms.h"
 #include "utils.h"
 #include "lists.h"
-#include "pretty_print.h"
+//#include "pretty_print.h"
 #include <iostream>
 
 
@@ -102,6 +102,8 @@ auto constexpr e_mul(integer<A>, Rest... r) {
 	else
 		return A;
 }
+
+//FIXTHIS: something is wrong here but i should probably rewrite this in clisp first
 template< typename ...Args, typename ...Rest>
 auto constexpr e_mul(list<Args...> l, Rest...) {
 	auto constexpr x = handle_prefix(l);
@@ -140,6 +142,10 @@ auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {
 	}
 };
 
+
+// (+ 3 (+ 3 (+ 2 2) 2) 2) the last 2 is completely ignored
+// 	FIXTHIS:				the 2nd from theright gets a dulpicate token
+
 // the outer layer
 template < typename A, typename ...Rest >
 auto constexpr parse(token_list< A, Rest... >) {
@@ -153,32 +159,26 @@ auto constexpr parse(token_list< A, Rest... >) {
 	}
 }
 
-
-
-
-int main()
-{
-
-	auto x = constexpr_string("(+ 3 (* 3 (+ 2 2) 2))");
+int main(){
+	auto x = constexpr_string("(+ 3 (+ 3 (+ 2 2) 2))");
 	//auto x = constexpr_string("( abcd )");
 	using tokens = decltype(tokenize(x));
 	auto constexpr res = parse(tokens{});
-	pretty_print(typeid(tokens).name());
+	//pretty_print(typeid(tokens).name());
 	std::cout << ";; " << res << "\n";
 
-
-	auto y = constexpr_string("(+ 3 (* 3 (+ 2 2) 2) 2)");
-	using tokens = decltype(tokenize(y));
-	auto constexpr res2 = parse(tokens{});
-	pretty_print(typeid(tokens).name());
+	/** /
+	auto y = constexpr_string("(+ 3 (+ 2 2) 2)");
+	using tokens2 = decltype(tokenize(y));
+	auto constexpr res2 = parse(tokens2{});
+	//pretty_print(typeid(tokens).name());
 	std::cout << ";; " << res2 << "\n";
-
+	/**/
 }
 
 
 // clang++ -std=c++20 -S -emit-llvm main.cpp -o - | opt -analyze -dot-callgraph
 // dot -Tpng -ocallgraph.png callgraph.dot
-
 
 // print template instantiation
 // https://stackoverflow.com/questions/4448094/can-we-see-the-template-instantiated-code-by-c-compiler
