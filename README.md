@@ -80,3 +80,13 @@ auto x = constexpr_string("abc");
 static_assert('a' == x()[0]);
 static_assert('b' == x()[1]);
 ```
+now that we have all we need, we can top it off with another macro that enables us to handle files in constexpr
+```cpp
+static constexpr const char from_file[] = { 
+  #include "directives.scm" 
+};
+```
+we just have to make sure that our source file is formatted appropriately, in the case of `(+ 1 1)` the formatting is the following:
+```cpp
+R"=====(+ 1 1)====="
+```
