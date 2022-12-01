@@ -4,34 +4,6 @@
 
 
 # <a name="capab">current capabilities</a>
-### parsing char* in constexpr
-
-``` cpp
-auto x = constexpr_string("(ab 12) (as 123 +)");
-using res = decltype(tokenize(x));
-
-/** /
-  token_list<
-    list<
-    token_list<
-      c_list<c<97>, c<98>>,
-      whitespace,
-      integer<12>
-    >
-  >,
-  whitespace,
-  list<
-    token_list<
-      c_list<c<97>, c<115>>,
-      whitespace,
-      integer<123>,
-      whitespace,
-      plus>
-    >
-   >
-/**/
-
-```
 ### evaluating simple expressions
 ```cpp
 using tokens = decltype(tokenize(x));
@@ -114,26 +86,17 @@ lets determine the corresponding char tokens for our types and create a function
 ```cpp
 template <int C>
 constexpr auto deduce_token_type() {
-	if constexpr (C == '(')
-	{
-		return list_start{};
-	}
-	else if constexpr (C == ')')
-	{
-		return list_end{};
-	}
-	else if constexpr (C == '+')
-	{
-		return plus{};
-	}
-	else if constexpr (C == ' ')
-	{
-		return whitespace{};
-	}
-	else if constexpr (C >= '0' && C <= '9')
-	{
-		return integer<C - '0'>{}; //dont forget, its ascii char
-	}
+  if constexpr (C == '(') {
+    return list_start{};
+  } else if constexpr (C == ')') {
+    return list_end{};
+  } else if constexpr (C == '+') {
+    return plus{};
+  } else if constexpr (C == ' ') {
+    return whitespace{};
+  } else if constexpr (C >= '0' && C <= '9') {
+    return integer<C - '0'>{}; //dont forget, its ascii char
+  }
 }
 ```
 and there we have it, we now now the individual types of our tokens
@@ -181,15 +144,14 @@ using this list construction we can loop thru the string
 ```cpp
 template <typename Lambda, size_t Index = 0>
 constexpr auto tokenize(Lambda str_lambda) {
-	constexpr auto str = str_lambda();
-	if constexpr (Index < str.size()) {
-	    using curr = decltype(deduce_token_type< str[Index] >());
-		using second = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
-		return make_list(curr{},second{});
-	}
-	else {
-		return make_list();
-	}
+  constexpr auto str = str_lambda();
+  if constexpr (Index < str.size()) {
+    using curr = decltype(deduce_token_type< str[Index] >());
+    using second = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
+    return make_list(curr{},second{});
+  } else {
+    return make_list();
+  }
 }
 ```
 and get our list of tokens the following way
