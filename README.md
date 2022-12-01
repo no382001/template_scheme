@@ -1,6 +1,7 @@
 - [current capabilities](#capab)
-- [1. how? working with string in constexpr](#string)
-- [2. how? tokenizing with types](#token)
+- [working with strings in constexpr](#string)
+- [tokenizing with types](#token)
+  - [n-digit integers](#n-digit)
 
 
 # <a name="capab">current capabilities</a>
@@ -158,3 +159,30 @@ and get our list of tokens the following way
 ```cpp
 using tokens = decltype(tokenize(str));
 ```
+## <a name="n-digit">n-digit integer token as type</a>
+to tokenize an n digit integer we just need to implement the following expression<br>
+<img src="https://user-images.githubusercontent.com/102482527/205129800-c9465d3b-91b0-46b0-a601-ca6c4a43eb4e.svg" width="25%"></img><br>
+where<br>
+<img src="https://user-images.githubusercontent.com/102482527/205129790-5dd31fe9-2f07-4f29-b561-7e5b8609684d.svg" width="25%"></img>
+
+
+
+
+sadly we cant use the C implementation of `log` and `pow` as we need a constexpr solution which is not yet available, so we need to implement it ourselves, and it has to be implemented in a fucntional way (as expected), so these will generate a large amount of code if we use big numbers, but i dont see any other way around this. the generated code is already in the 80 thousands even for a simple expression, so it doesnt really matter.
+```cpp
+constexpr int _pow(int base, int exp, int result = 1) {
+  return exp < 1 ? result : _pow(base * base, exp / 2, (exp % 2) ? result * base : result);
+}
+
+constexpr int _log(int b, int n) {
+  return n < b ? 0 : _log(b, n / b) + 1;
+}
+```
+now we can finally implement the concatination itself
+```cpp
+template <int Value>
+struct integer{
+  template < int A >
+  static constexpr auto merge(integer<A>)->integer< _pow((Value * 10), (_log(10, A) + 1)) + A >;
+  static constexpr auto merge(non_integer)->integer<Value>;
+};
