@@ -17,8 +17,7 @@ auto constexpr parse(token_list< A, Rest... >) {
 	if constexpr (sizeof...(Rest) >= 0) {
 		return handle_prefix(A{});
 		//return define_atom(constexpr_string("abcd")) == A;
-	}
-	else {
+	} else {
 		return 0;
 	}
 }
@@ -37,7 +36,7 @@ int main(){
 	static_assert(4 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 (+ 1 0)) 1)"))){}),"nested LR");
 	static_assert(5 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 (+ 1 0) 1) 1)"))){}),"nested LR");
 	
-	auto x = constexpr_string("(+ 3 (+ 3 (+ 2 2) 2))");
+	auto x = constexpr_string("(+ 3 (+ 2 (+ 2 2) (+ 2 2) 2) (+ 2 2))");
 	//auto x = constexpr_string("( abcd )");
 	using tokens = decltype(tokenize(x));
 	auto constexpr res = parse(tokens{});

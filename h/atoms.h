@@ -30,59 +30,32 @@ struct integer{
 
 template <int C>
 constexpr auto deduce_token_type() {
-	if constexpr (C == '(')
-	{
+	if constexpr (C == '(') {
 		return list_start{};
-	}
-	else if constexpr (C >= '0' && C <= '9')
-	{
+	} else if constexpr (C >= '0' && C <= '9') {
 		return integer<C - '0'>{};
-	}
-	else if constexpr (C == ')')
-	{
+	} else if constexpr (C == ')') {
 		return list_end{};
-	}
-	else if constexpr (C >= 'a' && C <= 'z')
-	{
+	} else if constexpr (C >= 'a' && C <= 'z') {
 		return c_<C>{};
-	}
-	else if constexpr (C >= 'A' && C <= 'Z')
-	{
+	} else if constexpr (C >= 'A' && C <= 'Z') {
 		return c_<C>{};
-	}
-	else if constexpr (C == '"')
-	{
+	} else if constexpr (C == '"') {
 		return double_quote{};
-	}
-	else if constexpr (C == '\'')
-	{
+	} else if constexpr (C == '\'') {
 		return quote{};
-	}
-	else if constexpr (C == '+')
-	{
+	} else if constexpr (C == '+') {
 		return plus{};
-	}
-	else if constexpr (C == '-')
-	{
+	} else if constexpr (C == '-') {
 		return minus{};
-	}
-	else if constexpr (C == '*')
-	{
+	} else if constexpr (C == '*') {
 		return mul{};
-	}
-	else if constexpr (C == '/')
-	{
+	} else if constexpr (C == '/') {
 		return div_{};
-	}
-	/**/
-	else if constexpr (C == ' ')
-	{
+	} else if constexpr (C == ' ') {
 		return whitespace{};
 	}
-	/**/
 }
-
-// --------------------------------------------- INTEGER START
 
 template< typename Test, template < int... > class Type >
 struct is_templated_int_collection : std::false_type {};
@@ -102,8 +75,7 @@ constexpr auto find_first_non_integer(Lambda lambda) {
 	using type = decltype(deduce_token_type< str[Index] >());
 	if constexpr (!is_integer_v<type>) {
 		return Index;
-	}
-	else {
+	} else {
 		return find_first_non_integer< Index + 1 >(lambda);
 	}
 }
@@ -111,17 +83,13 @@ constexpr auto find_first_non_integer(Lambda lambda) {
 template < int Start, int End, typename Lambda >
 constexpr auto make_integer(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
-	if constexpr (Start < End)
-	{
+	if constexpr (Start < End) {
 		constexpr auto value = str[Start] - '0';
 		return integer< value >::merge(make_integer< Start + 1, End >(str_lambda));
-	}
-	else {
+	} else {
 		return non_integer{};
 	}
 }
-
-// --------------------------------------------- INTEGER END
 
 template <typename Lambda, size_t Index = 0, size_t end_of_char_list>
 //pass a stringview return type lambda that passes the arguments with __VA_ARGS__
@@ -131,8 +99,7 @@ constexpr auto tokenize_char_list(Lambda str_lambda) {
 		using curr = decltype(deduce_token_type< str[Index] >());
 		using second = decltype(tokenize_char_list< Lambda, Index + 1, end_of_char_list >(str_lambda));
 		return make_c_list(curr{}, second{});
-	}
-	else {
+	} else {
 		return make_c_list();
 	}
 }
@@ -143,16 +110,13 @@ constexpr auto find_end_of_list(Lambda lambda){
 	using type = decltype(deduce_token_type< str[Index] >());
 	if constexpr (is_same_type<type,list_start>){
 		return find_end_of_list<Index+1, layer+1>(lambda);
-	}
-	else if constexpr (is_same_type<type,list_end>) {
+	} else if constexpr (is_same_type<type,list_end>) {
 		if constexpr (layer - 1 <= 0){
 			return Index;
-		}
-		else {
+		} else {
 			return find_end_of_list< Index + 1 , layer - 1>(lambda);
 		}
-	}
-	else {
+	} else {
 		return find_end_of_list< Index + 1 , layer>(lambda);
 	}
 }
@@ -164,8 +128,7 @@ constexpr auto define_atom(Lambda lambda) {
 		using curr = decltype(deduce_token_type< str[Index] >());
 		using second = decltype(define_atom< Lambda, Index + 1>(lambda));
 		return make_c_list(curr{}, second{});
-	}
-	else {
+	} else {
 		return make_c_list();
 	}
 }

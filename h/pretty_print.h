@@ -6,8 +6,7 @@
 
 
 template <typename T>
-constexpr auto demangle() -> std::string
-{
+constexpr auto demangle() -> std::string {
 #if defined(__clang__)
     constexpr auto prefix = std::string_view{"[T = "};
     constexpr auto suffix = "]";
@@ -23,28 +22,24 @@ constexpr auto demangle() -> std::string
 #else
 # error Unsupported compiler
 #endif
-
     const auto start = function.find(prefix) + prefix.size();
     const auto end = function.find(suffix);
     const auto size = end - start;
-
     return std::string(function.substr(start, size)).data();
 }
 
 void pretty_print(std::string str) {
-
 	// delete all instances of struct and any whitespace in the string
 	auto clean = std::regex_replace(str, std::regex(R"((struct )|( ))"), "");
-
     std::string indent_list = std::string("\n");
     size_t token = 0;
     while ((token = clean.find_first_of("<>,", token)) != std::string::npos) {
         switch (clean[token]) {
-        case '<': indent_list.append(" ");
-        case ',': clean.insert(token + 1, indent_list);
-            break;
-        case '>': indent_list.erase(indent_list.size() - 1);
-            clean.insert(token, indent_list);
+            case '<': indent_list.append(" ");
+            case ',': clean.insert(token + 1, indent_list);
+                break;
+            case '>': indent_list.erase(indent_list.size() - 1);
+                clean.insert(token, indent_list);
         }
         token += indent_list.size() + 1;
         const size_t nw = clean.find_first_not_of(" ", token);
@@ -52,6 +47,5 @@ void pretty_print(std::string str) {
             clean.erase(token, nw - token);
         }
     }
-
     std::cout << clean << '\n';
 }

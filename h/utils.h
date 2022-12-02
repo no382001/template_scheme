@@ -2,6 +2,9 @@
 
 #define constexpr_string(...) ([]() constexpr -> std::string_view { return __VA_ARGS__; })
 
+// "(+ 3 (+ 3333 (+ 2 2) 2))"
+// TODO: something is wrong with the int concatenation, probably inconsistent data representation
+
 constexpr int _pow(int base, int exp, int result = 1) {
 	return exp < 1 ? result : _pow(base * base, exp / 2, (exp % 2) ? result * base : result);
 }
