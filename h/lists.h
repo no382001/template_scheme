@@ -3,7 +3,7 @@
 #include "utils.h"
 
 template < typename ...Types >
-struct token_list{
+struct token_list {
 	static constexpr auto append(token_list<>)->token_list< Types... >;
 
 	template < typename A >
@@ -56,6 +56,8 @@ auto constexpr make_c_list(T, Rest...) -> decltype(c_list< T >::append(c_list< R
 
 auto constexpr make_c_list()->c_list<>;
 
+
+
 template < typename ...Types >
 struct list {
 	static constexpr auto append(list<>)->list< Types... >;
@@ -80,3 +82,9 @@ template < typename T, typename ...Rest>
 auto constexpr make_list(T, Rest...) -> decltype(list< T >::append(list< Rest... >{}));
 
 auto constexpr make_list()->list<>;
+
+template <typename ...Rest>
+auto constexpr strip_type_token_list(token_list<Rest...>) {
+	return Rest{}...;
+}
+
