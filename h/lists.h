@@ -2,81 +2,35 @@
 #include "atoms.h"
 #include "utils.h"
 
-template < typename ...Types >
-struct token_list{
-	static constexpr auto append(token_list<>)->token_list< Types... >;
+// the basic attributes of a list object
+#define LIST_BODY(list_type)\
+static constexpr auto append(list_type<>)->list_type< Types... >;\
+template < typename A >\
+static constexpr auto append(A)->list_type< Types..., A >;\
+template < typename A >\
+static constexpr auto append(list_type< A >) { return decltype(append(A{})){}; }\
+template < typename A, typename B, typename ...Args >\
+static constexpr auto append(list_type< A, B, Args... >) {\
+	using curr = decltype(list_type::append(A{}));\
+	return decltype(curr::append(list_type< B, Args... >{})){};\
+}
 
-	template < typename A >
-	static constexpr auto append(A)->token_list< Types..., A >;
-	template < typename A >
-	static constexpr auto append(token_list< A >) {
-		return decltype(append(A{})){};
-	}
+// the basic functions to make a list object
+#define MAKE_LIST_FUNCTIONS(list_type)\
+template < typename T, typename ...Rest>\
+auto constexpr make_##list_type(T, Rest...) -> decltype(list_type< T >::append(list_type< Rest... >{}));\
+auto constexpr make_##list_type()->list_type<>;\
+template < typename ...Types >\
+using make_##list_type##_t = decltype(make_##list_type (Types{}...));\
+template < typename ...Types >\
+using list_type##_t = decltype(make_##list_type());
 
-	template < typename A, typename B, typename ...Args >
-	static constexpr auto append(token_list< A, B, Args... >) {
-		using curr = decltype(token_list::append(A{}));
-		return decltype(curr::append(token_list< B, Args... >{})){};
-	}
-};
+// create a fully functional list struct
+#define LIST(name)\
+template < typename ...Types >\
+struct name { LIST_BODY(name);};\
+MAKE_LIST_FUNCTIONS(name);
 
-template < typename T, typename ...Rest>
-auto constexpr make_token_list(T, Rest...) -> decltype(token_list< T >::append(token_list< Rest... >{}));
-
-auto constexpr make_token_list()->token_list<>;
-
-template < typename ...Types >
-using make_token_list_t = decltype(make_token_list(Types{}...));
-
-template < typename ...Types >
-using token_list_t = decltype(make_token_list());
-
-
-template < typename ...Types >
-struct c_list {
-	static constexpr auto append(c_list<>)->c_list< Types... >;
-
-	template < typename A >
-	static constexpr auto append(A)->c_list< Types..., A >;
-
-	template < typename A >
-	static constexpr auto append(c_list< A >) {
-		return decltype(append(A{})){};
-	}
-
-	template < typename A, typename B, typename ...Args >
-	static constexpr auto append(c_list< A, B, Args... >) {
-		using curr = decltype(c_list::append(A{}));
-		return decltype(curr::append(c_list< B, Args... >{})){};
-	}
-};
-
-template < typename T, typename ...Rest>
-auto constexpr make_c_list(T, Rest...) -> decltype(c_list< T >::append(c_list< Rest... >{}));
-
-auto constexpr make_c_list()->c_list<>;
-
-template < typename ...Types >
-struct list {
-	static constexpr auto append(list<>)->list< Types... >;
-
-	template < typename A >
-	static constexpr auto append(A)->list< Types..., A >;
-
-	template < typename A >
-	static constexpr auto append(list< A >) {
-		return decltype(append(A{})){};
-	}
-
-	template < typename A, typename B, typename ...Args >
-	static constexpr auto append(list< A, B, Args... >) {
-		using curr = decltype(list::append(A{}));
-		return decltype(curr::append(list< B, Args... >{})){};
-	}
-
-};
-
-template < typename T, typename ...Rest>
-auto constexpr make_list(T, Rest...) -> decltype(list< T >::append(list< Rest... >{}));
-
-auto constexpr make_list()->list<>;
+LIST(token_list);
+LIST(c_list);
+LIST(list);
