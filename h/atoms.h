@@ -1,7 +1,6 @@
 #pragma once
 #include "utils.h"
 #include "lists.h"
-#include "tokenizer.h"
 
 struct list_start {};
 struct list_end {};
@@ -15,8 +14,6 @@ struct term {};
 struct whitespace {};
 struct non_integer {};
 struct non_character {};
-
-struct define {};
 
 template <int Value>
 struct c_ {};
@@ -72,9 +69,6 @@ constexpr inline bool is_integer_v = is_templated_int_collection< T, integer >::
 template <typename T>
 constexpr inline bool is_char_v = is_templated_int_collection< T, c_ >::value;
 
-
-// maybe implement find first that is not the same as the type of the token in the index
-
 template < int Index, typename Lambda >
 constexpr auto find_first_non_integer(Lambda lambda) {
 	constexpr auto str = lambda();
@@ -83,17 +77,6 @@ constexpr auto find_first_non_integer(Lambda lambda) {
 		return Index;
 	} else {
 		return find_first_non_integer< Index + 1 >(lambda);
-	}
-}
-
-template < int Index, typename Lambda >
-constexpr auto find_first_non_c(Lambda lambda) {
-	constexpr auto str = lambda();
-	using type = decltype(deduce_token_type< str[Index] >());
-	if constexpr (!is_char_v<type>) {
-		return Index;
-	} else {
-		return find_first_non_c< Index + 1 >(lambda);
 	}
 }
 
@@ -149,12 +132,3 @@ constexpr auto define_atom(Lambda lambda) {
 		return make_c_list();
 	}
 }
-
-
-
-template <typename ...Rest>
-auto constexpr strip_type_token_list(token_list<Rest...>) { // nested expression overload
-	return Rest{}...;
-}
-
-using define_t = decltype(strip_type_token_list(tokenize(constexpr_string("define"))));
