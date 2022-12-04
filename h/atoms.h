@@ -92,7 +92,6 @@ constexpr auto make_integer(Lambda str_lambda) {
 }
 
 template <typename Lambda, size_t Index = 0, size_t end_of_char_list>
-//pass a stringview return type lambda that passes the arguments with __VA_ARGS__
 constexpr auto tokenize_char_list(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
 	if constexpr (Index < end_of_char_list) {
@@ -104,6 +103,7 @@ constexpr auto tokenize_char_list(Lambda str_lambda) {
 	}
 }
 
+// returns the index of the end of the list, layer safe
 template < int Index, int layer = 0, typename Lambda>
 constexpr auto find_end_of_list(Lambda lambda){
 	constexpr auto str = lambda();
@@ -121,6 +121,7 @@ constexpr auto find_end_of_list(Lambda lambda){
 	}
 }
 
+// whitespaces are not being tokenized currently, so wro symbols next to each other will merge
 template <typename Lambda, int Index = 0>
 constexpr auto define_atom(Lambda lambda) {
 	constexpr auto str = lambda();

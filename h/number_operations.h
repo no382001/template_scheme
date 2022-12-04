@@ -1,57 +1,22 @@
 #pragma once
-template<int A, typename ...Rest>
-auto constexpr e_add(integer<A>, Rest... r) {
-	if constexpr (sizeof...(Rest) > 0)
-		return A + e_add(r...);
-	else
-		return A;
-}
-template< typename ...Args,typename ...Rest>
-auto constexpr e_add(list<Args...> l, Rest...) { // nested expression overload
-	auto constexpr x = handle_prefix(l);
-	return e_add(integer<x>{}, Rest{}...);
+
+#define NUM_OP(name,sign)\
+template<int A, typename ...Rest>\
+auto constexpr e_##name(integer<A>, Rest... r) {\
+	if constexpr (sizeof...(Rest) > 0)\
+		return A sign e_##name(r...);\
+	else{ return A; }\
+}\
+template< typename ...Args,typename ...Rest>\
+auto constexpr e_##name(list<Args...> l, Rest...) { /* nested expression overload*/\
+	auto constexpr x = handle_prefix(l);\
+	return e_##name(integer<x>{}, Rest{}...);\
 }
 
-
-template<int A, typename ...Rest>
-auto constexpr e_sub(integer<A>, Rest... r) {
-	if constexpr (sizeof...(Rest) > 0)
-		return A - e_sub(r...);
-	else
-		return A;
-}
-template< typename ...Args, typename ...Rest>
-auto constexpr e_sub(list<Args...> l, Rest...) {
-	auto constexpr x = handle_prefix(l);
-	return e_sub(integer<x>{}, Rest{}...);
-}
-
-template<int A, typename ...Rest>
-auto constexpr e_mul(integer<A>, Rest... r) {
-	if constexpr (sizeof...(Rest) > 0)
-		return A * e_mul(r...);
-	else
-		return A;
-}
-
-template< typename ...Args, typename ...Rest>
-auto constexpr e_mul(list<Args...> l, Rest...) {
-	auto constexpr x = handle_prefix(l);
-	return e_mul(integer<x>{}, Rest{}...);
-}
-
-template<int A, typename ...Rest>
-auto constexpr e_div(integer<A>, Rest... r) {
-	if constexpr (sizeof...(Rest) > 0)
-		return A / e_div(r...);
-	else
-		return A;
-}
-template< typename ...Args, typename ...Rest>
-auto constexpr e_div(list<Args...> l, Rest...) {
-	auto constexpr x = handle_prefix(l);
-	return e_div(integer<x>{}, Rest{}...);
-}
+NUM_OP(add,+);
+NUM_OP(sub,-);
+NUM_OP(mul,+);
+NUM_OP(div,+);
 
 template <typename A, typename ...Rest>
 auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {
