@@ -37,3 +37,36 @@ template <typename A, typename... Rest>
 auto constexpr cdr(table<A,Rest...>){
     return table<Rest...>{};
 }
+
+/*
+(define (foldl f acc xs)
+  (if (null? xs)
+      acc
+      (foldl f
+             (f acc (car xs))
+             (cdr xs))))
+template <typename F, typename A, typename... Rest>
+auto constexpr foldl(){}
+
+template <typename F, typename A, typename... Rest>
+auto constexpr foldl(F,table<A,Rest...>){
+    if constexpr (sizeof...(Rest) > 0){
+        return foldl(F{},
+              F<A,car(Rest{}...)>{},
+              cdr(Rest{}...));
+    } else {
+        return A{};
+    }
+}
+*/
+
+// basicall left fold
+template<typename... Args>
+constexpr int all(Args... args) { return (... + args); }
+ 
+constexpr int b = all(1, 1, 1, 1);
+
+
+// i could use https://en.cppreference.com/w/cpp/language/fold
+// bc F is not known in the curr foldl impl
+// however the same problem will arise i will need a global template and operator overload for the function that will only be known in compile time
