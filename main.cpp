@@ -17,8 +17,10 @@ int main(){
 
 	auto x = constexpr_string("(+ 1 1)");
 	using tokens = decltype(tokenize(x));
-	using tab = decltype(make_table(table_entry<int,tokens>{}));
-	using res = decltype(tab::search<int>);
+	using tab = decltype(make_table(table_entry<int,tokens>{},table_entry<char,tokens>{}));
+	using first = decltype(car(tab{}));
+	using rest = decltype(cdr(tab{}));
+	//using res = decltype(tab::search<int>);
 	//auto constexpr res = parse(tokens{});
 	//pretty_print(typeid(tokens).name());
 	

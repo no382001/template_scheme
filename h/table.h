@@ -27,13 +27,13 @@ constexpr auto table_search(candidate c, A a, Rest ...rest) {
     }
 }
 
-template < typename ...Types >
-struct table {
-    LIST_BODY(table);
+LIST(table);
 
-    template < typename candidate>
-    static constexpr auto search() {
-        return table_search<candidate,Types...>;
-    }
-};
-MAKE_LIST_FUNCTIONS(table);
+template <typename A, typename... Rest>
+auto constexpr car(table<A,Rest...>){
+    return A{};
+}
+template <typename A, typename... Rest>
+auto constexpr cdr(table<A,Rest...>){
+    return table<Rest...>{};
+}
