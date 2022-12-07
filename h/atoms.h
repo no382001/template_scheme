@@ -132,3 +132,14 @@ constexpr auto define_atom(Lambda lambda) {
 		return make_c_list();
 	}
 }
+
+template < int Index, typename Lambda >
+constexpr auto find_first_non_c(Lambda lambda) {
+	constexpr auto str = lambda();
+	using type = decltype(deduce_token_type< str[Index] >());
+	if constexpr (!is_char_v<type>) {
+		return Index;
+	} else {
+		return find_first_non_c< Index + 1 >(lambda);
+	}
+}

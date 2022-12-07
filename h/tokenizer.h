@@ -32,7 +32,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 			return make_token_list(integer_type{}, second{});
 		} else if constexpr (is_char_v<curr>) {
 			//if something starts with a character, find the next non character
-			constexpr auto end_of_char_list = find_end_of_char_list< Index >(str_lambda);
+			constexpr auto end_of_char_list = find_first_non_c< Index >(str_lambda);
 			// tokenize the contents of the list and return it in a wrapper
 			if constexpr (end_of_char_list > 0) {
 				using char_list = decltype(tokenize_char_list< Lambda, Index, end_of_char_list >(str_lambda));
