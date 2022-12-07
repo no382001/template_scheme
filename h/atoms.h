@@ -69,16 +69,18 @@ constexpr inline bool is_integer_v = is_templated_int_collection< T, integer >::
 template <typename T>
 constexpr inline bool is_char_v = is_templated_int_collection< T, c_ >::value;
 
-
-template< typename T>
-auto constexpr is_char_list(T t) {
-	return false;
+#define IS_X_LIST(name)							\
+template< typename T>							\
+auto constexpr is_##name(T t) {						\
+	return false;								\
+}												\
+template< typename ...Args>						\
+auto constexpr is_##name(name<Args...> l) {		\
+	return true;								\
 }
 
-template< typename ...Args>
-auto constexpr is_char_list(c_list<Args...> l) {
-	return true;
-}
+IS_X_LIST(c_list);
+
 
 template < int Index, typename Lambda >
 constexpr auto find_first_non_integer(Lambda lambda) {

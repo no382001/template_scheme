@@ -1,5 +1,6 @@
 #pragma once
 #include "lists.h"
+#include "atoms.h"
 
 // after tokenization a resolve_symbols function should be run
 // that rearranges the tokens ina  way that symboos are resolved and the parser can work in peace
@@ -29,44 +30,32 @@ constexpr auto table_search(candidate c, A a, Rest ...rest) {
 
 LIST(table);
 
-template <typename A, typename... Rest>
-auto constexpr car(table<A,Rest...>){
-    return A{};
-}
-template <typename A, typename... Rest>
-auto constexpr cdr(table<A,Rest...>){
-    return table<Rest...>{};
+#define CAR_CDR(name)\
+template <typename A, typename... Rest>     \
+auto constexpr car(name<A,Rest...>){        \
+    return A{};                             \
+}                                           \
+template <typename A, typename... Rest>     \
+auto constexpr cdr(name<A,Rest...>){        \
+    return name<Rest...>{};                 \
 }
 
-/*
-(define (foldl f acc xs)
-  (if (null? xs)
-      acc
-      (foldl f
-             (f acc (car xs))
-             (cdr xs))))
-template <typename F, typename A, typename... Rest>
-auto constexpr foldl(){}
+CAR_CDR(table);
+CAR_CDR(token_list);
+CAR_CDR(list);
 
-template <typename F, typename A, typename... Rest>
-auto constexpr foldl(F,table<A,Rest...>){
-    if constexpr (sizeof...(Rest) > 0){
-        return foldl(F{},
-              F<A,car(Rest{}...)>{},
-              cdr(Rest{}...));
-    } else {
-        return A{};
-    }
-}
-*/
+IS_X_LIST(token_list);
+IS_X_LIST(list);
 
 // beginning of a new layer
-template <typename A, typename ...Rest, typename ...Chars>
-auto constexpr extract_symbols(list<token_list<A,Rest...>>) {
+template <typename A, typename ...Rest>
+auto constexpr extract_symbols(list<A,Rest...>) {
 	if constexpr (sizeof...(Rest) > 0) {
 		if constexpr (is_char_list(A{})) {
             using second = decltype(extract_symbols(Rest{}...));
             return make_token_list(A{},second{});
+        } else {
+            return extract_symbols(Rest{}...);
         }
 	} else {
         return A{};
@@ -89,12 +78,12 @@ auto constexpr extract_symbols(A,Rest...) {
 };
 
 
-// token list wrapper
+// token list wrapper, there is really no need for this i could just make typecheck functions to reduce the codebase
 template < typename A, typename ...Rest >
 auto constexpr collect_entries(token_list< A, Rest... >) {
 	if constexpr (sizeof...(Rest) >= 0) {
 		return extract_symbols(A{});
 	} else {
-		return;
+		return make_token_list();
 	}
 }
