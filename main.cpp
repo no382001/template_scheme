@@ -6,55 +6,26 @@
 #include "h/lists.h"
 #include "h/tokenizer.h"
 #include "h/number_operations.h"
+#include "h/parser.h"
+#include "h/table.h"
+#include "tests.h"
 #include "h/pretty_print.h"
 #include <iostream>
 #include <string_view>
 
-// the outer layer
-template < typename A, typename ...Rest >
-auto constexpr parse(token_list< A, Rest... >) {
-	// extract the first argument of token_list
-	if constexpr (sizeof...(Rest) >= 0) {
-		return handle_prefix(A{});
-		//return define_atom(constexpr_string("abcd")) == A;
-	} else {
-		return 0;
-	}
-}
-
 int main(){
-	static_assert(10 == parse(decltype(tokenize(constexpr_string("(+ 3 (+ 3 (+ 2 2)))"))){}),"LL fail");
-	static_assert(2 == parse(decltype(tokenize(constexpr_string("(+ 1 1)"))){}),"LL fail");
-	static_assert(3 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1))"))){}),"LL fail");
-	static_assert(1 == parse(decltype(tokenize(constexpr_string("(+ (- 1 1) 1)"))){}),"");
-	static_assert(2 == parse(decltype(tokenize(constexpr_string("(+ (- (+ 1 1) 1) 1)"))){}),"");
-	static_assert(4 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) 1)"))){}),"");
-	static_assert(5 == parse(decltype(tokenize(constexpr_string("(+ (+ (+ 1 0) 1 (+ 2 0)) 1)"))){}),"");
-	static_assert(6 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) (+ 1 1) 1)"))){}),"");
-	static_assert(6 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) 1 (+ 1 1))"))){}),"");
-	static_assert(6 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) 1 (+ 1 1))"))){}),"");
-	static_assert(4 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 (+ 1 0)) 1)"))){}),"nested LR");
-	static_assert(5 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 (+ 1 0) 1) 1)"))){}),"nested LR");
-	
-	auto x = constexpr_string("(+ 3 (+ 2 (+ 2 2) (+ 2 2) 2) (+ 2 2))");
-	//auto x = constexpr_string("( abcd )");
+
+	auto x = constexpr_string("(+ 1 1)");
 	using tokens = decltype(tokenize(x));
-	auto constexpr res = parse(tokens{});
+	using tab = decltype(make_table(table_entry<int,tokens>{},table_entry<char,tokens>{}));
+	using first = decltype(car(tab{}));
+	using rest = decltype(cdr(tab{}));
+	//using res = decltype(tab::search<int>);
+	//auto constexpr res = parse(tokens{});
 	//pretty_print(typeid(tokens).name());
 	
-	auto str = std::string(demangle<tokens>());
-	pretty_print(str);
+	//auto str = std::string(demangle<tokens>());
+	//pretty_print(str);
 
-	std::cout << ";; " << res << "\n";
-
-}
-
-
-// clang++ -std=c++20 -S -emit-llvm main.cpp -o - | opt -analyze -dot-callgraph
-// dot -Tpng -ocallgraph.png callgraph.dot
-
-// print template instantiation
-// https://stackoverflow.com/questions/4448094/can-we-see-the-template-instantiated-code-by-c-compiler
-// clang++ -std=c++20 -Xclang -ast-print -fsyntax-only main.cpp
-
-// https://stackoverflow.com/questions/5373714/how-to-generate-a-calling-graph-for-c-code
+	//std::cout << ";; " << res << "\n";
+} 
