@@ -1,16 +1,16 @@
 #pragma once
 
-#define NUM_OP(name,sign)\
-template<int A, typename ...Rest>\
-auto constexpr e_##name(integer<A>, Rest... r) {\
-	if constexpr (sizeof...(Rest) > 0)\
-		return A sign e_##name(r...);\
-	else{ return A; }\
-}\
-template< typename ...Args,typename ...Rest>\
-auto constexpr e_##name(list<Args...> l, Rest...) { /* nested expression overload*/\
-	auto constexpr x = handle_prefix(l);\
-	return e_##name(integer<x>{}, Rest{}...);\
+#define NUM_OP(name,sign)															\
+template<int A, typename ...Rest>													\
+auto constexpr e_##name(integer<A>, Rest... r) {									\
+	if constexpr (sizeof...(Rest) > 0)												\
+		return A sign e_##name(r...);												\
+	else{ return A; }																\
+}																					\
+template< typename ...Args,typename ...Rest>										\
+auto constexpr e_##name(list<Args...> l, Rest...) { /* nested expression overload*/ \
+	auto constexpr x = handle_prefix(l);											\
+	return e_##name(integer<x>{}, Rest{}...);										\
 }
 
 NUM_OP(add,+);

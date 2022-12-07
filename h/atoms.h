@@ -69,6 +69,17 @@ constexpr inline bool is_integer_v = is_templated_int_collection< T, integer >::
 template <typename T>
 constexpr inline bool is_char_v = is_templated_int_collection< T, c_ >::value;
 
+
+template< typename T>
+auto constexpr is_char_list(T t) {
+	return false;
+}
+
+template< typename ...Args>
+auto constexpr is_char_list(c_list<Args...> l) {
+	return true;
+}
+
 template < int Index, typename Lambda >
 constexpr auto find_first_non_integer(Lambda lambda) {
 	constexpr auto str = lambda();
@@ -91,6 +102,7 @@ constexpr auto make_integer(Lambda str_lambda) {
 	}
 }
 
+// only c_ is a character, ints are currently not even if they are in the same stream as the char list
 template <typename Lambda, size_t Index = 0, size_t end_of_char_list>
 constexpr auto tokenize_char_list(Lambda str_lambda) {
 	constexpr auto str = str_lambda();

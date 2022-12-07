@@ -60,13 +60,41 @@ auto constexpr foldl(F,table<A,Rest...>){
 }
 */
 
-// basicall left fold
-template<typename... Args>
-constexpr int all(Args... args) { return (... + args); }
- 
-constexpr int b = all(1, 1, 1, 1);
+// beginning of a new layer
+template <typename A, typename ...Rest, typename ...Chars>
+auto constexpr extract_symbols(list<token_list<A,Rest...>>) {
+	if constexpr (sizeof...(Rest) > 0) {
+		if constexpr (is_char_list(A{})) {
+            using second = decltype(extract_symbols(Rest{}...));
+            return make_token_list(A{},second{});
+        }
+	} else {
+        return A{};
+    }
+};
+
+// multiple char_l and non char_l overload
+template <typename A, typename ...Rest, typename ...Chars>
+auto constexpr extract_symbols(A,Rest...) {
+	if constexpr (sizeof...(Rest) > 0) {
+		if constexpr (is_char_list(A{})) {
+            using second = decltype(extract_symbols(Rest{}...));
+            return make_token_list(A{},second{});
+        } else {
+            return extract_symbols(Rest{}...);
+        }
+	} else {
+        return A{};
+    }
+};
 
 
-// i could use https://en.cppreference.com/w/cpp/language/fold
-// bc F is not known in the curr foldl impl
-// however the same problem will arise i will need a global template and operator overload for the function that will only be known in compile time
+// token list wrapper
+template < typename A, typename ...Rest >
+auto constexpr collect_entries(token_list< A, Rest... >) {
+	if constexpr (sizeof...(Rest) >= 0) {
+		return extract_symbols(A{});
+	} else {
+		return;
+	}
+}
