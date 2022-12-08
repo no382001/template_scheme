@@ -10,6 +10,7 @@
 #include "h/table.h"
 #include "tests.h"
 #include "h/pretty_print.h"
+#include "h/car_crd.h"
 #include <iostream>
 #include <string_view>
 
@@ -27,7 +28,7 @@ int main(){
 	using asdsad = decltype(car(make_list()));
 	using fa21s = decltype(car(list<integer<1>,integer<2>>{}));
 	using fa221s = decltype(cdr(list<integer<1>,integer<2>>{}));
-	using fa221s = decltype(cdr(list<>{}));
+	using fa212321s = decltype(cdr(list<>{}));
 
 	using prost_table = decltype(extract_symbols(car(car(tokens{}))));
 
