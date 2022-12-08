@@ -71,12 +71,16 @@ constexpr inline bool is_char_v = is_templated_int_collection< T, c_ >::value;
 
 #define IS_X_LIST(name)							\
 template< typename T>							\
-auto constexpr is_##name(T t) {						\
+auto constexpr is_##name(T t) {					\
 	return false;								\
 }												\
 template< typename ...Args>						\
 auto constexpr is_##name(name<Args...> l) {		\
 	return true;								\
+}												\
+template<>										\
+auto constexpr is_##name(name<> l) {			\
+	return false;								\
 }
 
 IS_X_LIST(c_list);

@@ -30,60 +30,56 @@ constexpr auto table_search(candidate c, A a, Rest ...rest) {
 
 LIST(table);
 
-#define CAR_CDR(name)\
-template <typename A, typename... Rest>     \
-auto constexpr car(name<A,Rest...>){        \
-    return A{};                             \
-}                                           \
-template <typename A, typename... Rest>     \
-auto constexpr cdr(name<A,Rest...>){        \
-    return name<Rest...>{};                 \
+template <typename A, typename... Args>
+auto constexpr car_inner(A,Args...){
+    return A{};
 }
 
-CAR_CDR(table);
-CAR_CDR(token_list);
-CAR_CDR(list);
+template <template<class> class T, typename... Args>
+auto constexpr car(T<Args...>){
+    if constexpr (sizeof...(Args) > 0) {
+        return car_inner(Args{}...);
+    } else {
+        return T{};
+    }
+}
+
+template <template<class> class T, typename A, typename... Args>
+auto constexpr cdr_inner(A,Args...){
+    return T<Args...>{};
+}
+
+template <template<class> class T, typename... Args>
+auto constexpr cdr(T<Args...>){
+    if constexpr (sizeof...(Args) > 0) {
+        return cdr_inner<T>(Args{}...);
+    } else {
+        return T{};
+    }
+}
 
 IS_X_LIST(token_list);
 IS_X_LIST(list);
 
-// beginning of a new layer
-template <typename A, typename ...Rest>
-auto constexpr extract_symbols(list<A,Rest...>) {
-	if constexpr (sizeof...(Rest) > 0) {
-		if constexpr (is_char_list(A{})) {
-            using second = decltype(extract_symbols(Rest{}...));
-            return make_token_list(A{},second{});
+template <typename A>
+auto constexpr extract_symbols(A) {
+    using curr = A;
+    if constexpr (!is_same_type<curr,list<>> || !is_same_type<curr,token_list<>> || !is_same_type<curr,c_list<>>){ //len
+		if constexpr (is_token_list(car(curr{}))) {
+            using curr = decltype(extract_symbols(car(curr{})));
+            using second = decltype(extract_symbols((cdr(curr{}))));
+            return make_list(curr{},second{});
+        } else if constexpr (is_list(car(curr{}))) {
+            using curr = decltype(extract_symbols(car(curr{})));
+            using second = decltype(extract_symbols(cdr(curr{})));
+            return make_list(curr{},second{});
+        } else if constexpr (is_c_list(car(curr{}))) {
+            using second = decltype(extract_symbols(cdr(curr{})));
+            return make_list(curr{},second{});
         } else {
-            return extract_symbols(Rest{}...);
+            return extract_symbols(cdr(curr{}));
         }
-	} else {
-        return A{};
+    } else {
+        return make_list();
     }
 };
-
-// multiple char_l and non char_l overload
-template <typename A, typename ...Rest, typename ...Chars>
-auto constexpr extract_symbols(A,Rest...) {
-	if constexpr (sizeof...(Rest) > 0) {
-		if constexpr (is_char_list(A{})) {
-            using second = decltype(extract_symbols(Rest{}...));
-            return make_token_list(A{},second{});
-        } else {
-            return extract_symbols(Rest{}...);
-        }
-	} else {
-        return A{};
-    }
-};
-
-
-// token list wrapper, there is really no need for this i could just make typecheck functions to reduce the codebase
-template < typename A, typename ...Rest >
-auto constexpr collect_entries(token_list< A, Rest... >) {
-	if constexpr (sizeof...(Rest) >= 0) {
-		return extract_symbols(A{});
-	} else {
-		return make_token_list();
-	}
-}
