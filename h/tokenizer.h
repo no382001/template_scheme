@@ -18,7 +18,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 		if constexpr (is_same_type<curr, list_start>) {
 			constexpr auto end_of_list = find_end_of_list< Index >(str_lambda);
 			// tokenize the contents of the list and return it in a wrapper
-			using list = decltype(tokenize_list< Lambda, Index, end_of_list>(str_lambda));
+			using list = decltype(tokenize_list< Lambda, Index>(str_lambda));
 			using second = decltype(tokenize<Lambda, end_of_list + 1>(str_lambda));
 			return make_token_list(list{}, second{});
 		} else if constexpr (is_same_type<curr, list_end>) {

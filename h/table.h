@@ -33,26 +33,40 @@ LIST(table);
 IS_X_LIST(token_list);
 IS_X_LIST(list);
 
-template <typename A>
-auto constexpr extract_symbols(A) {
-    if constexpr (!is_same_type<A,list<>> || !is_same_type<A,token_list<>> || !is_same_type<A,c_list<>>){ //len
-		if constexpr (is_token_list(car(A{}))) {
-            using curr = decltype(extract_symbols(car(A{})));
-            using second = decltype(extract_symbols((cdr(curr{}))));
-            return make_list(curr{},second{});
-        } else if constexpr (is_list(car(A{}))) {
-            using curr = decltype(extract_symbols(car(A{})));
-            using second = decltype(extract_symbols(cdr(curr{})));
-            return make_list(curr{},second{});
-        } else if constexpr (is_c_list(car(A{}))) {
-            using second = decltype(extract_symbols(cdr(A{})));
-            return make_list(A{},second{});
-        } else if constexpr (is_token_list(cdr(A{}))){
-            return extract_symbols(cdr(A{}));
-        } else {
-            return make_list();
-        }
-    } else {
-        return make_list();
-    }
-};
+template <typename Lambda, size_t Index = 0>
+//pass a stringview return type lambda that passes the arguments with __VA_ARGS__
+constexpr auto tokenize_table_entries(Lambda str_lambda) {
+	constexpr auto str = str_lambda();
+	if constexpr (Index < str.size()) {
+		
+		using curr = decltype(deduce_token_type< str[Index] >());
+		
+		if constexpr (is_char_v<curr>) {
+			//if something starts with a character, find the next non character
+			constexpr auto end_of_char_list = find_first_non_c< Index >(str_lambda);
+			// tokenize the contents of the list and return it in a wrapper
+			if constexpr (end_of_char_list > 0) {
+				using char_list = decltype(tokenize_char_list< Lambda, Index, end_of_char_list >(str_lambda));
+				using second = decltype(tokenize_table_entries< Lambda, end_of_char_list >(str_lambda));
+				return make_table(char_list{}, second{});
+			} else {
+				using second = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
+				return make_table(curr{}, second{});
+			}
+		} else if constexpr (is_same_type<curr, list_start>) { // handle nested lists
+			constexpr auto end_of_list = find_end_of_list< Index >(str_lambda);
+			// tokenize the contents of the list and return it in a wrapper
+			using list = decltype(tokenize_table_entries< Lambda, Index + 1>(str_lambda));
+			using second = decltype(tokenize_table_entries<Lambda, end_of_list + 1>(str_lambda));
+			return make_table(list{}, second{});
+		
+		} else if constexpr (is_same_type<curr, list_end>) { //return cond for EOList
+			return make_table();
+
+		} else {
+			return tokenize_table_entries< Lambda, Index + 1 >(str_lambda);
+		}
+	} else {
+		return make_table();
+	}
+}
