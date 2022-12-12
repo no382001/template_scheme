@@ -18,9 +18,16 @@ constexpr auto tokenize(Lambda str_lambda) {
 		if constexpr (is_same_type<curr, list_start>) {
 			constexpr auto end_of_list = find_end_of_list< Index >(str_lambda);
 			// tokenize the contents of the list and return it in a wrapper
-			using list = decltype(tokenize_list< Lambda, Index>(str_lambda));
+			using l = decltype(tokenize_list< Lambda, Index>(str_lambda));
 			using second = decltype(tokenize<Lambda, end_of_list + 1>(str_lambda));
-			return make_token_list(list{}, second{});
+
+			// drop empty expressions, define handling
+			if constexpr (is_same_type<_empty_list,l>){
+				return make_token_list(second{});
+			} else {
+				return make_token_list(l{}, second{});
+			}
+
 		} else if constexpr (is_same_type<curr, list_end>) {
 			// base case for tokenize_list
 			return make_token_list();
@@ -36,8 +43,15 @@ constexpr auto tokenize(Lambda str_lambda) {
 			// tokenize the contents of the list and return it in a wrapper
 			if constexpr (end_of_char_list > 0) {
 				using char_list = decltype(tokenize_char_list< Lambda, Index, end_of_char_list >(str_lambda));
-				using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
-				return make_token_list(char_list{}, second{});
+				
+				// if its a define expression, ignore node, another tokenizing process deals with that
+				if constexpr (is_same_type<_define,char_list>){
+					return make_token_list();
+				} else {
+					using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
+					return make_token_list(char_list{}, second{});
+				}		
+				
 			} else {
 				using second = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
 				return make_token_list(curr{}, second{});

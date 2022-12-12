@@ -11,8 +11,6 @@ struct table_entry {
     static constexpr auto get_symbol() {return symbol{};}
 };
 
-//LIST(table);
-
 // positive search
 template < typename candidate, typename A, typename... Rest>
 constexpr auto table_search(candidate c, A a, Rest ...rest) {
