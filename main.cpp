@@ -22,9 +22,11 @@
 int main(){
 
 	// "(1 abc 1 abc 1 ( 1 gelcim 1 okt 1)) (+ ab 1( 1 klajsd ok laksd) 1)"
-	auto x = constexpr_string("(define x 1) (+ 1 x)");
+	auto x = constexpr_string("(define x (+ 1 1 x)) (+ 1 x)");
 	using tokens = decltype(tokenize(x));
-	using table_entries = decltype(tokenize_table_entries(x));
+	using table_entries = decltype(gather_table_entries(x));
+	using s = decltype(car(car(car(car(table_entries{})))));
+	using e = decltype(cdr(car(car(car(table_entries{})))));
 
 	//using res = decltype(tab::search<int>);
 	//auto constexpr res = parse(tokens{});
