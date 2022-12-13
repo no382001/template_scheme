@@ -2,32 +2,30 @@
 #include "lists.h"
 #include "atoms.h"
 #include "car_crd.h"
-// after tokenization a resolve_symbols function should be run
-// that rearranges the tokens ina  way that symboos are resolved and the parser can work in peace
 
-// entry datatype: symbol, //layer, //argnum, expression
-template <typename symbol,/*int layer, int argnum, typename expression*/>
-struct table_entry {
-    static constexpr auto get_symbol() {return symbol{};}
-	//static constexpr auto get_expression() {return expression{};}
-};
+
+// naturally after define the content of the whole list is saved here, i guess ill parse it elsewhere
+template <typename list>
+struct table_entry {};
+
+
 
 // positive search
-template < typename candidate, typename A, typename... Rest>
-constexpr auto table_search(candidate c, A a, Rest ...rest) {
-    if constexpr (sizeof...(Rest) > 0){
-        using curr = A::get_symbol(); 
-        if constexpr (is_same_type<curr,candidate>) {
-            return A{};
-        } else {
-            return table_search(c,rest...);
-        }
+template <typename candidate, template<class,class> class T, typename A, typename... Args>
+auto constexpr table_search(candidate,T<A,Args...>){
+    if constexpr (sizeof...(Args) > 0) {
+		using curr = decltype(car(car(A{})));
+		if constexpr (is_same_type<candidate,curr>){
+			return A{};
+		}else {
+			return table_search(candidate{},T<Args...>{});
+		}
     } else {
         return A{};
     }
 }
 
-LIST(table);
+LIST(table)
 
 IS_X_LIST(token_list);
 IS_X_LIST(list);
@@ -48,7 +46,7 @@ constexpr auto gather_table_entries(Lambda str_lambda) {
 				// if its a define expression, ignore node, another tokenizing process deals with that
 				if constexpr (is_same_type<_define,char_list>){
 					using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
-					return make_table(table_entry<second>{});
+					return table_entry<second>{};
 				} else {
 					return make_table();
 				}

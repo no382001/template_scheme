@@ -22,18 +22,29 @@
 int main(){
 
 	// "(1 abc 1 abc 1 ( 1 gelcim 1 okt 1)) (+ ab 1( 1 klajsd ok laksd) 1)"
-	auto x = constexpr_string("(define x (+ 1 1 x)) (+ 1 x)");
+	auto x = constexpr_string("(define x (+ 1 1 x)) (define y (22)) (+ 1 y x)");
 	using tokens = decltype(tokenize(x));
 	using table_entries = decltype(gather_table_entries(x));
-	using s = decltype(car(car(car(car(table_entries{})))));
-	using e = decltype(cdr(car(car(car(table_entries{})))));
+	
+	using resss = decltype(table_search(c_list<c_<'x'>>{},table_entries{}));
+	using resss2 = decltype(table_search(c_list<c_<'y'>>{},table_entries{}));
+	
+	using ss = decltype(car(car(car(table_entries{}))));
+	//using ss = decltype(car(car(table_entries{})));
+
+	using s = decltype(car(car(car(cdr(table_entries{})))));
+
+	//constexpr bool b = is_same_type<s,token_list<c_list<c_<121>>>>;
+	//constexpr bool b2 = is_same_type<ss,c_list<c_<120>>>;
+
+	//using e = decltype(cdr(car(car(car(table_entries{})))));
 
 	//using res = decltype(tab::search<int>);
 	//auto constexpr res = parse(tokens{});
 	//pretty_print(typeid(tokens).name());
 	
-	//auto str = std::string(demangle<prot_table>());
-	//pretty_print(str);
+	//auto str = std::string(demangle<resss>());
+	// pretty_print(str);
 
 	//std::cout << ";; " << res << "\n";
 
