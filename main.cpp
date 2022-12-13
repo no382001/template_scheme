@@ -1,6 +1,6 @@
 #include <string_view>
 #include <type_traits>
-#include <cmath>
+#include <iostream>
 #include "h/atoms.h"
 #include "h/utils.h"
 #include "h/lists.h"
@@ -11,22 +11,28 @@
 #include "tests.h"
 #include "h/pretty_print.h"
 #include "h/car_crd.h"
-#include <iostream>
-#include <string_view>
-
-
-// clist is actually symbol list, strings are denoted by double quotes
-// modify tokenizer to replace c_lists with a symmbol that contains its layer information aswell as its string value
-// copy and modify the tokenizer to tokenize just the symbols in the same way but this time return a table list with all the symbols
 
 int main(){
+	//auto x = constexpr_string("(define x (+ 1 1 x)) (define y (22)) (+ 1 y x)");
+	auto x = constexpr_string("(define y 22) (+ 1 y (- 1 1) 2)");
+	auto xasas = constexpr_string("(+ 1 2 (- 1 1) 2)");
 
-	// "(1 abc 1 abc 1 ( 1 gelcim 1 okt 1)) (+ ab 1( 1 klajsd ok laksd) 1)"
-	auto x = constexpr_string("(define x (+ 1 1 x)) (define y (22)) (+ 1 y x)");
-	using tokens = decltype(tokenize(x));
+	// populate the table with the contents of (define ...) expressions
 	using table_entries = decltype(gather_table_entries(x));
+
+	// build the ast for parsing, without (define ...) expressions, substitute symbols
+	using tokessns = decltype(tokenize_w_table<table_entries>(x));
+	auto constexpr result = parse(car(tokessns{}));
 	
-	using resss = decltype(table_search(c_list<c_<'x'>>{},table_entries{}));
+	using token2s = decltype(tokenize(xasas));
+	auto constexpr resultbasic = parse(token2s{});
+	
+	// parse tokens, and look up table entries if they are encountered
+	//auto constexpr result = parse();
+
+	using resss = decltype((table_search(c_list<c_<'y'>>{},table_entries{})));
+
+	using asdasd = decltype(car(cdr(car(resss{}))));
 	using resss2 = decltype(table_search(c_list<c_<'y'>>{},table_entries{}));
 	
 	using ss = decltype(car(car(car(table_entries{}))));

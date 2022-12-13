@@ -1,9 +1,17 @@
 #pragma once
+#include <string_view>
+#include <type_traits>
+#include <cmath>
 #include "h/atoms.h"
 #include "h/utils.h"
 #include "h/lists.h"
 #include "h/tokenizer.h"
 #include "h/number_operations.h"
+#include "h/parser.h"
+#include "h/table.h"
+#include "tests.h"
+#include "h/pretty_print.h"
+#include "h/car_crd.h"
 
 #define TEST(...) ([]() constexpr -> int { return parse(decltype(tokenize(constexpr_string(__VA_ARGS__))){}); })
 
@@ -48,3 +56,13 @@ auto constexpr b2 = is_c_list(tokens{});
 
 //auto seven = constexpr_string("(1111111)");
 //using tokens2 = decltype(tokenize(seven));
+
+
+
+// "(1 abc 1 abc 1 ( 1 gelcim 1 okt 1)) (+ ab 1( 1 klajsd ok laksd) 1)"
+auto xss = constexpr_string("(define x (+ 1 1 x)) (define y (22)) (+ 1 y x)");
+using tokssens = decltype(tokenize(xss));
+using table_entries = decltype(gather_table_entries(xss));
+
+using resss = decltype(table_search(c_list<c_<'x'>>{},table_entries{}));
+using resss2 = decltype(table_search(c_list<c_<'y'>>{},table_entries{}));

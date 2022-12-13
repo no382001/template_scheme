@@ -6,8 +6,8 @@
 #include "utils.h"
 #include "lists.h"
 
+// tokenize does not handle (define ...) type expressions, if they are found, the node is terminated
 template <typename Lambda, size_t Index = 0>
-//pass a stringview return type lambda that passes the arguments with __VA_ARGS__
 constexpr auto tokenize(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
 

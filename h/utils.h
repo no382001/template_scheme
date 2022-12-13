@@ -22,3 +22,4 @@ constexpr auto tokenize_list(Lambda str_lambda) {
 	using curr = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
 	return make_list(curr{});
 }
+
