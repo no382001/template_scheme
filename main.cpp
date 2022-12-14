@@ -24,6 +24,8 @@ auto constexpr map_pair_l(One<A,Args...>,Two<B,Brgs...>){
 	}
 }
 
+#define _lambda c_list<c_<108>, c_<97>, c_<109>, c_<98>, c_<100>, c_<97>>
+
 
 int main(){
 	auto constexpr string = constexpr_string("((lambda (x y) (+ x y)) 1 1)");
@@ -32,12 +34,35 @@ int main(){
 	using list = decltype(car(car(tokens{})));
 	using operator_lam = decltype(car(car(car(list{}))));
 
-
 	using arguments = decltype(car(car(cdr(car(car(list{}))))));
 	using expressions = decltype(cdr(cdr(car(car(list{})))));
 	using parameters = decltype(cdr(car(car(tokens{}))));
 
-	using something = decltype(map_pair_l(arguments{},parameters{}));
-	// implement putting 2 lists into pairs
+	using arg_x_parameter_table = decltype(map_pair_l(arguments{},parameters{}));
+
+
+	static_assert(is_same_type<operator_lam,_lambda>,"");
+		// if it is lambda send a callback
+		// then step back into the list and handle it as a lambda expression
+		// - arguments
+		// - expressions
+		// - parameters
+		// 
+		// map the arg and par together
+		// tokenize expressions (this whole procedure should happen in tokenize)
+		// when returned here, go thru the token list and substitute the symbol if found
+		// 
+		// TODO: i need to rewrite the table search thing, whihch im going to delete,
+		// if emty list is returned then its not found
+		// then return the list for another lambda to handle possibly?   im pretty sure i might need some cases for this to fuly work
+
+
+
+	// each layer should return a tokenlist that is already substituted by the inner layer
+	// the outermost will be ready for parsing
+
+	// the lambda should simply disappear after it is resolved, leaving only the substituted list
+
+
 
 };

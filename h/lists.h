@@ -2,6 +2,9 @@
 #include "atoms.h"
 #include "utils.h"
 
+
+
+
 // the basic attributes of a list object
 #define LIST_BODY(list_type)													\
 static constexpr auto append(list_type<>)->list_type< Types... >;				\
@@ -25,7 +28,7 @@ using make_##list_type##_t = decltype(make_##list_type (Types{}...));									\
 template < typename ...Types >																			\
 using list_type##_t = decltype(make_##list_type());
 
-// create a fully functional list struct
+// lists have all the same functionality, names are just typename wrappers around the list data structure
 #define LIST(name)				\
 template < typename ...Types >	\
 struct name { LIST_BODY(name);};\
