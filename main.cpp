@@ -8,23 +8,36 @@
 #include "h/number_operations.h"
 #include "h/parser.h"
 #include "h/table.h"
-#include "tests.h"
 #include "h/pretty_print.h"
 #include "h/car_crd.h"
 
-int main(){
-	auto string = constexpr_string("(define y 3) (define x 2) (define z  2) (+ 1 y (- x 1) z)");
+LIST(pair_l);
 
-	// populate the table with the contents of (define ...) expressions
-	using table_entries = decltype(gather_table_entries(string));
-
-	// build the ast for parsing, without (define ...) expressions, but substitute the symbols with their values
-	using tokens = decltype(tokenize_w_table<table_entries>(string));
-
-	auto constexpr result = parse(tokens{});
-
-	auto ast = std::string(demangle<tokens>());
-	pretty_print(ast);
-
-	std::cout << ";; " << result << "\n";
+template <template <class,class> typename One, typename A, typename... Args, template <class,class> typename Two, typename B, typename... Brgs>
+auto constexpr map_pair_l(One<A,Args...>,Two<B,Brgs...>){
+		using p = decltype(make_pair_l(A{},B{}));
+	if constexpr (sizeof...(Args) == 0) {
+		return make_token_list(p{});
+	} else {
+		using second = decltype(map_pair_l(One<Args...>{},Two<Brgs...>{}));
+		return make_token_list(p{},second{});
+	}
 }
+
+
+int main(){
+	auto constexpr string = constexpr_string("((lambda (x y) (+ x y)) 1 1)");
+	using tokens = decltype(tokenize(string));
+
+	using list = decltype(car(car(tokens{})));
+	using operator_lam = decltype(car(car(car(list{}))));
+
+
+	using arguments = decltype(car(car(cdr(car(car(list{}))))));
+	using expressions = decltype(cdr(cdr(car(car(list{})))));
+	using parameters = decltype(cdr(car(car(tokens{}))));
+
+	using something = decltype(map_pair_l(arguments{},parameters{}));
+	// implement putting 2 lists into pairs
+
+};
