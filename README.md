@@ -7,9 +7,16 @@
 # <a name="capab">current capabilities</a>
 ### evaluating simple expressions
 ```cpp
-using tokens = decltype(tokenize(x));
-auto constexpr res = parse(tokens{});
-//pretty_print(typeid(tokens).name()); //with msvc
+auto string = constexpr_string("(define y 3) (define x 2) (define z  2) (+ 1 y (- x 1) z)");
+
+// populate the table with the contents of (define ...) expressions
+using table_entries = decltype(gather_table_entries(string));
+
+// build the ast for parsing, without (define ...) expressions, but substitute the symbols with their values
+using tokens = decltype(tokenize_w_table<table_entries>(string));
+
+auto constexpr result = parse(tokens{});
+
 auto str = std::string(demangle<tokens>());
 pretty_print(str);
 std::cout << ";; " << res << "\n";
@@ -19,25 +26,20 @@ token_list<
  list<
   token_list<
    plus,
+   integer<1>,
    integer<3>,
    list<
     token_list<
-     plus,
-     integer<3>,
-     list<
-      token_list<
-       plus,
-       integer<2>,
-       integer<2>
-      >
-     >,
-     integer<2>
+     minus,
+     integer<2>,
+     integer<1>
     >
-   >
+   >,
+   integer<2>
   >
  >
 >
-;; 12
+;; 7
 /**/
 ```
 # <a name="string">traversing a string in constexpr, how?</a>

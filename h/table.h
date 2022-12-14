@@ -91,12 +91,12 @@ constexpr auto tokenize_w_table(Lambda str_lambda) {
 			constexpr auto end_of_list = find_end_of_list< Index >(str_lambda);
 			// tokenize the contents of the list and return it in a wrapper
 			using l = decltype(tokenize_list_w_table<Table, Lambda, Index>(str_lambda));
-			using second = decltype(tokenize_w_table<Table, Lambda, end_of_list + 1>(str_lambda));
 
 			// drop empty expressions, define handling
 			if constexpr (is_same_type<_empty_list,l>){
-				return make_token_list(second{});
+				return tokenize_w_table<Table, Lambda, end_of_list + 1>(str_lambda);
 			} else {
+				using second = decltype(tokenize_w_table<Table, Lambda, end_of_list + 1>(str_lambda));
 				return make_token_list(l{}, second{});
 			}
 
