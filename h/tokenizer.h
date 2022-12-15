@@ -5,6 +5,7 @@
 #include "atoms.h"
 #include "utils.h"
 #include "lists.h"
+#include "lambda.h"
 
 // tokenize does not handle (define ...) type expressions, if they are found, the node is terminated
 template <typename Lambda, size_t Index = 0>
@@ -20,9 +21,20 @@ constexpr auto tokenize(Lambda str_lambda) {
 			// tokenize the contents of the list and return it in a wrapper
 			using l = decltype(tokenize_list< Lambda, Index>(str_lambda));
 			using second = decltype(tokenize<Lambda, end_of_list + 1>(str_lambda));
+			/**/
+			if constexpr (is_lambda(car(l{}))){ // remove the list wrapper and check if its a lambda
+				using arguments = decltype(car(car(car(car(l{}))))); // horrible leftover layers making it hard to read, how to get rid of this? 
+				using expression = decltype(car(car(cdr(car(car(l{}))))));
+				using parameters = decltype(second{});
+				using arg_x_parameter_table = decltype(map_pair_l(arguments{},parameters{})); // both are wrapped in a million layers, but it pairs them up perfectly??
 
-			// drop empty expressions, define handling
-			if constexpr (is_same_type<_empty_list,l>){
+				using result = decltype(substitute(arg_x_parameter_table{},expression{}));
+
+				return make_token_list(result{});
+
+				// parse the parameters and substitute types using the table lookup
+
+			} else /**/ if constexpr (is_same_type<_empty_list,l>){ // drop empty expressions, define handling
 				return make_token_list(second{});
 			} else {
 				return make_token_list(l{}, second{});
@@ -44,8 +56,10 @@ constexpr auto tokenize(Lambda str_lambda) {
 			if constexpr (end_of_char_list > 0) {
 				using char_list = decltype(tokenize_char_list< Lambda, Index, end_of_char_list >(str_lambda));
 				
-				// if its a define expression, ignore node, another tokenizing process deals with that
-				if constexpr (is_same_type<_define,char_list>){
+				if constexpr (is_same_type<_lambda,char_list>){// extract args and expressions to the outer layer
+					using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
+					return make_lambda(second{});
+				} else if constexpr (is_same_type<_define,char_list>){// if its a define expression, ignore node, another tokenizing process deals with that
 					return make_token_list();
 				} else {
 					using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));

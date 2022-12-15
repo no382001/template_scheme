@@ -8,6 +8,7 @@
 // the basic attributes of a list object
 #define LIST_BODY(list_type)													\
 static constexpr auto append(list_type<>)->list_type< Types... >;				\
+static constexpr auto append(list_type<>,list_type<>)->list_type< Types... >;	\
 template < typename A >															\
 static constexpr auto append(A)->list_type< Types..., A >;						\
 template < typename A >															\
@@ -22,18 +23,42 @@ static constexpr auto append(list_type< A, B, Args... >) {						\
 #define MAKE_LIST_FUNCTIONS(list_type)																	\
 template < typename T, typename ...Rest>																\
 auto constexpr make_##list_type(T, Rest...) -> decltype(list_type< T >::append(list_type< Rest... >{}));\
-auto constexpr make_##list_type()->list_type<>;															\
+auto constexpr make_##list_type()->list_type<>; 														\
 template < typename ...Types >																			\
 using make_##list_type##_t = decltype(make_##list_type (Types{}...));									\
 template < typename ...Types >																			\
 using list_type##_t = decltype(make_##list_type());
+/*
+template < typename ...Rest>																			\
+auto constexpr make_##list_type(Rest...)->decltype(list_type< Rest... >{});								\
+auto constexpr make_##list_type(list_type<>)->list_type<>;												\
+*/
 
 // lists have all the same functionality, names are just typename wrappers around the list data structure
-#define LIST(name)				\
-template < typename ...Types >	\
-struct name { LIST_BODY(name);};\
+#define LIST(name)									\
+template < typename ...Types >						\
+struct name { LIST_BODY(name);};					\
 MAKE_LIST_FUNCTIONS(name);
 
 LIST(token_list);
 LIST(c_list);
 LIST(list);
+
+//template < template <class> typename T,typename... Rest>
+//auto constexpr make_list(T<Rest...>)->list<Rest...>;
+
+
+template <template <class> typename A, typename... Args>
+auto constexpr simplify(A<A<Args...>>){
+	return A<Args...>{};
+}
+
+template <template <class> typename A, template <class> typename B, typename... Args>
+auto constexpr simplify(A<B<A<B<Args...>>>>){
+	return A<B<Args...>>>{};
+}
+
+template <template <class> typename A, template <class> typename B, typename... Args>
+auto constexpr remove_outer(A<B<Args...>>){
+	return B<Args...>{};
+}

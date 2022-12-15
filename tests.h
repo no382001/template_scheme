@@ -36,6 +36,7 @@ static_assert(5 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 (+ 1 0) 1
 
 auto x = constexpr_string("(+ ab 1( 1 klajsd ok laksd) 1)");
 using tokenass = decltype(tokenize(x));
+/*
 using token_away = decltype(car(tokens{}));
 using list_Away = decltype(car(token_away{}));
 using first = decltype(car(list_Away{}));
@@ -44,13 +45,14 @@ using asdsad = decltype(car(make_list()));
 using fa21s = decltype(car(list<integer<1>,integer<2>>{}));
 using fa221s = decltype(cdr(list<integer<1>,integer<2>>{}));
 using fa212321s = decltype(cdr(list<>{}));
+*/
 //using tab = decltype(make_table(table_entry<int,tokens>{},table_entry<char,tokens>{}));
 ////using first_table = decltype(car(tab{}));
 //using rest_table = decltype(cdr(tab{}));
 ////using c_t = decltype(c_list<c_<97>, c_<98>, c_<99>>{});
 auto constexpr asdasdaasd = is_c_list(integer<1>{});
 //auto constexpr b = is_c_list(c_t{});
-auto constexpr b2 = is_c_list(tokens{});
+//auto constexpr b2 = is_c_list(tokens{});
 
 //auto y = constexpr_string("(1111111111111111)"); //16to parse 7 actually parsed
 //using token1s = decltype(tokenize(y));
