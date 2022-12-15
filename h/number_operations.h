@@ -30,5 +30,7 @@ auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {
 		} else if constexpr (is_same_type<A, div_>) {
 			return e_div(Rest{}...);
 		}
+	} else if constexpr (is_integer_v<A>){
+		return A{}.get_value();
 	}
 };

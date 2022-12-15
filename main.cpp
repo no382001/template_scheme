@@ -11,11 +11,13 @@
 #include "h/pretty_print.h"
 #include "h/car_crd.h"
 #include "h/lambda.h"
+#include "tests.h"
 
-
+static_assert(3 == parse(decltype(tokenize(constexpr_string("((lambda (x y) (+ x y)) 2 1)"))){}),"");
+static_assert(1 == parse(decltype(tokenize(constexpr_string("((lambda (x) (x)) 1)"))){}),"");
 
 int main(){
-	auto constexpr string = constexpr_string("((lambda (x y) (+ x y)) 2 1)");
+	auto constexpr string = constexpr_string("((lambda (x) (x)) 1)");
 	using tokens = decltype(tokenize(string)); // car fails in instances where the lists dont fold inwards
 	
 	auto constexpr result = parse(tokens{});
