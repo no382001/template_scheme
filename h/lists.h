@@ -52,13 +52,22 @@ template <template <class> typename A, typename... Args>
 auto constexpr simplify(A<A<Args...>>){
 	return A<Args...>{};
 }
-
-template <template <class> typename A, template <class> typename B, typename... Args>
-auto constexpr simplify(A<B<A<B<Args...>>>>){
-	return A<B<Args...>>>{};
+template <typename A>
+auto constexpr simplify(A){
+	return A{};
 }
 
 template <template <class> typename A, template <class> typename B, typename... Args>
 auto constexpr remove_outer(A<B<Args...>>){
 	return B<Args...>{};
+}
+
+
+template <template <class> typename A, typename... Rest>
+bool constexpr is_empty_list(A<Rest...>){
+	if constexpr (sizeof...(Rest) > 0) {
+        return false;
+    } else {
+        return true;
+    }
 }

@@ -21,20 +21,20 @@ constexpr auto tokenize(Lambda str_lambda) {
 			// tokenize the contents of the list and return it in a wrapper
 			using l = decltype(tokenize_list< Lambda, Index>(str_lambda));
 			using second = decltype(tokenize<Lambda, end_of_list + 1>(str_lambda));
-			/**/
-			if constexpr (is_lambda(car(l{}))){ // remove the list wrapper and check if its a lambda
-				using arguments = decltype(car(car(car(car(l{}))))); // horrible leftover layers making it hard to read, how to get rid of this? 
-				using expression = decltype(car(car(cdr(car(car(l{}))))));
-				using parameters = decltype(second{});
-				using arg_x_parameter_table = decltype(map_pair_l(arguments{},parameters{})); // both are wrapped in a million layers, but it pairs them up perfectly??
 
+			if constexpr (is_lambda(car(l{}))){ // remove the list wrapper and check if its a lambda
+				
+				using stripped_l = decltype(car(car(l{})));
+				using arguments = decltype(car(car(stripped_l{})));
+				using expression = decltype(car(car(cdr(stripped_l{}))));
+				using parameters = decltype(second{});
+				using arg_x_parameter_table = decltype(map_pair_l(arguments{},parameters{}));
 				using result = decltype(substitute(arg_x_parameter_table{},expression{}));
 
-				return make_token_list(result{});
+				return result{};
 
-				// parse the parameters and substitute types using the table lookup
 
-			} else /**/ if constexpr (is_same_type<_empty_list,l>){ // drop empty expressions, define handling
+			} else if constexpr (is_empty_list(l{})){ // drop empty expressions, define handling
 				return make_token_list(second{});
 			} else {
 				return make_token_list(l{}, second{});

@@ -58,3 +58,8 @@ auto constexpr substitute(table,Args...){
     }
 }
 
+template <typename Lambda, size_t Index>
+constexpr auto tokenize_list_for_lambda(Lambda str_lambda) {
+	using curr = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
+	return make_token_list(curr{});
+}
