@@ -26,6 +26,24 @@ auto constexpr map_pair_l(One<A,Args...>,Two<B,Brgs...>){
 
 #define _lambda c_list<c_<108>, c_<97>, c_<109>, c_<98>, c_<100>, c_<97>>
 
+// search for the key of a pair list, get the value back
+// - returns void when not found
+template <typename candidate, typename... Args>
+auto constexpr search_pair_l(candidate,Args...){
+    if constexpr (sizeof...(Args) == 0) {
+		return make_token_list();
+    } else {
+		using curr_t = decltype(car(Args{}...));
+		using to_compare = decltype(car(car(Args{}...)));
+		if constexpr (is_same_type<candidate,to_compare>){
+			return cdr(car(Args{}...));
+		} else if constexpr (!is_same_type<token_list<>,curr_t>){
+			return search_pair_l(candidate{},cdr(Args{}...));
+		}
+    }
+}
+
+
 
 int main(){
 	auto constexpr string = constexpr_string("((lambda (x y) (+ x y)) 1 1)");
@@ -40,6 +58,9 @@ int main(){
 
 	using arg_x_parameter_table = decltype(map_pair_l(arguments{},parameters{}));
 
+	using etest = decltype(car(car(arg_x_parameter_table{})));
+
+	using found = decltype(search_pair_l(c_list<c_<120>>{},arg_x_parameter_table{}));
 
 	static_assert(is_same_type<operator_lam,_lambda>,"");
 		// if it is lambda send a callback
@@ -48,14 +69,13 @@ int main(){
 		// - expressions
 		// - parameters
 		// 
-		// map the arg and par together
+		// - map the arg and par together
 		// tokenize expressions (this whole procedure should happen in tokenize)
 		// when returned here, go thru the token list and substitute the symbol if found
 		// 
 		// TODO: i need to rewrite the table search thing, whihch im going to delete,
-		// if emty list is returned then its not found
+		// if empty list is returned then its not found
 		// then return the list for another lambda to handle possibly?   im pretty sure i might need some cases for this to fuly work
-
 
 
 	// each layer should return a tokenlist that is already substituted by the inner layer
