@@ -29,6 +29,7 @@ LIST(table)
 
 IS_X_LIST(token_list);
 IS_X_LIST(list);
+IS_X_LIST(table);
 
 // gather_table_entries only handles (define ...) type expressions, if any other is found, the node is terminated
 // no scoping yet, everything is global

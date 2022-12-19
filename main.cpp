@@ -11,36 +11,25 @@
 #include "h/pretty_print.h"
 #include "h/car_crd.h"
 #include "h/lambda.h"
-#include "tests.h"
+//#include "tests.h"
 
-static_assert(3 == parse(decltype(tokenize(constexpr_string("((lambda (x y) (+ x y)) 2 1)"))){}),"");
-static_assert(1 == parse(decltype(tokenize(constexpr_string("((lambda (x) (x)) 1)"))){}),"");
+//static_assert(3 == parse(decltype(tokenize(constexpr_string("((lambda (x y) (+ x y)) 2 1)"))){}),"");
+//static_assert(1 == parse(decltype(tokenize(constexpr_string("((lambda (x) (x)) 1)"))){}),"");
 
 int main(){
-	auto constexpr string = constexpr_string("((lambda (x) (x)) 1)");
+	auto constexpr string = constexpr_string("(((lambda (x) (lambda (y) (+ x y))) 3) 4)");
 	using tokens = decltype(tokenize(string)); // car fails in instances where the lists dont fold inwards
-	
-	auto constexpr result = parse(tokens{});
+	auto ast = std::string(demangle<tokens>());
+	std::cout << ast << '\n';
 
-	//static_assert(is_same_type<operator_lam,_lambda>,"");
-		// if it is lambda send a callback
-		// then step back into the list and handle it as a lambda expression
-		// - arguments
-		// - expressions
-		// - parameters
-		// 
-		// - map the arg and par together
-		// tokenize expressions (this whole procedure should happen in tokenize)
-		// when returned here, go thru the token list and substitute the symbol if found
-		// 
-		// TODO: i need to rewrite the table search thing, whihch im going to delete,
-		// if empty list is returned then its not found
-		// then return the list for another lambda to handle possibly?   im pretty sure i might need some cases for this to fuly work
-	// each layer should return a tokenlist that is already substituted by the inner layer
-	// the outermost will be ready for parsing
-
-	// the lambda should simply disappear after it is resolved, leaving only the substituted list
+	// the problem now is: i have lots of list types that im using and also whenever i car or cdr, different results need to be handled in some way
 
 
+	//using tokens = decltype(token_list<list<table<token_list<pair_l<token_list<c_list<c_<120>>>, token_list<integer<3>>>, pair_l<c_list<c_<121>>, integer<4>>>, token_list<plus, c_list<c_<120>>, c_list<c_<121>>>>>>{}); 
 
+	//using t =  decltype(car(car(car(tokens{}))));
+	//using value = decltype(search_pair_l(token_list<c_list<c_<120>>>{},t{}));
+	///using x =  decltype(remove_outer(cdr(car(car(tokens{})))));
+
+	//using result = decltype(substitute(t{},x{}));
 };

@@ -22,16 +22,34 @@ constexpr auto tokenize(Lambda str_lambda) {
 			using l = decltype(tokenize_list< Lambda, Index>(str_lambda));
 			using second = decltype(tokenize<Lambda, end_of_list + 1>(str_lambda));
 
-			if constexpr (is_lambda(car(l{}))){ // remove the list wrapper and check if its a lambda
+			if constexpr (is_indicator(car(l{}))){ //indicating the return of the nested layers within nested lambda
+					using arguments = decltype(car(l{}));
+					using expression = decltype(car(cdr(car(l{}))));
+					using param = decltype(remove_outer(cdr(cdr(car(l{})))).append(second{}));
+
+					//using arg_x_parameter_table = decltype(map_pair_l(arguments{},param{}));
+					//using result = decltype(substitute(arg_x_parameter_table{},expression{}));
+
+					return make_table(arguments{},expression{},param{});
+			} else if constexpr (is_lambda(car(l{}))){ // remove the list wrapper and check if its a lambda
 				
 				using stripped_l = decltype(car(car(l{})));
 				using arguments = decltype(car(car(stripped_l{})));
 				using expression = decltype(car(car(cdr(stripped_l{}))));
 				using parameters = decltype(second{});
-				using arg_x_parameter_table = decltype(map_pair_l(arguments{},parameters{}));
-				using result = decltype(substitute(arg_x_parameter_table{},expression{}));
 
-				return result{};
+				if constexpr (is_table(car(cdr(stripped_l{})))){ //if returned from no param node
+					using table = decltype(car(cdr(stripped_l{})));
+					
+					// append args to curr args
+					using appended = decltype(make_token_list(arguments{}).append(car(table{})));
+					using expression = decltype(cdr(table{}));
+
+					return make_indicator(appended{},expression{},parameters{}); // pass things up for handling
+
+				} else if constexpr (is_empty_list(second{})){
+					return make_table(arguments{},expression{}); // if nested lambda, ergo no param, return the expression and the args
+				}
 
 
 			} else if constexpr (is_empty_list(l{})){ // drop empty expressions, define handling

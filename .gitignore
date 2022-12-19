@@ -13,6 +13,7 @@
 *.out
 .vscode/*
 gentemp/*
+.history/*
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

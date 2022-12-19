@@ -12,6 +12,10 @@ LIST(lambda);
 IS_X_LIST(lambda);
 LIST(pair_l);
 
+
+LIST(indicator);
+IS_X_LIST(indicator);
+
 template <template <class,class> typename One, typename A, typename... Args, template <class,class> typename Two, typename B, typename... Brgs>
 auto constexpr map_pair_l(One<A,Args...>,Two<B,Brgs...>){
 		using p = decltype(make_pair_l(A{},B{}));
@@ -62,4 +66,9 @@ template <typename Lambda, size_t Index>
 constexpr auto tokenize_list_for_lambda(Lambda str_lambda) {
 	using curr = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
 	return make_token_list(curr{});
+}
+
+template <typename table, template <class,class> typename T, typename A, typename... Args>
+auto constexpr subst_helper(table, T<A,Args...>){
+	return substitute(table{},A{},Args{}...);
 }
