@@ -27,12 +27,9 @@ auto constexpr make_##list_type()->list_type<>; 														\
 template < typename ...Types >																			\
 using make_##list_type##_t = decltype(make_##list_type (Types{}...));									\
 template < typename ...Types >																			\
-using list_type##_t = decltype(make_##list_type());
-/*
+using list_type##_t = decltype(make_##list_type());														\
 template < typename ...Rest>																			\
-auto constexpr make_##list_type(Rest...)->decltype(list_type< Rest... >{});								\
-auto constexpr make_##list_type(list_type<>)->list_type<>;												\
-*/
+auto constexpr make_##list_type(list_type<>)->list_type<>;
 
 // lists have all the same functionality, names are just typename wrappers around the list data structure
 #define LIST(name)									\

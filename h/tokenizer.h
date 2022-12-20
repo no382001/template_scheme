@@ -7,6 +7,8 @@
 #include "lists.h"
 #include "lambda.h"
 
+LIST(outer_lambda);
+
 // tokenize does not handle (define ...) type expressions, if they are found, the node is terminated
 template <typename Lambda, size_t Index = 0>
 constexpr auto tokenize(Lambda str_lambda) {
@@ -22,15 +24,15 @@ constexpr auto tokenize(Lambda str_lambda) {
 			using l = decltype(tokenize_list< Lambda, Index>(str_lambda));
 			using second = decltype(tokenize<Lambda, end_of_list + 1>(str_lambda));
 
-			if constexpr (is_indicator(car(l{}))){ //indicating the return of the nested layers within nested lambda
-					using arguments = decltype(car(l{}));
+			if constexpr (is_table(car(l{}))){ //indicating the return of the nested layers within nested lambda
+					using arguments = decltype(car(car(l{})));
 					using expression = decltype(car(cdr(car(l{}))));
 					using param = decltype(remove_outer(cdr(cdr(car(l{})))).append(second{}));
 
-					//using arg_x_parameter_table = decltype(map_pair_l(arguments{},param{}));
-					//using result = decltype(substitute(arg_x_parameter_table{},expression{}));
+					using arg_x_parameter_table = decltype(map_pair_l(arguments{},param{}));
+					using result = decltype(substitute(arg_x_parameter_table{},expression{}));
 
-					return make_table(arguments{},expression{},param{});
+					return result{};
 			} else if constexpr (is_lambda(car(l{}))){ // remove the list wrapper and check if its a lambda
 				
 				using stripped_l = decltype(car(car(l{})));
@@ -42,13 +44,13 @@ constexpr auto tokenize(Lambda str_lambda) {
 					using table = decltype(car(cdr(stripped_l{})));
 					
 					// append args to curr args
-					using appended = decltype(make_token_list(arguments{}).append(car(table{})));
-					using expression = decltype(cdr(table{}));
+					using appended = decltype(arguments{}.append(car(table{})));
+					using expression = decltype(car(cdr(table{})));
 
-					return make_indicator(appended{},expression{},parameters{}); // pass things up for handling
+					return make_table(appended{},expression{},parameters{}); // pass things up for handling
 
 				} else if constexpr (is_empty_list(second{})){
-					return make_table(arguments{},expression{}); // if nested lambda, ergo no param, return the expression and the args
+					return make_table(arguments{},expression{},token_list<>{}); // if nested lambda, ergo no param, return the expression and the args
 				}
 
 
@@ -56,7 +58,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 				return make_token_list(second{});
 			} else {
 				return make_token_list(l{}, second{});
-			}
+			} 
 
 		} else if constexpr (is_same_type<curr, list_end>) {
 			// base case for tokenize_list

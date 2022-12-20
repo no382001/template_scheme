@@ -16,9 +16,20 @@
 //static_assert(3 == parse(decltype(tokenize(constexpr_string("((lambda (x y) (+ x y)) 2 1)"))){}),"");
 //static_assert(1 == parse(decltype(tokenize(constexpr_string("((lambda (x) (x)) 1)"))){}),"");
 
+
 int main(){
 	auto constexpr string = constexpr_string("(((lambda (x) (lambda (y) (+ x y))) 3) 4)");
-	using tokens = decltype(tokenize(string)); // car fails in instances where the lists dont fold inwards
+	using tokens = decltype(tokenize(string));
+	
+	auto constexpr res = parse(tokens{});
+
+	using a =  decltype(token_list<c_list<c_<120>>, c_list<c_<121>>>{});
+	using p =  decltype(token_list<integer<3>, integer<4>>{});
+	using e =  decltype(token_list<integer<3>, integer<4>>{});
+	using arg_x_parameter_table = decltype(map_pair_l(a{},p{}));
+	using result = decltype(substitute(arg_x_parameter_table{},e{}));
+
+
 	auto ast = std::string(demangle<tokens>());
 	std::cout << ast << '\n';
 
@@ -27,7 +38,6 @@ int main(){
 
 	//using tokens = decltype(token_list<list<table<token_list<pair_l<token_list<c_list<c_<120>>>, token_list<integer<3>>>, pair_l<c_list<c_<121>>, integer<4>>>, token_list<plus, c_list<c_<120>>, c_list<c_<121>>>>>>{}); 
 
-	//using t =  decltype(car(car(car(tokens{}))));
 	//using value = decltype(search_pair_l(token_list<c_list<c_<120>>>{},t{}));
 	///using x =  decltype(remove_outer(cdr(car(car(tokens{})))));
 
