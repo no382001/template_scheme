@@ -5,58 +5,30 @@
 
 
 # <a name="capab">current capabilities</a>
-### evaluating simple expressions
+### evaluating simple lambda expressions
 ```cpp
-auto string = constexpr_string("(define y 3) (define x 2) (define z  2) (+ 1 y (- x 1) z)");
-
-// populate the table with the contents of (define ...) expressions
-using table_entries = decltype(gather_table_entries(string));
-
-// build the ast for parsing, without (define ...) expressions, but substitute the symbols with their values
-using tokens = decltype(tokenize_w_table<table_entries>(string));
-
-auto constexpr result = parse(tokens{});
-
-auto str = std::string(demangle<tokens>());
-pretty_print(str);
-std::cout << ";; " << res << "\n";
-
-/** /  
-token_list<
- list<
-  token_list<
-   plus,
-   integer<1>,
-   integer<3>,
-   list<
-    token_list<
-     minus,
-     integer<2>,
-     integer<1>
-    >
-   >,
-   integer<2>
-  >
- >
->
-;; 7
-/**/
+auto constexpr string = constexpr_string("(((lambda (x) (lambda (y) (+ x y))) 3) 4)");
+	
+using tokens = decltype(tokenizer(string));
+auto constexpr res = parse(tokens{}); // 7
 ```
 # <a name="string">traversing a string in constexpr, how?</a>
 how? very easy, since we cant really manipulate or even look at std::string or char* in constexpr (they only work in runtime which is not our thing now) our only option is std::string_view which basically is just a constexpr char ptr, for our case anyways. <br><br>
 
 using this macro, we have our lambda object that returns its arguments in constexpr
 ```cpp
+#include <string_view>
+
 #define constexpr_string(...) ([]() constexpr -> std::string_view { return __VA_ARGS__; })
 ```
 (`__VA_ARGS__` is a variadic macro that refers to whatever occupies the place of `...` in the argument list)<br><br>
 
 by initializing the object and indexing after, we can get the character we are looking for, all in constexpr 
 ```cpp
-auto str = constexpr_string("abc");
+auto letters = constexpr_string("abc");
 
-static_assert('a' == str()[0]);
-static_assert('b' == str()[1]);
+static_assert('a' == letters()[0]);
+static_assert('b' == letters()[1]);
 ```
 now that we have all we need, we can top it off with another macro that enables us to handle files in constexpr
 ```cpp
@@ -106,15 +78,12 @@ and there we have it, we now now the individual types of our tokens
 ```cpp
 auto str = constexpr_string("(+ 1 1)");
 
-using token0 = decltype(deduce_token_type<str()[0]>());
-using token1 = decltype(deduce_token_type<str()[1]>());
-using token2 = decltype(deduce_token_type<str()[2]>());
-using token3 = decltype(deduce_token_type<str()[3]>());
+using token0 = decltype(deduce_token_type<str()[0]>()); // list_start
+using token1 = decltype(deduce_token_type<str()[1]>()); // plus
+using token2 = decltype(deduce_token_type<str()[2]>()); // whitespace
+using token3 = decltype(deduce_token_type<str()[3]>()); // integer<1>
 ```
 but this isnt something we can work with yet, in order to feed this to a parser and get an evaluation, we need a list of tokens <br><br>
-
-(syntax highlighting will get worse from here with md)
-<br><br>
 
 nothing is easier, here it is
 ```cpp
@@ -160,6 +129,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 and get our list of tokens the following way
 ```cpp
 using tokens = decltype(tokenize(str));
+// list<list_start, plus, whitespace, integer<1>, whitespace, integer<1>, list_end> 
 ```
 ## <a name="n-digit">n-digit integer token as type</a>
 to tokenize an n digit integer we just need to implement the following expression<br>
@@ -170,7 +140,7 @@ where<br>
 
 
 
-sadly we cant use the C implementation of `log` and `pow` as we need a constexpr solution which is not yet available, so we need to implement it ourselves, and it has to be implemented in a fucntional way (as expected), so these will generate a large amount of code if we use big numbers, but i dont see any other way around this. the generated code is already in the 80 thousands even for a simple expression, so it doesnt really matter.
+sadly we cant use the C implementation of `log` and `pow` as we need a constexpr solution which is not yet available. We need to implement it ourselves, and the solution can only be purely functional.
 ```cpp
 constexpr int _pow(int base, int exp, int result = 1) {
   return exp < 1 ? result : _pow(base * base, exp / 2, (exp % 2) ? result * base : result);
@@ -180,7 +150,7 @@ constexpr int _log(int b, int n) {
   return n < b ? 0 : _log(b, n / b) + 1;
 }
 ```
-now we can finally implement the concatination itself
+now we can finally implement the concatenation itself
 ```cpp
 template <int Value>
 struct integer{
@@ -189,5 +159,5 @@ struct integer{
 };
 ```
 ```cpp
-using i = decltype(integer<1>::merge(integer<1>{}));
+using i = decltype(integer<1>::merge(integer<1>{})); // integer<11>
 ```
