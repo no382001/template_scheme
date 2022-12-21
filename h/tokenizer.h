@@ -7,9 +7,33 @@
 #include "lists.h"
 #include "lambda.h"
 
-LIST(outer_lambda);
 
-// tokenize does not handle (define ...) type expressions, if they are found, the node is terminated
+template <typename... Args>
+auto constexpr is_token_list_list(token_list<list<Args...>>){
+	return true;
+}
+template <typename T>
+auto constexpr is_token_list_list(T){
+	return false;
+}
+
+
+
+template <typename Lambda>
+constexpr auto tokenizer(Lambda str_lambda) {
+	using list_of_tokens = decltype(tokenize<Lambda,0>(str_lambda));
+
+	// plain lambda expressions like "((lambda (x y) (+ x y)) 2 1)" will return in a token_list when resolved,
+	// but the parser only takes token_list<list<...>>, if this is the only parsed expression it needs to be wrapped in tokenlist<list<...>>
+	if constexpr (!is_token_list_list(list_of_tokens{})){
+		return make_token_list(make_list(list_of_tokens{})); //wrap in list and token_list so the parser is happy
+	} else {
+		return list_of_tokens{};
+	}
+}
+
+
+// tokenize does not handle (define ...) type expressions, if they are found, the node is terminated, see table.h
 template <typename Lambda, size_t Index = 0>
 constexpr auto tokenize(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
@@ -27,12 +51,18 @@ constexpr auto tokenize(Lambda str_lambda) {
 			if constexpr (is_table(car(l{}))){ //indicating the return of the nested layers within nested lambda
 					using arguments = decltype(car(car(l{})));
 					using expression = decltype(car(cdr(car(l{}))));
-					using param = decltype(remove_outer(cdr(cdr(car(l{})))).append(second{}));
 
-					using arg_x_parameter_table = decltype(map_pair_l(arguments{},param{}));
-					using result = decltype(substitute(arg_x_parameter_table{},expression{}));
-
-					return result{};
+					if constexpr (is_table(cdr(cdr(car(l{}))))){
+						using param = decltype(car(cdr(cdr(car(l{})))).append(second{})); //remove leftover table list from the beginning
+						using arg_x_parameter_table = decltype(map_pair_l(arguments{},param{}));
+						using result = decltype(substitute(arg_x_parameter_table{},expression{}));
+						return result{};
+					} else {
+						using param = decltype(cdr(cdr(car(l{}))).append(second{}));
+						using arg_x_parameter_table = decltype(map_pair_l(arguments{},param{}));
+						using result = decltype(substitute(arg_x_parameter_table{},expression{}));
+						return result{};
+					}
 			} else if constexpr (is_lambda(car(l{}))){ // remove the list wrapper and check if its a lambda
 				
 				using stripped_l = decltype(car(car(l{})));
@@ -49,8 +79,8 @@ constexpr auto tokenize(Lambda str_lambda) {
 
 					return make_table(appended{},expression{},parameters{}); // pass things up for handling
 
-				} else if constexpr (is_empty_list(second{})){
-					return make_table(arguments{},expression{},token_list<>{}); // if nested lambda, ergo no param, return the expression and the args
+				} else {
+					return make_table(arguments{},expression{},second{}); // if nested lambda, ergo no param, return the expression and the args
 				}
 
 

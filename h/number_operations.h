@@ -34,3 +34,20 @@ auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {
 		return A{}.get_value();
 	}
 };
+
+template <typename A, typename ...Rest>
+auto constexpr  handle_prefix(A,Rest...) {
+	if constexpr (sizeof...(Rest) > 0) {
+		if constexpr (is_same_type<A, plus>) { // if the prefix is valid
+			return e_add(Rest{}...); // pass the rest of the parameters to the evaluator
+		} else if constexpr (is_same_type<A, minus>) {
+			return e_sub(Rest{}...);
+		} else if constexpr (is_same_type<A, mul>) {
+			return e_mul(Rest{}...);
+		} else if constexpr (is_same_type<A, div_>) {
+			return e_div(Rest{}...);
+		}
+	} else if constexpr (is_integer_v<A>){
+		return A{}.get_value();
+	}
+};
