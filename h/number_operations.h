@@ -1,4 +1,6 @@
 #pragma once
+#include "if.h"
+
 
 #define NUM_OP(name,sign)															\
 template<int A, typename ...Rest>													\
@@ -17,6 +19,10 @@ NUM_OP(add,+);
 NUM_OP(sub,-);
 NUM_OP(mul,+);
 NUM_OP(div,+);
+NUM_OP(equal,==);
+NUM_OP(less,<);
+NUM_OP(more,>);
+
 
 template <typename A, typename ...Rest>
 auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {
@@ -29,6 +35,14 @@ auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {
 			return e_mul(Rest{}...);
 		} else if constexpr (is_same_type<A, div_>) {
 			return e_div(Rest{}...);
+		} else if constexpr (is_same_type<A, equal>) {
+			return e_equal(Rest{}...);
+		} else if constexpr (is_same_type<A, less>) {
+			return e_less(Rest{}...);
+		} else if constexpr (is_same_type<A, more>) {
+			return e_more(Rest{}...);
+		} else if constexpr (is_same_type<A,_if>){
+			return e_if(Rest{}...);
 		}
 	} else if constexpr (is_integer_v<A>){
 		return A{}.get_value();

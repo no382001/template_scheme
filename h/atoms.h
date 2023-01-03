@@ -15,6 +15,11 @@ struct whitespace {};
 struct non_integer {};
 struct non_character {};
 
+struct equal {};
+struct less {};
+struct more {};
+
+
 template <int Value>
 struct c_ {};
 
@@ -55,6 +60,12 @@ constexpr auto deduce_token_type() {
 		return div_{};
 	} else if constexpr (C == ' ') {
 		return whitespace{};
+	} else if constexpr (C == '<') {
+		return less{};
+	} else if constexpr (C == '>') {
+		return more{};
+	} else if constexpr (C == '=') {
+		return equal{};
 	}
 }
 
