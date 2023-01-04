@@ -13,29 +13,34 @@
 #include "h/pretty_print.h"
 #include "h/car_crd.h"
 
-//TODO: clean this ugly thing
-
 #define TEST(...) ([]() constexpr -> int { return parse(decltype(tokenize(constexpr_string(__VA_ARGS__))){}); })
 
+// basic nesting test
 static_assert(2 == TEST("(+ 1 1)")());
 static_assert(3 == TEST("(+ 1 (+ 1 1))")());
 static_assert(1 == TEST("(+ (- 1 1) 1)")());
 static_assert(2 == TEST("(+ (- (+ 1 1) 1) 1)")());
 static_assert(5 == TEST("(+ 1 (+ 1 (+ 1 0) 1) 1)")());
+static_assert(4 == TEST("(+ 1 (+ 1 1 ) 1)")());
+static_assert(5 == TEST("(+ (+ (+ 1 0) 1 (+ 2 0)) 1)")());
+static_assert(6 == TEST("(+ 1 (+ 1 1 ) (+ 1 1) 1)")());
+static_assert(6 == TEST("(+ 1 (+ 1 1 ) 1 (+ 1 1))")());
+static_assert(4 == TEST("(+ 1 (+ 1 (+ 1 0)) 1)")());
+static_assert(5 == TEST("(+ 1 (+ 1 (+ 1 0) 1) 1)")());
 static_assert(19 == TEST("(+ 3 (+ 2 (+ 2 2) (+ 2 2) 2) (+ 2 2))")());
-// ...
 
-static_assert(4 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) 1)"))){}),"");
-static_assert(5 == parse(decltype(tokenize(constexpr_string("(+ (+ (+ 1 0) 1 (+ 2 0)) 1)"))){}),"");
-static_assert(6 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) (+ 1 1) 1)"))){}),"");
-static_assert(6 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) 1 (+ 1 1))"))){}),"");
-static_assert(6 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 1 ) 1 (+ 1 1))"))){}),"");
-static_assert(4 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 (+ 1 0)) 1)"))){}),"nested LR");
-static_assert(5 == parse(decltype(tokenize(constexpr_string("(+ 1 (+ 1 (+ 1 0) 1) 1)"))){}),"nested LR");
+// mixed operator tests
+static_assert(9 == TEST("(+ (* 2 3) (/ (+ 4 5) 3))")());
+static_assert(30 == TEST("(+ (* (+ 2 3) (- 10 5)) (/ (* 10 5) (- 20 10)))")());
+static_assert(-16 == TEST("(- (/ (* (- (+ 10 5) (* 2 3)) (/ (* 10 5) (- 20 10))) (+ 2 3)) (* (+ 2 3) (- 10 5)))")());
 
+// nested if statement tests
+static_assert(1 == TEST("(if (> 3 2) (if (> 2 1) (if (> 1 0) 1 0) 0) 0))")());
 
-auto x = constexpr_string("(+ ab 1( 1 klajsd ok laksd) 1)");
-using tokenass = decltype(tokenize(x));
+// some other garbage
+
+//auto x = constexpr_string("(+ ab 1( 1 klajsd ok laksd) 1)");
+//using tokenass = decltype(tokenize(x));
 /*
 using token_away = decltype(car(tokens{}));
 using list_Away = decltype(car(token_away{}));
@@ -50,7 +55,7 @@ using fa212321s = decltype(cdr(list<>{}));
 ////using first_table = decltype(car(tab{}));
 //using rest_table = decltype(cdr(tab{}));
 ////using c_t = decltype(c_list<c_<97>, c_<98>, c_<99>>{});
-auto constexpr asdasdaasd = is_c_list(integer<1>{});
+//auto constexpr asdasdaasd = is_c_list(integer<1>{});
 //auto constexpr b = is_c_list(c_t{});
 //auto constexpr b2 = is_c_list(tokens{});
 
@@ -61,12 +66,12 @@ auto constexpr asdasdaasd = is_c_list(integer<1>{});
 //using tokens2 = decltype(tokenize(seven));
 
 // "(1 abc 1 abc 1 ( 1 gelcim 1 okt 1)) (+ ab 1( 1 klajsd ok laksd) 1)"
-auto xss = constexpr_string("(define x (+ 1 1 x)) (define y (22)) (+ 1 y x)");
-using tokssens = decltype(tokenize(xss));
-using table_entries = decltype(gather_table_entries(xss));
+//auto xss = constexpr_string("(+ (* 2 3) (/ (+ 4 5) 2))");
+//using tokssens = decltype(tokenize(xss));
+//auto constexpr sss = parse(tokssens{});
 
-using resss = decltype(table_search(c_list<c_<'x'>>{},table_entries{}));
-using resss2 = decltype(table_search(c_list<c_<'y'>>{},table_entries{}));
+////using resss = decltype(table_search(c_list<c_<'x'>>{},table_entries{}));
+//using resss2 = decltype(table_search(c_list<c_<'y'>>{},table_entries{}));
 
 /* 
 auto x = constexpr_string("(define y 22) (+ 1 y (- 1 1) 2)");
@@ -81,13 +86,11 @@ using table_entries2 = decltype(gather_table_entries(xssssss));
 using tokessns = decltype(tokenize_w_table<table_entries>(x));
 using tokessnsss = decltype(tokenize_w_table<table_entries2>(xssssss));
 
-auto constexpr result = parse(tokessns{});
-
-
 using token2s = decltype(tokenize(xasas));
 auto constexpr resultbasic = parse(token2s{});
 
 */
+//auto constexpr result = parse(tokens{});
 
 //constexpr bool b = is_same_type<s,token_list<c_list<c_<121>>>>;
 //constexpr bool b2 = is_same_type<ss,c_list<c_<120>>>;
@@ -97,3 +100,7 @@ auto constexpr resultbasic = parse(token2s{});
 //using res = decltype(tab::search<int>);
 //auto constexpr res = parse(tokens{});
 //pretty_print(typeid(tokens).name());
+
+
+
+

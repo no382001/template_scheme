@@ -20,7 +20,7 @@ static_assert(2 == parse(decltype(tokenizer(constexpr_string("(+ 1 ((lambda (x) 
 static_assert(7 == parse(decltype(tokenizer(constexpr_string("(((lambda (x) (lambda (y) (+ x y))) 3) 4)"))){}),"");
 
 int main(){
-	auto constexpr string = constexpr_string("(if (= 1 1) (+ 1 1) (3))");
+	auto constexpr string = constexpr_string("(if (> 3 2) (if (> 2 1) (if (> 1 0) 1 0) 0) 0))");
 	/*
 	(define x 1)
 	(if (> x 0)
@@ -36,5 +36,5 @@ int main(){
 	auto constexpr res = parse(tokens{});
 
 	auto ast = std::string(demangle<tokens>());
-	std::cout << ast << '\n';
+	std::cout << res << '\n';
 };

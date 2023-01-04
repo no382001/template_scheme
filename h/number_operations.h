@@ -17,8 +17,8 @@ auto constexpr e_##name(list<Args...> l, Rest...) { /* nested expression overloa
 
 NUM_OP(add,+);
 NUM_OP(sub,-);
-NUM_OP(mul,+);
-NUM_OP(div,+);
+NUM_OP(mul,*);
+NUM_OP(div,/);
 NUM_OP(equal,==);
 NUM_OP(less,<);
 NUM_OP(more,>);
