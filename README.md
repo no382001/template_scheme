@@ -5,16 +5,24 @@
 
 
 # <a name="capab">current capabilities</a>
-### evaluating simple lambda expressions
+### evaluating simple expressions
 ```cpp
 auto constexpr string = constexpr_string("(- (/ (* (- (+ 10 5) (* 2 3)) (/ (* 10 5) (- 20 10))) (+ 2 3)) (* (+ 2 3) (- 10 5)))");
-// token_list<list<token_list<minus, list<token_list<div_, list<token_list<mul, list<token_list<minus, list<token_list<plus, integer<10>, integer<5> > >, list<token_list<mul, integer<2>, integer<3> > > > >, list<token_list<div_, list<token_list<mul, integer<10>, integer<5> > >, list<token_list<minus, integer<20>, integer<10> > > > > > >, list<token_list<plus, integer<2>, integer<3> > > > >, list<token_list<mul, list<token_list<plus, integer<2>, integer<3> > >, list<token_list<minus, integer<10>, integer<5> > > > > > > >
 using tokenss = decltype(tokenizer(string));
+// token_list<list<token_list<minus, list<token_list<div_, list<token_list<mul, list<token_list<minus, list<token_list<plus, integer<10>, integer<5> > >, list<token_list<mul, integer<2>, integer<3> > > > >, list<token_list<div_, list<token_list<mul, integer<10>, integer<5> > >, list<token_list<minus, integer<20>, integer<10> > > > > > >, list<token_list<plus, integer<2>, integer<3> > > > >, list<token_list<mul, list<token_list<plus, integer<2>, integer<3> > >, list<token_list<minus, integer<10>, integer<5> > > > > > > >
 auto constexpr res = parse(tokenss{});
-
 auto ast = std::string(demangle<tokenss>());
 std::cout << ast << '\n'; // -16
+
+auto constexpr string2 = constexpr_string("(if (> 3 2) (if (> 2 1) (if (> 1 0) 1 0) 0) 0))");
+using tokenss2 = decltype(tokenizer(string2));
+// token_list<list<token_list<c_list<c_<105>, c_<102> >, list<token_list<more, integer<3>, integer<2> > >, list<token_list<c_list<c_<105>, c_<102> >, list<token_list<more, integer<2>, integer<1> > >, list<token_list<c_list<c_<105>, c_<102> >, list<token_list<more, integer<1>, integer<0> > >, integer<1>, integer<0> > >, integer<0> > >, integer<0> > > >
+auto constexpr res2 = parse(tokenss2{});
+auto ast2 = std::string(demangle<tokenss2>());
+std::cout << ast2 << '\n'; // 1
+
 ```
+there were some form of lambdas and defines working they are being reworked.
 # <a name="string">traversing a string in constexpr, how?</a>
 how? very easy, since we cant really manipulate or even look at std::string or char* in constexpr (they only work in runtime which is not our thing now) our only option is std::string_view which basically is just a constexpr char ptr, for our case anyways. <br><br>
 
