@@ -7,10 +7,13 @@
 # <a name="capab">current capabilities</a>
 ### evaluating simple lambda expressions
 ```cpp
-auto constexpr string = constexpr_string("(((lambda (x) (lambda (y) (+ x y))) 3) 4)");
-	
-using tokens = decltype(tokenizer(string));
-auto constexpr res = parse(tokens{}); // 7
+auto constexpr string = constexpr_string("(- (/ (* (- (+ 10 5) (* 2 3)) (/ (* 10 5) (- 20 10))) (+ 2 3)) (* (+ 2 3) (- 10 5)))");
+// token_list<list<token_list<minus, list<token_list<div_, list<token_list<mul, list<token_list<minus, list<token_list<plus, integer<10>, integer<5> > >, list<token_list<mul, integer<2>, integer<3> > > > >, list<token_list<div_, list<token_list<mul, integer<10>, integer<5> > >, list<token_list<minus, integer<20>, integer<10> > > > > > >, list<token_list<plus, integer<2>, integer<3> > > > >, list<token_list<mul, list<token_list<plus, integer<2>, integer<3> > >, list<token_list<minus, integer<10>, integer<5> > > > > > > >
+using tokenss = decltype(tokenizer(string));
+auto constexpr res = parse(tokenss{});
+
+auto ast = std::string(demangle<tokenss>());
+std::cout << ast << '\n'; // -16
 ```
 # <a name="string">traversing a string in constexpr, how?</a>
 how? very easy, since we cant really manipulate or even look at std::string or char* in constexpr (they only work in runtime which is not our thing now) our only option is std::string_view which basically is just a constexpr char ptr, for our case anyways. <br><br>
