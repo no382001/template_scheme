@@ -23,6 +23,20 @@ NUM_OP(equal,==);
 NUM_OP(less,<);
 NUM_OP(more,>);
 
+/*
+template<int A, typename ...Rest>
+auto constexpr e_lambda(A, Rest...) {
+	if constexpr (sizeof...(Rest) > 0)
+		return A + e_lambda(r...);
+	else{ return A; }
+}
+template< typename ...Args,typename ...Rest>
+auto constexpr e_##name(list<Args...> l, Rest...) {
+	auto constexpr x = handle_prefix(l);
+	return e_##name(integer<x>{}, Rest{}...);
+}
+
+*/
 
 template <typename A, typename ...Rest>
 auto constexpr  handle_prefix(list<token_list<A,Rest...>>) {

@@ -23,7 +23,11 @@ static constexpr auto append(list_type< A, B, Args... >) {						\
 #define MAKE_LIST_FUNCTIONS(list_type)																	\
 template < typename T, typename ...Rest>																\
 auto constexpr make_##list_type(T, Rest...) -> decltype(list_type< T >::append(list_type< Rest... >{}));\
-auto constexpr make_##list_type()->list_type<>; 														\
+template < typename T, typename ...Rest>																\
+auto constexpr make_##list_type(list_type<T>, Rest...) -> decltype(list_type<T>::append(list_type< Rest... >{}));\
+auto constexpr make_##list_type()->list_type<>;															\
+template <typename... Args>																				\
+auto constexpr make_##list_type(list_type<Args...>) -> decltype(make_##list_type (Args{}...));			\
 template < typename ...Types >																			\
 using make_##list_type##_t = decltype(make_##list_type (Types{}...));									\
 template < typename ...Types >																			\
@@ -41,9 +45,26 @@ LIST(token_list);
 LIST(c_list);
 LIST(list);
 
-//template < template <class> typename T,typename... Rest>
-//auto constexpr make_list(T<Rest...>)->list<Rest...>;
+using test1 = decltype(make_list());
+using test2 = decltype(make_list(make_list()));
+using test3 = decltype(make_list(make_list(int{})));
 
+using test23 = decltype(make_list(make_list(int{}),make_list()));
+
+template <template <class> typename A, template <class> typename B, typename... First, typename... Second>
+bool constexpr is_same_list_t(A<First...> a,B<Second...> b){ 
+	using derivedA = decltype(A{});
+	using derivedB = decltype(B{});
+	
+	if constexpr (is_same_type<derivedA,derivedB>){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+static_assert( false == is_same_list_t(list<int>{},token_list<>{}));
+static_assert( true == is_same_list_t(list<int>{},list<>{}));
 
 template <template <class> typename A, typename... Args>
 auto constexpr simplify(A<A<Args...>>){
@@ -68,3 +89,5 @@ bool constexpr is_empty_list(A<Rest...>){
         return true;
     }
 }
+
+using test4 = decltype(make_list(list<char>{},list<>{},list<char>{},list<char>{})); // collapse

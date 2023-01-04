@@ -13,28 +13,38 @@
 #include "h/lambda.h"
 #include "h/if.h"
 #include "tests.h"
+/*
+milestones:
+	- lambda expressions are working well, migrate them to parse module
+	- define expressions are working well, showcase with add function: almost ready 
+	- implement the y combinator, showcase with fibonacchi
 
+to implement:
+	- fix lists, i makes so much extra work when its not working right
+	- quoting, now ints just evaluate to their values like expressions, also there is no way to return a list
+		- maybe an function that builds a string output, or just evaluates to an int like now
+	- negative integers
+	- strings
+	- fix the integer concatinator, which probably breaks bc the int is stored in the template arg
+	- add some more primitives
 
-static_assert(3 == parse(decltype(tokenizer(constexpr_string("((lambda (x y) (+ x y)) 2 1)"))){}),"");
-static_assert(2 == parse(decltype(tokenizer(constexpr_string("(+ 1 ((lambda (x) (x)) 1))"))){}),"");
-static_assert(7 == parse(decltype(tokenizer(constexpr_string("(((lambda (x) (lambda (y) (+ x y))) 3) 4)"))){}),"");
+good to have:
+	- read from file
+
+*/
+
+//static_assert(3 == TEST("((lambda (x y) (+ x y)) 2 1)")());
+//static_assert(2 == TEST("(+ 1 ((lambda (x) (x)) 1))")());
+//static_assert(7 == TEST("(((lambda (x) (lambda (y) (+ x y))) 3) 4)")());
 
 int main(){
-	auto constexpr string = constexpr_string("(if (> 3 2) (if (> 2 1) (if (> 1 0) 1 0) 0) 0))");
-	/*
-	(define x 1)
-	(if (> x 0)
-      (1)
-	  (0))
+	auto constexpr string = constexpr_string("(((lambda (x) (lambda (y) (+ x y))) 3) 4)");
 
-	(if (= 1 1) '1 '0)
-	// implement quoting, now it just evaluates but lone ints evaluate to their values they two are expressions
-
-	*/
+	using tokenss = decltype(tokenizer(string));
+	// token_list<list<token_list<list<token_list<list<lambda<token_list<list<token_list<c_list<c_<120> > > >, list<lambda<token_list<list<token_list<c_list<c_<121> > > >, list<token_list<plus, c_list<c_<120> >, c_list<c_<121> > > > > > > > > >, integer<3> > >, integer<4> > > >
 	
-	using tokens = decltype(tokenizer(string));
-	auto constexpr res = parse(tokens{});
+	//auto constexpr res = parse(tokenss{});
 
-	auto ast = std::string(demangle<tokens>());
-	std::cout << res << '\n';
+	auto ast = std::string(demangle<tokenss>());
+	std::cout << ast << '\n';
 };

@@ -37,6 +37,11 @@ static_assert(-16 == TEST("(- (/ (* (- (+ 10 5) (* 2 3)) (/ (* 10 5) (- 20 10)))
 // nested if statement tests
 static_assert(1 == TEST("(if (> 3 2) (if (> 2 1) (if (> 1 0) 1 0) 0) 0))")());
 
+// lambdas
+//static_assert(3 == TEST("((lambda (x y) (+ x y)) 2 1)")());
+//static_assert(2 == TEST("(+ 1 ((lambda (x) (x)) 1))")());
+//static_assert(7 == TEST("(((lambda (x) (lambda (y) (+ x y))) 3) 4)")());
+
 // some other garbage
 
 //auto x = constexpr_string("(+ ab 1( 1 klajsd ok laksd) 1)");
