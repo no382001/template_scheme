@@ -11,6 +11,7 @@
 *.sln.docstates
 *.a
 *.out
+*.ghc
 .vscode/*
 gentemp/*
 .history/*
