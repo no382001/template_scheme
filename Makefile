@@ -1,2 +1,2 @@
 make :
-	g++ -std=c++2a -w h/lists.h
+	g++ -std=c++2a -w tests.h

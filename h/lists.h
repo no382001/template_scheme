@@ -44,6 +44,7 @@ LIST(list);
 template <typename ...Types>
 struct quote {};
 
+
 template <typename ...Types>
 auto constexpr make_quote(Types... types){
     static_assert(sizeof...(Types) > 0,"empty quote");
