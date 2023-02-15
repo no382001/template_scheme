@@ -44,9 +44,13 @@ LIST(list);
 template <typename ...Types>
 struct quote {};
 
+template <typename T>
+constexpr inline bool is_quoted(T){
+    return is_same_list_t(T{},quote<>{});
+}
 
 template <typename ...Types>
 auto constexpr make_quote(Types... types){
-    static_assert(sizeof...(Types) > 0,"empty quote");
+    static_assert(sizeof...(Types) > 0,"make_quote has no arguments");
     return quote<Types...>{};
 }
