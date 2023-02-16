@@ -1,7 +1,6 @@
 #include "h/lists.h"
 #include "h/car_cdr.h"
 #include "h/utils.h"
-#include "h/static_warning.h"
 
 struct testobj {};
 struct fooobj {};
