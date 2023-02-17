@@ -60,3 +60,24 @@ auto constexpr IRcdr(T<Args...>){
     static_assert(sizeof...(Args) > 0,"IRcdr on empty list");
     return IRcdr_inner<T>(Args{}...);
 }
+
+template <template<class> class T, typename... Args>
+auto constexpr IRcadr(T<Args...>){
+    static_assert(sizeof...(Args) > 0,"cadr on empty list");
+    using the_cdr = decltype(IRcdr(T<Args...>{}));
+    return IRcar(the_cdr{});
+}
+
+template <template<class> class T, typename... Args>
+auto constexpr IRcddr(T<Args...>){
+    static_assert(sizeof...(Args) > 0,"cadr on empty list");
+    using the_cdr = decltype(IRcdr(T<Args...>{}));
+    return IRcdr(the_cdr{});
+}
+
+template <template<class> class T, typename... Args>
+auto constexpr IRcaddr(T<Args...>){
+    static_assert(sizeof...(Args) > 0,"cadr on empty list");
+    using the_cdr = decltype(IRcdr(T<Args...>{}));
+    return IRcar(IRcdr(the_cdr{}));
+}

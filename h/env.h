@@ -33,4 +33,3 @@ auto constexpr list_search(candidate,environment<A,Args...>){
     }
 }
 
-auto constexpr init_env(){}

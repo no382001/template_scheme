@@ -31,11 +31,28 @@ using list_type##_t = decltype(make_##list_type());														\
 template < typename ...Rest>																			\
 auto constexpr make_##list_type(list_type<>)->list_type<>;
 
+
+#define IS_X_LIST(name)							\
+template< typename T>							\
+auto constexpr is_##name(T t) {					\
+	return false;								\
+}												\
+template< typename ...Args>						\
+auto constexpr is_##name(name<Args...> l) {		\
+	return true;								\
+}												\
+template<>										\
+auto constexpr is_##name(name<> l) {			\
+	return false;								\
+}
+
+
 // names are just typename wrappers around the list data structure
 #define LIST(name)									\
 template < typename ...Types >						\
 struct name { LIST_BODY(name);};					\
-MAKE_LIST_FUNCTIONS(name);
+MAKE_LIST_FUNCTIONS(name);                          \
+IS_X_LIST(name);
 
 LIST(list);
 
@@ -57,20 +74,3 @@ auto constexpr make_quote(Types... types){
     static_assert(sizeof...(Types) > 0,"make_quote has no arguments");
     return quote<Types...>{};
 }
-
-
-#define IS_X_LIST(name)							\
-template< typename T>							\
-auto constexpr is_##name(T t) {					\
-	return false;								\
-}												\
-template< typename ...Args>						\
-auto constexpr is_##name(name<Args...> l) {		\
-	return true;								\
-}												\
-template<>										\
-auto constexpr is_##name(name<> l) {			\
-	return false;								\
-}
-
-IS_X_LIST(IRL);
