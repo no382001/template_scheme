@@ -57,3 +57,20 @@ auto constexpr make_quote(Types... types){
     static_assert(sizeof...(Types) > 0,"make_quote has no arguments");
     return quote<Types...>{};
 }
+
+
+#define IS_X_LIST(name)							\
+template< typename T>							\
+auto constexpr is_##name(T t) {					\
+	return false;								\
+}												\
+template< typename ...Args>						\
+auto constexpr is_##name(name<Args...> l) {		\
+	return true;								\
+}												\
+template<>										\
+auto constexpr is_##name(name<> l) {			\
+	return false;								\
+}
+
+IS_X_LIST(IRL);

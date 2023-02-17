@@ -1,6 +1,8 @@
+#pragma once
 #include "h/lists.h"
 #include "h/car_cdr.h"
 #include "h/utils.h"
+#include "h/env.h"
 
 struct testobj {};
 struct fooobj {};
@@ -71,7 +73,38 @@ using listtest41 = decltype(make_list(make_list(),make_list(testobj{}),make_list
 using listres41 = decltype(list<testobj>{});
 //static_assert(is_same_type<listtest41,listres41>,"obj in list constructor and empty list on either side, collapses into obj in list");
 
-
 using listtest5 = decltype(make_list(list<testobj>{},list<>{},list<testobj>{},list<testobj>{}));
 using listres5 = decltype(list<testobj,testobj,testobj>{});
 static_assert(is_same_type<listtest5,listres5>,"3 list<obj> in list constructor and empty list inbetween them, collapses into 3 list<obj> in list");
+
+
+// list search tests
+
+struct variable {};
+struct procedure {};
+template <typename name>
+struct p_name {};
+template <typename... args>
+struct p_args {};
+template <typename... body>
+struct p_body {};
+
+using env = decltype(make_environment()); // init list
+// (define n 1)
+using n_1 = decltype(table_entry<variable,c_<110>,integer<1>>{});
+// (make-procedure (f n) (+ 1 n))
+using proc_f_n_plus_1_n = decltype(table_entry<procedure,p_name<c_<'f'>>,p_args<c_<'n'>>,p_body<list<plus,integer<1>,c_<'n'>>>>{});
+
+// add entries to "table"
+using env1 = decltype(extend_environment<env>(n_1{}));
+using env2 = decltype(extend_environment<env1>(proc_f_n_plus_1_n{}));
+
+using search_expected = decltype(table_entry<variable, c_<110>, integer<1>>{});
+using search_res = decltype(list_search(variable{},env2{}));
+static_assert(is_same_type<search_expected,search_res>, "first entry");
+
+using search_res2 = decltype(list_search(procedure{},env2{})); 
+static_assert(is_same_type<table_entry<procedure,p_name<c_<'f'>>,p_args<c_<'n'>>,p_body<list<plus,integer<1>,c_<'n'>>>>,search_res2>, "second entry");
+
+using search_res3 = decltype(list_search(int{},env2{}));
+static_assert(is_same_type<void,search_res3>, "non existent entry");

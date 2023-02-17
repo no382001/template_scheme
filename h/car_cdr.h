@@ -1,9 +1,11 @@
 #pragma once
 #include "lists.h"
 
-// car and cdr only accepts quoted lists as arguments
 //template <typename T>
 //concept car_cdr_operable_list = is_same_list_t<T,table_entry> || is_quoted(T{}); // howtf do i enforce this in the template argument? ohwell, lets just use list instead of table ernty
+
+// -----------------------------------------------------------------------
+// car and cdr only accepts quoted lists as arguments
 
 template <typename A, typename... Args>
 auto constexpr car_inner(A,Args...){
@@ -34,6 +36,8 @@ auto constexpr cadr(quote<T<Args...>>){
     return car(make_quote(the_cdr{}));
 }
 
+// -----------------------------------------------------------------------
+// for IR use only, accepts any type
 
 template <typename A, typename... Args>
 auto constexpr IRcar_inner(A,Args...){
