@@ -2,22 +2,8 @@
 #include "utils.h"
 #include "lists.h"
 
-struct list_start {};
-struct list_end {};
-struct double_quote {};
-struct plus {};
-struct minus {};
-struct mul {};
-struct div_ {};
-struct term {};
-struct whitespace {};
-struct non_integer {};
-struct non_character {};
-
-struct equal {};
-struct less {};
-struct more {};
-
+struct scm_false {};
+struct scm_true {};
 
 template <int Value>
 struct c_ {};

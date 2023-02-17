@@ -6,6 +6,7 @@
 
 struct testobj {};
 struct fooobj {};
+struct plus {};
 
 // QUOTE
 // (quoted? exp)
