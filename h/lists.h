@@ -55,6 +55,7 @@ MAKE_LIST_FUNCTIONS(name);                          \
 IS_X_LIST(name);
 
 LIST(list);
+LIST(c_list);
 
 // IR list 
 LIST(IRL);

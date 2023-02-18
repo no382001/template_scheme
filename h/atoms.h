@@ -20,3 +20,14 @@ struct integer{
 };
 
 
+template< typename Test, template < int... > class Type >
+struct is_templated_int_collection : std::false_type {};
+
+template< template < int... > class Type, int ...Args >
+struct is_templated_int_collection< Type< Args... >, Type > : std::true_type {};
+
+template < typename T >
+constexpr inline bool is_integer_v = is_templated_int_collection< T, integer >::value;
+
+template <typename T>
+constexpr inline bool is_char_v = is_templated_int_collection< T, c_ >::value;

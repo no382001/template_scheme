@@ -32,4 +32,3 @@ auto constexpr list_search(candidate,environment<A,Args...>){
         return;
     }
 }
-
