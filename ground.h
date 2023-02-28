@@ -59,7 +59,6 @@ auto constexpr IRapply(Proc,quote<Args>) {
 // (apply addtion '(1 2 3))
 using appltest1 = decltype(IRapply(addition{},quote<list<integer<1>,integer<2>,integer<3>>>{}));
 
-
 template < typename Exp, typename Env = init_env>
 auto constexpr IReval(quote<Exp>) {
     // this is the problem
@@ -86,7 +85,7 @@ auto constexpr IReval(quote<Exp>) {
 
             using evaluated_operands = decltype(list_of_values(app_operands{})); // work in progress
 
-            return IRapply(app_operator{},app_operands{});
+            return IRapply(app_operator{},quote<app_operands>{});
         } else {
             if constexpr (is_same_type<Exp,list<>>){
                 using curr = decltype(IRcar(Exp{}));
@@ -103,6 +102,9 @@ auto constexpr IReval(quote<Exp>) {
         }
     }
 }
+
+// variable arg template for IReval
+
 
 // list of values goes here when ready
 // (list-of-values exps env)
@@ -125,18 +127,21 @@ using sssss = decltype(IReval(quote<c_<110>>{}));
 static_assert(is_same_type<sssss,integer<1>>,"ireval on variable, with init env containing n as 1");
 
 
-//using ssssaa = decltype(IReval(quote<c_<110>,c_<110>>{}));
+using ssssaa = decltype(IReval(quote<list<list<c_<110>,c_<110>>,c_<110>,c_<110>>>{}));
+static_assert(is_same_type<ssssaa,list<list<integer<1>, integer<1>>,integer<1>, integer<1>>>,"");
+
+
 
 // (eval '(apply addition '(1 2 3)))
-//using evaltest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
+using evaltest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
 using evaltest21 = decltype(integer<6>{});
-//static_assert(is_same_type<evaltest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
+static_assert(is_same_type<evaltest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
 
 // (eval '(apply proc 'body 'param '(1 2 3) 'env))
-//using proctest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
-//static_assert(is_same_type<proctest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
+using proctest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
+static_assert(is_same_type<proctest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
 
-//using vartest = decltype(IReval(quote<list<apply,addition,quote<list<c_<110>,integer<2>>>>>{}));
+using vartest = decltype(IReval(quote<list<apply,addition,quote<list<c_<110>,integer<2>>>>>{}));
 
 
 // put eval in appy prim proc?? last resort
