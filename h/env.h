@@ -32,3 +32,5 @@ auto constexpr list_search(candidate,environment<A,Args...>){
         return;
     }
 }
+
+using init_env = decltype(make_environment(table_entry<c_<110>,integer<1>>{}));

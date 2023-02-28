@@ -3,6 +3,7 @@
 #include "h/car_cdr.h"
 #include "h/utils.h"
 #include "h/env.h"
+#include "h/eval_apply.h"
 
 struct testobj {};
 struct fooobj {};
@@ -109,3 +110,36 @@ static_assert(is_same_type<table_entry<procedure,p_name<c_<'f'>>,p_args<c_<'n'>>
 
 using search_res3 = decltype(list_search(int{},env2{}));
 static_assert(is_same_type<void,search_res3>, "non existent entry");
+
+
+using list_of_test = decltype(list_of_values(c_<110>{},c_<110>{}));
+static_assert(is_same_type<list_of_test,list<integer<1>, integer<1>>>,"serach and replace, with init env containing n as 1");
+
+using sssss = decltype(IReval(quote<c_<110>>{}));
+static_assert(is_same_type<sssss,integer<1>>,"ireval on variable, with init env containing n as 1");
+
+using ssssaa = decltype(IReval(quote<list<list<c_<110>,c_<110>>,c_<110>,c_<110>>>{}));
+static_assert(is_same_type<ssssaa,list<list<integer<1>, integer<1>>,integer<1>, integer<1>>>,"");
+
+// (eval '(apply addition '(1 2 3)))
+using evaltest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
+using evaltest21 = decltype(integer<6>{});
+static_assert(is_same_type<evaltest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
+
+// (eval '(apply proc 'body 'param '(1 2 3) 'env))
+using proctest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
+static_assert(is_same_type<proctest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
+
+using vartest = decltype(IReval(quote<list<apply,addition,quote<list<c_<110>,integer<2>>>>>{}));
+static_assert(is_same_type<vartest,integer<3>>,"(define x 1) (eval '(apply addition '(x 2)))");
+
+using test_em = decltype(eval_members(quote<list<integer<1>,integer<2>>>{}));
+static_assert(is_same_type<test_em,list<integer<1>,integer<2>>>,"self evaluating");
+
+using test_em_var = decltype(eval_members(quote<list<c_<110>,integer<2>>>{}));
+static_assert(is_same_type<test_em_var,list<integer<1>,integer<2>>>,"self eval and variable");
+
+using evaluated_symbol = decltype(IReval(quote<c_<110>>{}));
+using testaddev22 = decltype(apply_addition(list<evaluated_symbol,integer<3>>{}));
+using testaddevres22 = decltype(integer<4>{});
+static_assert(is_same_type<testaddev22,testaddevres22>,"additon of symbol and integer");
