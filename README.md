@@ -1,3 +1,6 @@
+this document is valid until `dc8078e`, the repo is being reconstructed from the ground up
+
+
 - [current capabilities](#capab)
 - [working with strings in constexpr](#string)
 - [tokenizing with types](#token)
