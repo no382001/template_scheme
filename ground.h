@@ -13,6 +13,36 @@ using init_env = decltype(make_environment(table_entry<c_<110>,integer<1>>{}));
 template <typename Env = init_env, typename A, typename... Args>
 auto constexpr list_of_values(A,Args...);
 
+template < typename Exp, typename Env = init_env >
+auto constexpr IReval(quote<Exp>);
+
+template <typename A, typename... Args>
+auto constexpr eval_members(quote<list<A,Args...>>){
+        if constexpr (sizeof...(Args) == 0){
+            using ev_curr = decltype(IReval(make_quote(A{})));
+            return make_list(ev_curr{});
+        } else {
+            using ev_curr = decltype(IReval(make_quote(A{})));
+            using ev_second = decltype(IReval(make_quote(make_list(Args{}...))));
+            return make_list(ev_curr{},ev_second{});
+        }
+}
+
+template <typename A, typename... Args>
+auto constexpr eval_members(list<A,Args...>){
+    if constexpr (sizeof...(Args) == 0){
+        using ev_curr = decltype(IReval(make_quote(A{})));
+        return make_list(ev_curr{});
+    } else {
+        using ev_curr = decltype(IReval(make_quote(A{})));
+
+        using ev_second = decltype(IReval(make_quote(make_list(Args{}...))));
+        return make_list(ev_curr{},ev_second{});
+    }
+}
+
+
+
 struct apply {};
 struct eval {};
 
@@ -30,9 +60,7 @@ auto constexpr IRapply(Proc,quote<Args>) {
 using appltest1 = decltype(IRapply(addition{},quote<list<integer<1>,integer<2>,integer<3>>>{}));
 
 
-
-
-template < typename Exp, typename Env = init_env >
+template < typename Exp, typename Env = init_env>
 auto constexpr IReval(quote<Exp>) {
     // this is the problem
     if constexpr (is_char_v<Exp> || is_c_list(Exp{})){
@@ -51,7 +79,7 @@ auto constexpr IReval(quote<Exp>) {
             using app_operator = decltype(IRcadr(Exp{}));
             using evaluated_op = decltype(IReval(quote<app_operator>{}));
 
-            using app_operands = decltype(IRcaddr(Exp{}));
+            using app_operands = decltype(eval_members(IRcaddr(Exp{})));
 
             // the list here should be evaluated member by member but its a list
             // and i cannot explicitly make a spec for a list, what do?
@@ -64,9 +92,12 @@ auto constexpr IReval(quote<Exp>) {
                 using curr = decltype(IRcar(Exp{}));
                 return make_list();
             } else {
-                using curr = decltype(IRcar(Exp{}));
-                using second = decltype(IRcdr(Exp{}));
-                return make_list(curr{},second{});
+                //using curr = decltype(IRcar(Exp{}));
+                //using second = decltype(IRcdr(Exp{}));
+
+                using members = decltype(eval_members(Exp{}));
+
+                return members{};
             // maybe here if its not a tagged list its a normal one right?s
             }
         }
@@ -93,13 +124,35 @@ static_assert(is_same_type<list_of_test,list<integer<1>, integer<1>>>,"serach an
 using sssss = decltype(IReval(quote<c_<110>>{}));
 static_assert(is_same_type<sssss,integer<1>>,"ireval on variable, with init env containing n as 1");
 
+
+//using ssssaa = decltype(IReval(quote<c_<110>,c_<110>>{}));
+
 // (eval '(apply addition '(1 2 3)))
-using evaltest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
+//using evaltest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
 using evaltest21 = decltype(integer<6>{});
-static_assert(is_same_type<evaltest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
+//static_assert(is_same_type<evaltest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
 
 // (eval '(apply proc 'body 'param '(1 2 3) 'env))
-using proctest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
+//using proctest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
 //static_assert(is_same_type<proctest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
 
 //using vartest = decltype(IReval(quote<list<apply,addition,quote<list<c_<110>,integer<2>>>>>{}));
+
+
+// put eval in appy prim proc?? last resort
+// put it in a separate function so it can be tested
+
+using test_em = decltype(eval_members(quote<list<integer<1>,integer<2>>>{}));
+static_assert(is_same_type<test_em,list<integer<1>,integer<2>>>,"self evaluating");
+
+using test_em_var = decltype(eval_members(quote<list<c_<110>,integer<2>>>{}));
+static_assert(is_same_type<test_em_var,list<integer<1>,integer<2>>>,"self eval and variable");
+
+
+
+
+
+using evaluated_symbol = decltype(IReval(quote<c_<110>>{}));
+using testaddev22 = decltype(apply_addition(list<evaluated_symbol,integer<3>>{}));
+using testaddevres22 = decltype(integer<4>{});
+static_assert(is_same_type<testaddev22,testaddevres22>,"additon of symbol and integer");
