@@ -11,7 +11,7 @@
 template <typename Env = init_env, typename A, typename... Args>
 auto constexpr list_of_values(A,Args...);
 
-template < typename Exp, typename Env = init_env >
+template <typename Env, typename Exp>
 auto constexpr IReval(quote<Exp>);
 
 
@@ -54,35 +54,35 @@ static_assert(is_same_type<map_pair_test,environment<table_entry<integer<1>,inte
 
 
 // needs refactoring
-template <typename A, typename... Args>
+template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(quote<list<A,Args...>>){
         if constexpr (sizeof...(Args) == 0){
-            using ev_curr = decltype(IReval(make_quote(A{})));
+            using ev_curr = decltype(IReval<Env>(make_quote(A{})));
             return make_list(ev_curr{});
         } else {
-            using ev_curr = decltype(IReval(make_quote(A{})));
-            using ev_second = decltype(IReval(make_quote(make_list(Args{}...))));
+            using ev_curr = decltype(IReval<Env>(make_quote(A{})));
+            using ev_second = decltype(IReval<Env>(make_quote(make_list(Args{}...))));
             return make_list(ev_curr{},ev_second{});
         }
 }
 
 // needs refactoring
-template <typename A, typename... Args>
+template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
     if constexpr (sizeof...(Args) == 0){
-        using ev_curr = decltype(IReval(make_quote(A{})));
+        using ev_curr = decltype(IReval<Env>(make_quote(A{})));
         return make_list(ev_curr{});
     } else {
-        using ev_curr = decltype(IReval(make_quote(A{})));
+        using ev_curr = decltype(IReval<Env>(make_quote(A{})));
 
-        using ev_second = decltype(IReval(make_quote(make_list(Args{}...))));
+        using ev_second = decltype(IReval<Env>(make_quote(make_list(Args{}...))));
         return make_list(ev_curr{},ev_second{});
     }
 }
 
-template <template <int...> typename templated_int, int a>
+template <typename Env, template <int...> typename templated_int, int a>
 auto constexpr eval_members(quote<templated_int<a>>){
-    return IReval(quote<templated_int<a>>{});
+    return IReval<Env>(quote<templated_int<a>>{});
 }
 
 struct apply {};
@@ -104,7 +104,7 @@ auto constexpr IRapply(Proc,quote<Args>) {
 // (apply addtion '(1 2 3))
 using appltest1 = decltype(IRapply(addition{},quote<list<integer<1>,integer<2>,integer<3>>>{}));
 
-template < typename Exp, typename Env = init_env>
+template <typename Env, typename Exp>
 auto constexpr IReval(quote<Exp>) {
     // this is the problem
     if constexpr (is_char_v<Exp> || is_c_list(Exp{})){
@@ -121,14 +121,14 @@ auto constexpr IReval(quote<Exp>) {
         // if it is an application
         if constexpr (is_same_type<apply,indicator>){
             using app_operator = decltype(IRcadr(Exp{}));
-            using evaluated_op = decltype(IReval(quote<app_operator>{}));
+            using evaluated_op = decltype(IReval<Env>(quote<app_operator>{}));
 
-            using app_operands = decltype(eval_members(IRcaddr(Exp{})));
+            using app_operands = decltype(eval_members<Env>(IRcaddr(Exp{})));
 
             // the list here should be evaluated member by member but its a list
             // and i cannot explicitly make a spec for a list, what do?
 
-            using evaluated_operands = decltype(list_of_values(app_operands{}));
+            using evaluated_operands = decltype(list_of_values<Env>(app_operands{}));
 
 
             // if apply returns with void, exec comp proc branch
@@ -155,7 +155,10 @@ auto constexpr IReval(quote<Exp>) {
                 // wtf is the order? if env first then cant deduct exp, vice versa
                 using result = decltype(IReval<temp_ext_env>(expression{}));
 
-                return make_list(temp_ext_env){};
+                using op = decltype(IRcar(result{}));
+                using opnds = decltype(IRcdr(result{}));
+
+                return IRapply(op{},quote<opnds>{});
             }
 
         } else {
@@ -166,7 +169,7 @@ auto constexpr IReval(quote<Exp>) {
                 //using curr = decltype(IRcar(Exp{}));
                 //using second = decltype(IRcdr(Exp{}));
 
-                using members = decltype(eval_members(Exp{}));
+                using members = decltype(eval_members<Env>(Exp{}));
 
                 return members{};
             // maybe here if its not a tagged list its a normal one right?s
@@ -183,10 +186,10 @@ auto constexpr IReval(quote<Exp>) {
 template <typename Env, typename A, typename... Args>
 auto constexpr list_of_values(A,Args...){
     if constexpr (sizeof...(Args) == 0){
-        using only_operand = decltype(IReval(quote<A>{}));
+        using only_operand = decltype(IReval<Env>(quote<A>{}));
         return only_operand{};
     } else {
-        using first_operand = decltype(IReval(quote<A>{}));
+        using first_operand = decltype(IReval<Env>(quote<A>{}));
         using second = decltype(list_of_values(Args{}...));
         return make_list(first_operand{},second{});
     }
