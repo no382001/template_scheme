@@ -6,6 +6,15 @@
 #include "h/atoms.h"
 #include "h/primitive_operations.h"
 #include "tests.h"
-#include "h/list_of_values.h"
 #include "h/eval_apply.h"
+
+
+
+// (apply addtion '(1 2 3))
+using sdfgs = decltype(IRapply(addition{},quote<list<integer<1>,integer<2>,integer<3>>>{}));
+
+using asdasd = decltype(apply_primitve_procedure(int{},list<integer<1>,integer<1>>{}));
+
+
+
 

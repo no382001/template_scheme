@@ -5,13 +5,14 @@
 #include "atoms.h"
 
 // base case for apply_primitve_procedure
-// template arguments are oveloaded in each macro
+// template arguments are oveloaded in each macro, if the proc is not primitive, it returns with void
 //
 // !is_same_type<T,T> so the compiler does not know until template instantiation the value of the expression
 // otherwise if i were to enter 0, even if the template is not instantiated, the value is known and the assert is in place
 template <typename T, typename Arguments> 
 auto constexpr apply_primitve_procedure(T,Arguments){
-	static_assert(!is_same_type<T,T>,"no such primitive procedure T");
+	//static_assert(!is_same_type<T,T>,"no such primitive procedure T");
+	return;
 }
 
 #define PRIMITIVE_ARITHMETIC_OP(name,sign)                                          	\
@@ -113,9 +114,7 @@ using testrelv24aaa = decltype(apply_equal(list<integer<3>,integer<2>>{}));
 using dfff = decltype(scm_false{});
 static_assert(is_same_type<testrelv24aaa,dfff>,"rel of two integers: negative test");
 
-// make macro for apply primitive operator and overload it for every operator that has a macro
-
-
 using testr22elv2 = decltype(apply_primitve_procedure(addition{},list<integer<2>,integer<3>,integer<4>>{}));
 
-//using testr22elv22 = decltype(apply_primitve_procedure(int{},list<integer<2>,integer<3>,integer<4>>{}));
+using testr22elv22 = decltype(apply_primitve_procedure(int{},list<integer<2>,integer<3>,integer<4>>{}));
+static_assert(is_same_type<testr22elv22,void>,"not prim proc");

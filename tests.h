@@ -143,3 +143,19 @@ using evaluated_symbol = decltype(IReval(quote<c_<110>>{}));
 using testaddev22 = decltype(apply_addition(list<evaluated_symbol,integer<3>>{}));
 using testaddevres22 = decltype(integer<4>{});
 static_assert(is_same_type<testaddev22,testaddevres22>,"additon of symbol and integer");
+
+using nesttest1 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,integer<2>,list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>>>>{}));
+static_assert(is_same_type<nesttest1,integer<9>>,"(eval '(apply 'addition '(1 2 '(apply 'addition '(1 2 3)))");
+
+using nesttest2 = decltype(IReval(quote<list<apply,addition,quote<list<integer<1>,list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>,integer<3>>>>>{}));
+static_assert(is_same_type<nesttest2,integer<10>>,"nesstest 2");
+
+using functionvar = decltype(IReval(quote<list<apply,inc_c_list,quote<c_<110>>>>{}));
+
+// the arg and operand count is not the same, fix this and remove any addition that were made to fix this problem
+
+
+// eval_members only takes a list of arguments
+// eval members either should have a spec for single members
+
+//static_assert(is_same_type<functionvar,void>,"(define x 1) (eval '(apply inc '(x 2)))");
