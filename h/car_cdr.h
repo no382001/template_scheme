@@ -81,3 +81,10 @@ auto constexpr IRcaddr(T<Args...>){
     using the_cdr = decltype(IRcdr(T<Args...>{}));
     return IRcar(IRcdr(the_cdr{}));
 }
+
+template <template<class> class T, typename... Args>
+auto constexpr IRcadddr(T<Args...>){
+    static_assert(sizeof...(Args) > 0,"IRcadddr on empty list");
+    using the_cdr = decltype(IRcdr(T<Args...>{}));
+    return IRcar(IRcdr(IRcdr(the_cdr{})));
+}

@@ -5,6 +5,9 @@
 #include "atoms.h"
 #include "primitive_operations.h"
 
+struct variable {};
+struct procedure {};
+
 // -----------------------------------------------------------------------------------------------------
 // setting up an init-env for eval
 
@@ -42,10 +45,9 @@ auto constexpr list_search(candidate,environment<A,Args...>){
 using inc_c_list = decltype(c_list<c_<'i'>,c_<'n'>,c_<'c'>>{});
 
 using init_env = decltype(
-    make_environment(table_entry<c_<110>,integer<1>>{},  //));
-                    table_entry<inc_c_list,c_<'a'>,quote<list<addition,c_<'a'>,integer<1>>>>{}));
+    make_environment(table_entry<c_<110>,variable,integer<1>>{},  //));
+                    table_entry<inc_c_list,procedure,c_<'a'>,quote<list<addition,c_<'a'>,integer<1>>>>{}));
 
 
-//environment<table_entry<c_<110>, integer<1>>,
-//          table_entry<inc_c_list, c_<97>, list<addition, c_<97>, integer<1>>>,
+//environment<table_entry<c_<110>, integer<1>>,table_entry<inc_c_list, c_<97>, list<addition, c_<97>, integer<1>>>,
 //          table_entry<c_<97>, integer<1>>>

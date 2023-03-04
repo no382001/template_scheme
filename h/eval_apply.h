@@ -21,7 +21,7 @@ LIST(pair);
 
 template <template <class,class> typename One, typename A, typename... Args, template <class,class> typename Two, typename B, typename... Brgs>
 auto constexpr map_pair_inner(One<A,Args...>,Two<B,Brgs...>){
-    using p = decltype(table_entry<A,B>{});
+    using p = decltype(table_entry<A,variable,B>{});
 	if constexpr (sizeof...(Args) == 0) {
 		return make_environment(p{});
 	} else {
@@ -30,6 +30,7 @@ auto constexpr map_pair_inner(One<A,Args...>,Two<B,Brgs...>){
 	}
 }
 
+// map two lists, create a table entry with variable as a tag
 // return table_entries with env wrap
 template <template <class,class> typename One, typename... Args, template <class,class> typename Two, typename... Brgs>
 auto constexpr map_pair(One<Args...>,Two<Brgs...>){
@@ -42,12 +43,12 @@ auto constexpr map_pair(One<Args...>,Two<Brgs...>){
 
 template <template <int...> typename One, int... A, template <int...> typename Two, int... B>
 auto constexpr map_pair(One<A...>,Two<B...>){
-    return make_environment(table_entry<One<A...>,Two<B...>>{});
+    return make_environment(table_entry<One<A...>,variable,Two<B...>>{});
 }
 
 
 using map_pair_test = decltype(map_pair(list<integer<1>>{},list<integer<1>>{}));
-static_assert(is_same_type<map_pair_test,environment<table_entry<integer<1>,integer<1>>>>,"map_pair_test");
+static_assert(is_same_type<map_pair_test,environment<table_entry<integer<1>,variable,integer<1>>>>,"map_pair_test");
 
 //using map_pair_test2 = decltype(map_pair(list<integer<1>>{},list<integer<1>,integer<1>>{}));
 
@@ -111,7 +112,7 @@ auto constexpr IReval(quote<Exp>) {
         // it is a variable
         using var_res = decltype(list_search(Exp{},Env{}));
         // return the value of the variable
-        return IRcadr(var_res{});
+        return IRcaddr(var_res{});
 
     } else if constexpr (is_same_type<apply,Exp> || is_same_type<addition,Exp> || is_integer_v<Exp>){
         // self-evaluating
@@ -140,23 +141,20 @@ auto constexpr IReval(quote<Exp>) {
             } else {
                 // its compound, look var in table
                 using comp_proc_entry = decltype(list_search(app_operator{},Env{}));
-                // cadr is arglist
-                using arglist = decltype(IRcadr(comp_proc_entry{}));
-                // caddr is expression
-                using expression = decltype(IRcaddr(comp_proc_entry{}));
+                // caddr is arglist
+                using arglist = decltype(IRcaddr(comp_proc_entry{}));
+                // cadddr is expression
+                using expression = decltype(IRcadddr(comp_proc_entry{}));
                 // make arg and operand pair
-               
                 // make map_pair return table_entry with env wrap
                 using arg_x_op_env = decltype(map_pair(arglist{},evaluated_operands{}));
                 // extend env with argument a operand pair
                 using temp_ext_env = decltype(extend_environment<init_env>(arg_x_op_env{}));
 
-                // eval members in expression
-                // wtf is the order? if env first then cant deduct exp, vice versa
                 using result = decltype(IReval<temp_ext_env>(expression{}));
 
                 using op = decltype(IRcar(result{}));
-                using opnds = decltype(IRcdr(result{}));
+                using opnds = decltype(IRcdr(result{})); 
 
                 return IRapply(op{},quote<opnds>{});
             }

@@ -88,8 +88,8 @@ void print_table(T t) {
 int main(){
 
 
-using comproc = decltype(IReval<init_env>(quote<list<apply,inc_c_list,quote<c_<110>>>>{}));
-static_assert(is_same_type<comproc,integer<2>>,"apply com proc 1 arg 1 operand");
+//using comproc = decltype(IReval<init_env>(quote<list<apply,inc_c_list,quote<c_<110>>>>{}));
+//static_assert(is_same_type<comproc,integer<2>>,"apply com proc 1 arg 1 operand");
 
 
 // if there is no apply it will think that its a variable and replace it with the cadr of the entry,

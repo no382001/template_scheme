@@ -83,8 +83,7 @@ static_assert(is_same_type<listtest5,listres5>,"3 list<obj> in list constructor 
 
 // list search tests
 
-struct variable {};
-struct procedure {};
+
 template <typename name>
 struct p_name {};
 template <typename... args>
