@@ -1,31 +1,11 @@
-this document is valid until `dc8078e`, the repo is being reconstructed from the ground up
+this document is valid until `dc8078e`, the repo is being reconstructed from the ground up <br>
+<br>
+all im using to compile is `g++ -std=c++20 ...`, which is the CPP20 standard, i believe this is when they introduced the constexpr lambdas that im using (question mark), i dont remember, i will look it up
 
-
-- [current capabilities](#capab)
 - [working with strings in constexpr](#string)
 - [tokenizing with types](#token)
   - [n-digit integers](#n-digit)
 
-
-# <a name="capab">current capabilities</a>
-### evaluating simple expressions
-```cpp
-auto constexpr string = constexpr_string("(- (/ (* (- (+ 10 5) (* 2 3)) (/ (* 10 5) (- 20 10))) (+ 2 3)) (* (+ 2 3) (- 10 5)))");
-using tokenss = decltype(tokenizer(string));
-// token_list<list<token_list<minus, list<token_list<div_, list<token_list<mul, list<token_list<minus, list<token_list<plus, integer<10>, integer<5> > >, list<token_list<mul, integer<2>, integer<3> > > > >, list<token_list<div_, list<token_list<mul, integer<10>, integer<5> > >, list<token_list<minus, integer<20>, integer<10> > > > > > >, list<token_list<plus, integer<2>, integer<3> > > > >, list<token_list<mul, list<token_list<plus, integer<2>, integer<3> > >, list<token_list<minus, integer<10>, integer<5> > > > > > > >
-auto constexpr res = parse(tokenss{});
-auto ast = std::string(demangle<tokenss>());
-std::cout << ast << '\n'; // -16
-
-auto constexpr string2 = constexpr_string("(if (> 3 2) (if (> 2 1) (if (> 1 0) 1 0) 0) 0))");
-using tokenss2 = decltype(tokenizer(string2));
-// token_list<list<token_list<c_list<c_<105>, c_<102> >, list<token_list<more, integer<3>, integer<2> > >, list<token_list<c_list<c_<105>, c_<102> >, list<token_list<more, integer<2>, integer<1> > >, list<token_list<c_list<c_<105>, c_<102> >, list<token_list<more, integer<1>, integer<0> > >, integer<1>, integer<0> > >, integer<0> > >, integer<0> > > >
-auto constexpr res2 = parse(tokenss2{});
-auto ast2 = std::string(demangle<tokenss2>());
-std::cout << ast2 << '\n'; // 1
-
-```
-there were some form of lambdas and defines working they are being reworked.
 # <a name="string">traversing a string in constexpr, how?</a>
 how? very easy, since we cant really manipulate or even look at std::string or char* in constexpr (they only work in runtime which is not our thing now) our only option is std::string_view which basically is just a constexpr char ptr, for our case anyways. <br><br>
 
@@ -37,7 +17,7 @@ using this macro, we have our lambda object that returns its arguments in conste
 ```
 (`__VA_ARGS__` is a variadic macro that refers to whatever occupies the place of `...` in the argument list)<br><br>
 
-by initializing the object and indexing after, we can get the character we are looking for, all in constexpr 
+by calling the lambda and indexing after, we get the character were looking for 
 ```cpp
 auto letters = constexpr_string("abc");
 
@@ -64,12 +44,12 @@ struct list_end {};
 struct plus {};
 struct whitespace {};
 ```
-so far its trivial, all of these tokens correspond to only one character, however how can we represent an integer? 
+so far its trivial, all of these tokens correspond to only one character, however how can we represent an integer? we have template parameters to help us with that
 ```cpp
 template <int value>
 struct integer {};
 ```
-like so the template parameter `value` will simply hold onto our number <i>(note that this can only hold one digit integers at a time, so its not really useful, i will explain the multi digit solution later on)</i> <br><br>
+like so, the template parameter `value` will simply hold onto our number<br><br>
 
 lets determine the corresponding char tokens for our types and create a function that can tell us what kind of token is it
 ```cpp
@@ -97,9 +77,9 @@ using token1 = decltype(deduce_token_type<str()[1]>()); // plus
 using token2 = decltype(deduce_token_type<str()[2]>()); // whitespace
 using token3 = decltype(deduce_token_type<str()[3]>()); // integer<1>
 ```
-but this isnt something we can work with yet, in order to feed this to a parser and get an evaluation, we need a list of tokens <br><br>
+but this isnt something we can work with yet, in order to feed this to a parser, we need a list of tokens <br><br>
 
-nothing is easier, here it is
+so lets introduce variadic template parameters and abuse them a bit <i>(this example is not complete and has some side effects, look for the real thing in the headers if you are interested)</i>
 ```cpp
 template < typename ...Types >
 struct list{
@@ -126,7 +106,8 @@ auto constexpr make_list(T, Rest...) -> decltype(list< T >::append(list< Rest...
 // base case for the list wrapper
 auto constexpr make_list()->list<>;
 ```
-using this list construction we can loop thru the string
+
+using this previous list construction we can loop thru our string
 ```cpp
 template <typename Lambda, size_t Index = 0>
 constexpr auto tokenize(Lambda str_lambda) {
@@ -150,8 +131,8 @@ to tokenize an n digit integer we just need to implement the following expressio
 <img src="https://user-images.githubusercontent.com/102482527/205129800-c9465d3b-91b0-46b0-a601-ca6c4a43eb4e.svg" width="25%"></img><br>
 where<br>
 <img src="https://user-images.githubusercontent.com/102482527/205129790-5dd31fe9-2f07-4f29-b561-7e5b8609684d.svg" width="25%"></img>
-
-
+<br>
+<i>(this was very fun to do, but on certain numbers in the template argument it just fails, i have yet to figure out why, it works on most smaller than 4-5 digit numbers tho)</i>
 
 
 sadly we cant use the C implementation of `log` and `pow` as we need a constexpr solution which is not yet available. We need to implement it ourselves, and the solution can only be purely functional.
