@@ -9,6 +9,7 @@ struct testobj {};
 struct fooobj {};
 struct plus {};
 
+/**/
 // QUOTE
 // (quoted? exp)
 // -------------
@@ -151,12 +152,6 @@ using nesttest2 = decltype(IReval<init_env>(quote<list<apply,addition,quote<list
 static_assert(is_same_type<nesttest2,integer<10>>,"nesstest 2");
 
 using comproc = decltype(IReval<init_env>(quote<list<apply,inc_c_list,quote<c_<110>>>>{}));
-static_assert(is_same_type<comproc,integer<2>>,"com proc 1 arg 1 operand");
-
-// the arg and operand count is not the same, fix this and remove any addition that were made to fix this problem
-
-
-// eval_members only takes a list of arguments
-// eval members either should have a spec for single members
+static_assert(is_same_type<comproc,integer<2>>,"apply com proc 1 arg 1 operand");
 
 //static_assert(is_same_type<functionvar,void>,"(define x 1) (eval '(apply inc '(x 2)))");
