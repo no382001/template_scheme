@@ -161,4 +161,14 @@ static_assert(is_same_type<nesttest2,integer<10>>,"nesstest 2");
 using comproc = decltype(IReval<init_env>(quote<list<apply,inc_c_list,quote<c_<110>>>>{}));
 static_assert(is_same_type<comproc,integer<2>>,"apply com proc, 1 arg and 1 operand");
 
-//static_assert(is_same_type<functionvar,void>,"(define x 1) (eval '(apply inc '(x 2)))");
+// if there is no apply it will think that its a variable and replace it with the cadr of the entry,
+// quot gets removed when integer self elvaulates in normal workflow
+// have another column in the env table for the type of the variable, and the procedure that is needed to emplace into the expression
+using comproc2 = decltype(IReval<init_env>(quote<list<inc_c_list,quote<integer<1>>>>{}));
+static_assert(is_same_type<comproc2,integer<2>>,"apply com proc 1 arg 1 operand");
+                                            
+using comproc3 = decltype(IReval<init_env>(quote<list<inc_c_list,list<inc_c_list,quote<integer<1>>>>>{}));
+static_assert(is_same_type<comproc3,integer<3>>,"(inc (inc '1))"); // (inc (inc '1) '1) works too with 4 as a result so a new branch is launched when inc processes the operands
+
+using comproc4 = decltype(IReval<init_env>(quote<list<sum_of_2,quote<list<integer<1>,integer<2>>>>>{}));
+static_assert(is_same_type<comproc4,integer<3>>,"2 arg copmp proc");
