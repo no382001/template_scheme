@@ -88,14 +88,15 @@ void print_table(T t) {
 int main(){
 
 
-//using comproc = decltype(IReval<init_env>(quote<list<apply,inc_c_list,quote<c_<110>>>>{}));
-//static_assert(is_same_type<comproc,integer<2>>,"apply com proc 1 arg 1 operand");
+using comproc = decltype(IReval<init_env>(quote<list<apply,inc_c_list,quote<c_<110>>>>{}));
+static_assert(is_same_type<comproc,integer<2>>,"apply com proc 1 arg 1 operand");
 
 
 // if there is no apply it will think that its a variable and replace it with the cadr of the entry,
 // quot gets removed when integer self elvaulates in normal workflow
 // have another column in the env table for the type of the variable, and the procedure that is needed to emplace into the expression
 using comproc2 = decltype(IReval<init_env>(quote<list<inc_c_list,quote<integer<1>>>>{}));
+static_assert(is_same_type<comproc2,integer<2>>,"apply com proc 1 arg 1 operand");
 
 
 // table_entry

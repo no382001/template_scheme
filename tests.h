@@ -80,6 +80,14 @@ using listtest5 = decltype(make_list(list<testobj>{},list<>{},list<testobj>{},li
 using listres5 = decltype(list<testobj,testobj,testobj>{});
 static_assert(is_same_type<listtest5,listres5>,"3 list<obj> in list constructor and empty list inbetween them, collapses into 3 list<obj> in list");
 
+// (apply addtion '(1 2 3))
+using appltest1 = decltype(IRapply(addition{},quote<list<integer<1>,integer<2>,integer<3>>>{}));
+
+
+using map_pair_test = decltype(map_pair(list<integer<1>>{},list<integer<1>>{}));
+static_assert(is_same_type<map_pair_test,environment<table_entry<integer<1>,variable,integer<1>>>>,"map_pair_test");
+//using map_pair_test2 = decltype(map_pair(list<integer<1>>{},list<integer<1>,integer<1>>{}));
+
 
 // list search tests
 
@@ -151,6 +159,6 @@ using nesttest2 = decltype(IReval<init_env>(quote<list<apply,addition,quote<list
 static_assert(is_same_type<nesttest2,integer<10>>,"nesstest 2");
 
 using comproc = decltype(IReval<init_env>(quote<list<apply,inc_c_list,quote<c_<110>>>>{}));
-static_assert(is_same_type<comproc,integer<2>>,"apply com proc 1 arg 1 operand");
+static_assert(is_same_type<comproc,integer<2>>,"apply com proc, 1 arg and 1 operand");
 
 //static_assert(is_same_type<functionvar,void>,"(define x 1) (eval '(apply inc '(x 2)))");

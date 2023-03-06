@@ -41,18 +41,12 @@ auto constexpr map_pair(One<Args...>,Two<Brgs...>){
     }
 }
 
+// map pair is trying yo map each member of the clist to the members of the list
+
 template <template <int...> typename One, int... A, template <int...> typename Two, int... B>
 auto constexpr map_pair(One<A...>,Two<B...>){
     return make_environment(table_entry<One<A...>,variable,Two<B...>>{});
 }
-
-
-using map_pair_test = decltype(map_pair(list<integer<1>>{},list<integer<1>>{}));
-static_assert(is_same_type<map_pair_test,environment<table_entry<integer<1>,variable,integer<1>>>>,"map_pair_test");
-
-//using map_pair_test2 = decltype(map_pair(list<integer<1>>{},list<integer<1>,integer<1>>{}));
-
-
 
 // needs refactoring
 template <typename Env, typename A, typename... Args>
@@ -77,7 +71,17 @@ auto constexpr eval_members(list<A,Args...>){
         using ev_curr = decltype(IReval<Env>(make_quote(A{})));
 
         using ev_second = decltype(IReval<Env>(make_quote(make_list(Args{}...))));
-        return make_list(ev_curr{},ev_second{});
+        // probably if this fails, then its a compound
+        // eval member has to check if its a variable or a proc. rn if its a proc it will when evaling with 
+        // (inc '1) - is valid, so this here wouldnt be a problem if i want to kind of keep the standard
+        // THIS i still not the problem, but im glad that ive adressed 
+        
+        // if car of list is a procedure, (it also could be an unbound variable but the list serach should have already thrown an error)
+        if constexpr (is_same_type<void,ev_curr>){
+            return apply_compund_proc<Env>(A{},ev_second{});
+        } else {
+            return make_list(ev_curr{},ev_second{});
+        }
     }
 }
 
@@ -102,17 +106,62 @@ auto constexpr IRapply(Proc,quote<Args>) {
     }
 }
 
-// (apply addtion '(1 2 3))
-using appltest1 = decltype(IRapply(addition{},quote<list<integer<1>,integer<2>,integer<3>>>{}));
+template <typename Env, typename Op, typename Evaluated_opnds >
+auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
+    // its compound, look var in table
+    using comp_proc_entry = decltype(list_search(Op{},Env{}));
+    // caddr is arglist
+    using arglist = decltype(IRcaddr(comp_proc_entry{}));
+    // cadddr is expression
+    using expression = decltype(IRcadddr(comp_proc_entry{}));
+    // make arg and operand pair
+    // make map_pair return table_entry with env wrap]
 
+    // if its a single argument
+    // THIS IS UGLY, but due to type scoping rules i have to write it twice
+    // i could have a wrapper function for map pair to figure out which to use
+    if constexpr (is_c_list(arglist{}) || !is_list(arglist{})){
+        // handle pairing differently
+        using single_pair = decltype(make_environment(table_entry<arglist,variable,Evaluated_opnds>{}));
+        // extend env with argument a operand pair
+        using temp_ext_env = decltype(extend_environment<init_env>(single_pair{}));
+        using result = decltype(IReval<temp_ext_env>(expression{}));
+        using op = decltype(IRcar(result{}));
+        using opnds = decltype(IRcdr(result{})); 
+        return IRapply(op{},quote<opnds>{});
+
+    } else {
+        using arg_x_op_env = decltype(map_pair(arglist{},Evaluated_opnds{}));
+        // extend env with argument a operand pair
+        using temp_ext_env = decltype(extend_environment<init_env>(arg_x_op_env{}));
+        using result = decltype(IReval<temp_ext_env>(expression{}));
+        using op = decltype(IRcar(result{}));
+        using opnds = decltype(IRcdr(result{})); 
+        return IRapply(op{},quote<opnds>{});
+    }
+
+
+}
+
+
+// returns with void if "self evaluating variable not found, or is a procedure"
 template <typename Env, typename Exp>
 auto constexpr IReval(quote<Exp>) {
     // this is the problem
     if constexpr (is_char_v<Exp> || is_c_list(Exp{})){
-        // it is a variable
+        // it is a proc or variable
+        // look it up
         using var_res = decltype(list_search(Exp{},Env{}));
-        // return the value of the variable
-        return IRcaddr(var_res{});
+        using tag = decltype(IRcadr(var_res{}));
+
+        if constexpr (is_same_type<tag,variable>){
+            // return the value of the variable
+            return IRcaddr(var_res{});
+        } else {
+            //static_assert(!is_same_type<int,int>,"self evaluating variable not found, or is a procedure");
+            return;
+        }
+
 
     } else if constexpr (is_same_type<apply,Exp> || is_same_type<addition,Exp> || is_integer_v<Exp>){
         // self-evaluating
@@ -139,24 +188,8 @@ auto constexpr IReval(quote<Exp>) {
             if constexpr (!is_same_type<void,proc_res>){
                 return proc_res{};
             } else {
-                // its compound, look var in table
-                using comp_proc_entry = decltype(list_search(app_operator{},Env{}));
-                // caddr is arglist
-                using arglist = decltype(IRcaddr(comp_proc_entry{}));
-                // cadddr is expression
-                using expression = decltype(IRcadddr(comp_proc_entry{}));
-                // make arg and operand pair
-                // make map_pair return table_entry with env wrap
-                using arg_x_op_env = decltype(map_pair(arglist{},evaluated_operands{}));
-                // extend env with argument a operand pair
-                using temp_ext_env = decltype(extend_environment<init_env>(arg_x_op_env{}));
 
-                using result = decltype(IReval<temp_ext_env>(expression{}));
-
-                using op = decltype(IRcar(result{}));
-                using opnds = decltype(IRcdr(result{})); 
-
-                return IRapply(op{},quote<opnds>{});
+                return apply_compund_proc<Env>(app_operator{},evaluated_operands{});
             }
 
         } else {
@@ -164,8 +197,10 @@ auto constexpr IReval(quote<Exp>) {
                 using curr = decltype(IRcar(Exp{}));
                 return make_list();
             } else {
-                //using curr = decltype(IRcar(Exp{}));
-                //using second = decltype(IRcdr(Exp{}));
+                
+                using curr = decltype(IRcar(Exp{}));
+
+                using second = decltype(IRcdr(Exp{}));
 
                 using members = decltype(eval_members<Env>(Exp{}));
 
@@ -176,10 +211,6 @@ auto constexpr IReval(quote<Exp>) {
     }
 }
 
-// variable arg template for IReval
-
-
-// list of values goes here when ready
 // (list-of-values exps env)
 template <typename Env, typename A, typename... Args>
 auto constexpr list_of_values(A,Args...){
