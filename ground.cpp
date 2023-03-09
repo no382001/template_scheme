@@ -88,24 +88,17 @@ void print_table(T t) {
 int main(){
 
 
-// table_entry
-// car is name
-// cadr is variable/procedure:
-//      caddr is variable value if variable
-//      cddr is body if procedure
-
-// when eval sees a variable
-// decide witch branch by the table_entry column
-
-// write a printer that print the env in columns 
-
-
 print_table(init_env{});
 return 0;
 }
 
+// -----------------------------------------------------------------------------------------
+// p.1  primitive procedures wont evaluate when called,
+//      only in the case where they are part of a compund proc
+// p.2  i could hack apply before every primitive procedure, but bc p.1, it would ruin all compound proc branches
+// option 1. spend lots of time to hack prim proc into the env table, and circumvent the problem
+// option 2. rewrite everything for the 3rd time
 
-
-
-//static_assert(is_same_type<comproc2,integer<2>>,"com proc 1 arg 1 operand");
-
+// in this version i could almost evaluate a fibonacchi sequence,
+// but during the implementation of if then else statements, i noticed that the primitive procedures are not self evaluating,
+// and the problem is so deeply rooted id rather just restart
