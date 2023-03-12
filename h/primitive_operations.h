@@ -4,6 +4,11 @@
 #include "utils.h"
 #include "atoms.h"
 
+
+template <typename T>
+constexpr bool is_prim_proc(T){
+	return false;
+}
 // base case for apply_primitve_procedure
 // template arguments are oveloaded in each macro, if the proc is not primitive, it returns with void
 //
@@ -19,6 +24,10 @@ auto constexpr apply_primitve_procedure(T,Arguments){
 																						\
 struct name {}; /* identifying name, "quoted" name */									\
 																						\
+template <>																				\
+constexpr bool is_prim_proc(name){														\
+	return true;																		\
+}																						\
 template <typename Arguments> /* apply_primitve_procedure overload */					\
 auto constexpr apply_primitve_procedure(name,Arguments){								\
 	return apply_##name(Arguments{});													\

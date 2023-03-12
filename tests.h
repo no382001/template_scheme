@@ -172,3 +172,7 @@ static_assert(is_same_type<comproc3,integer<3>>,"(inc (inc '1))"); // (inc (inc 
 
 using comproc4 = decltype(IReval<init_env>(quote<list<sum_of_2,quote<list<integer<1>,integer<2>>>>>{}));
 static_assert(is_same_type<comproc4,integer<3>>,"2 arg copmp proc");
+
+
+using simpleeval = decltype(IReval<init_env>(quote<list<addition,quote<list<integer<1>,integer<2>>>>>{}));
+static_assert(is_same_type<simpleeval,integer<3>>,"2 arg copmp proc");

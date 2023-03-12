@@ -106,6 +106,15 @@ auto constexpr IRapply(Proc,quote<Args>) {
     }
 }
 
+template <typename arglist, typename Evaluated_opnds>
+auto constexpr apply_compund_proc_pair_helper(arglist,Evaluated_opnds){
+    if constexpr (is_c_list(arglist{}) || !is_list(arglist{})){
+        return make_environment(table_entry<arglist,variable,Evaluated_opnds>{});
+    } else {
+        return map_pair(arglist{},Evaluated_opnds{});
+    }
+}
+
 template <typename Env, typename Op, typename Evaluated_opnds >
 auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     // its compound, look var in table
@@ -117,32 +126,23 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     // make arg and operand pair
     // make map_pair return table_entry with env wrap]
 
-    // if its a single argument
-    // THIS IS UGLY, but due to type scoping rules i have to write it twice
-    // i could have a wrapper function for map pair to figure out which to use
-    if constexpr (is_c_list(arglist{}) || !is_list(arglist{})){
-        // handle pairing differently
-        using single_pair = decltype(make_environment(table_entry<arglist,variable,Evaluated_opnds>{}));
-        // extend env with argument a operand pair
-        using temp_ext_env = decltype(extend_environment<init_env>(single_pair{}));
-        using result = decltype(IReval<temp_ext_env>(expression{}));
-        using op = decltype(IRcar(result{}));
-        using opnds = decltype(IRcdr(result{})); 
-        return IRapply(op{},quote<opnds>{});
+    // handle pairing differently
+    using single_pair = decltype(apply_compund_proc_pair_helper(arglist{},Evaluated_opnds{}));
+    // extend env with argument a operand pair
+    using temp_ext_env = decltype(extend_environment<init_env>(single_pair{}));
+    using result = decltype(IReval<temp_ext_env>(expression{}));
 
+    if constexpr (is_integer_v<result>) { // needs all self evaluating types
+        return result{};
     } else {
-        using arg_x_op_env = decltype(map_pair(arglist{},Evaluated_opnds{}));
-        // extend env with argument a operand pair
-        using temp_ext_env = decltype(extend_environment<init_env>(arg_x_op_env{}));
-        using result = decltype(IReval<temp_ext_env>(expression{}));
         using op = decltype(IRcar(result{}));
         using opnds = decltype(IRcdr(result{})); 
         return IRapply(op{},quote<opnds>{});
     }
-
-
 }
 
+
+auto constexpr b = is_integer_v<integer<2>>;
 
 // returns with void if "self evaluating variable not found, or is a procedure"
 template <typename Env, typename Exp>
@@ -170,37 +170,36 @@ auto constexpr IReval(quote<Exp>) {
         using indicator = decltype(IRcar(Exp{}));
         // if it is an application
         if constexpr (is_same_type<apply,indicator>){
+            /*
             using app_operator = decltype(IRcadr(Exp{}));
             using evaluated_op = decltype(IReval<Env>(quote<app_operator>{}));
 
             using app_operands = decltype(eval_members<Env>(IRcaddr(Exp{})));
 
-            // the list here should be evaluated member by member but its a list
-            // and i cannot explicitly make a spec for a list, what do?
-
-            using evaluated_operands = decltype(list_of_values<Env>(app_operands{}));
-
-
             // if apply returns with void, exec comp proc branch
-
             using proc_res = decltype(IRapply(app_operator{},quote<app_operands>{}));
 
             if constexpr (!is_same_type<void,proc_res>){
                 return proc_res{};
             } else {
-
-                return apply_compund_proc<Env>(app_operator{},evaluated_operands{});
+                return apply_compund_proc<Env>(app_operator{},app_operands{});
             }
+            */
+           return IReval<Env>(make_quote(IRcdr(Exp{})));
+
+        } else if constexpr (is_prim_proc(indicator{})){
+
+            using app_operands = decltype(eval_members<Env>(IRcdr(Exp{})));
+
+            using proc_res = decltype(IRapply(indicator{},quote<app_operands>{}));
+
+            return proc_res{};
 
         } else {
             if constexpr (is_same_type<Exp,list<>>){
                 using curr = decltype(IRcar(Exp{}));
                 return make_list();
             } else {
-                
-                using curr = decltype(IRcar(Exp{}));
-
-                using second = decltype(IRcdr(Exp{}));
 
                 using members = decltype(eval_members<Env>(Exp{}));
 
