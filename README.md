@@ -1,4 +1,4 @@
-this document is valid until `dc8078e`, the repo is being reconstructed from the ground up <br>
+this document is valid until `dc8078e` (HEAD of `old` branch), the repo is being reconstructed from the ground up, latest working example is `3d43df9` (HEAD of `2nd_revision` branch and currently `main`)<br>
 <br>
 all im using to compile is `g++ -std=c++20 ...`, which is the CPP20 standard, i believe this is when they introduced the constexpr lambdas that im using (question mark), i dont remember, i will look it up
 
