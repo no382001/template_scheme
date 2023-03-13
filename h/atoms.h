@@ -31,3 +31,17 @@ constexpr inline bool is_integer_v = is_templated_int_collection< T, integer >::
 
 template <typename T>
 constexpr inline bool is_char_v = is_templated_int_collection< T, c_ >::value;
+
+
+template <typename T>
+auto constexpr is_self_evaluating(T) { 
+	if constexpr (is_integer_v<T> || is_char_v<T>){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+#define IS_SELF_EVALUATING(name)							\
+template <>													\
+auto constexpr is_self_evaluating(name) { return true; }

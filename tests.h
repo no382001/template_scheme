@@ -173,6 +173,40 @@ static_assert(is_same_type<comproc3,integer<3>>,"(inc (inc '1))"); // (inc (inc 
 using comproc4 = decltype(IReval<init_env>(quote<list<sum_of_2,quote<list<integer<1>,integer<2>>>>>{}));
 static_assert(is_same_type<comproc4,integer<3>>,"2 arg copmp proc");
 
+using simpleeval = decltype(IReval<init_env>(quote<list<equal,quote<list<integer<1>,integer<2>>>>>{}));
+static_assert(is_same_type<simpleeval,scm_false>,"2 arg copmp proc");
 
-using simpleeval = decltype(IReval<init_env>(quote<list<addition,quote<list<integer<1>,integer<2>>>>>{}));
-static_assert(is_same_type<simpleeval,integer<3>>,"2 arg copmp proc");
+using ifproc = decltype(IReval<init_env>(quote<list<scm_if,quote<list<equal,quote<list<integer<1>,integer<2>>>>>,integer<1>,integer<2>>>{}));
+static_assert(is_same_type<ifproc,integer<2>>,"2 arg copmp proc");
+
+// define fibonacchi
+/*
+(define (fib x)
+    (if (= x 2)
+    1
+    (+ (fib (- x 1)) (fib (- x 2))))))
+*/
+
+// ---------------DEBUGGING-------------------------------------------------------------
+
+//using fibonacchi = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<3>>>>{}));
+// errs at eval 189 with assert from cdr
+
+//using fibonacchi = decltype(eval_members<init_env>(quote<list<fib_name,quote<integer<3>>>>{}));
+// 63 apply comp
+
+using comp_proc_entry = decltype(list_search(fib_name{},init_env{}));
+
+// fails on apply comp result
+
+using arglist = decltype(IRcaddr(comp_proc_entry{}));
+// cadddr is expression
+using expression = decltype(IRcadddr(comp_proc_entry{}));
+// make arg and operand pair
+// make map_pair return table_entry with env wrap]
+
+// handle pairing differently
+using single_pair = decltype(apply_compund_proc_pair_helper(arglist{},integer<3>{}));
+// extend env with argument a operand pair
+using temp_ext_env = decltype(extend_environment<init_env>(single_pair{}));
+using result = decltype(IReval<temp_ext_env>(expression{}));

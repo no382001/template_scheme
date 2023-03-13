@@ -48,17 +48,23 @@ auto constexpr map_pair(One<A...>,Two<B...>){
     return make_environment(table_entry<One<A...>,variable,Two<B...>>{});
 }
 
+
 // needs refactoring
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(quote<list<A,Args...>>){
-        if constexpr (sizeof...(Args) == 0){
-            using ev_curr = decltype(IReval<Env>(make_quote(A{})));
-            return make_list(ev_curr{});
+    if constexpr (sizeof...(Args) == 0){
+        using ev_curr = decltype(IReval<Env>(make_quote(A{})));
+        return make_list(ev_curr{});
+    } else {
+        using ev_curr = decltype(IReval<Env>(make_quote(A{})));
+
+        using ev_second = decltype(IReval<Env>(make_quote(make_list(Args{}...))));
+        if constexpr (is_same_type<void,ev_curr>){
+            return apply_compund_proc<Env>(A{},ev_second{});
         } else {
-            using ev_curr = decltype(IReval<Env>(make_quote(A{})));
-            using ev_second = decltype(IReval<Env>(make_quote(make_list(Args{}...))));
             return make_list(ev_curr{},ev_second{});
         }
+    }
 }
 
 // needs refactoring
@@ -71,10 +77,7 @@ auto constexpr eval_members(list<A,Args...>){
         using ev_curr = decltype(IReval<Env>(make_quote(A{})));
 
         using ev_second = decltype(IReval<Env>(make_quote(make_list(Args{}...))));
-        // probably if this fails, then its a compound
-        // eval member has to check if its a variable or a proc. rn if its a proc it will when evaling with 
-        // (inc '1) - is valid, so this here wouldnt be a problem if i want to kind of keep the standard
-        // THIS i still not the problem, but im glad that ive adressed 
+        // (inc '1) is valid
         
         // if car of list is a procedure, (it also could be an unbound variable but the list serach should have already thrown an error)
         if constexpr (is_same_type<void,ev_curr>){
@@ -92,6 +95,9 @@ auto constexpr eval_members(quote<templated_int<a>>){
 
 struct apply {};
 struct eval {};
+
+IS_SELF_EVALUATING(apply);
+IS_SELF_EVALUATING(eval);
 
 template < typename Proc, typename Args >
 auto constexpr IRapply(Proc,quote<Args>) {
@@ -141,9 +147,6 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     }
 }
 
-
-auto constexpr b = is_integer_v<integer<2>>;
-
 // returns with void if "self evaluating variable not found, or is a procedure"
 template <typename Env, typename Exp>
 auto constexpr IReval(quote<Exp>) {
@@ -163,37 +166,25 @@ auto constexpr IReval(quote<Exp>) {
         }
 
 
-    } else if constexpr (is_same_type<apply,Exp> || is_same_type<addition,Exp> || is_integer_v<Exp>){
-        // self-evaluating
+    } else if constexpr (is_self_evaluating(Exp{})){
         return Exp{};
     } else {
         using indicator = decltype(IRcar(Exp{}));
         // if it is an application
         if constexpr (is_same_type<apply,indicator>){
-            /*
-            using app_operator = decltype(IRcadr(Exp{}));
-            using evaluated_op = decltype(IReval<Env>(quote<app_operator>{}));
-
-            using app_operands = decltype(eval_members<Env>(IRcaddr(Exp{})));
-
-            // if apply returns with void, exec comp proc branch
-            using proc_res = decltype(IRapply(app_operator{},quote<app_operands>{}));
-
-            if constexpr (!is_same_type<void,proc_res>){
-                return proc_res{};
-            } else {
-                return apply_compund_proc<Env>(app_operator{},app_operands{});
-            }
-            */
            return IReval<Env>(make_quote(IRcdr(Exp{})));
 
         } else if constexpr (is_prim_proc(indicator{})){
-
             using app_operands = decltype(eval_members<Env>(IRcdr(Exp{})));
-
             using proc_res = decltype(IRapply(indicator{},quote<app_operands>{}));
-
             return proc_res{};
+
+        } else if constexpr (is_same_type<scm_if,indicator>){
+            using pred = decltype(IRcadr(Exp{}));
+            using then = decltype(IRcaddr(Exp{}));
+            using el = decltype(IRcadddr(Exp{}));
+            
+            return if_proc<Env>(pred{},then{},el{});
 
         } else {
             if constexpr (is_same_type<Exp,list<>>){

@@ -24,6 +24,7 @@ auto constexpr apply_primitve_procedure(T,Arguments){
 																						\
 struct name {}; /* identifying name, "quoted" name */									\
 																						\
+IS_SELF_EVALUATING(name);																\
 template <>																				\
 constexpr bool is_prim_proc(name){														\
 	return true;																		\
@@ -62,6 +63,11 @@ static_assert(is_same_type<testaddev,testaddevres>,"additon of two integers");
 #define PRIMITIVE_RELATIONAL_OP(name,sign)												\
 																						\
 struct name {}; /* identifying name, "quoted" name */									\
+IS_SELF_EVALUATING(name);																\
+template <>																				\
+constexpr bool is_prim_proc(name){														\
+	return true;																		\
+}																						\
 																						\
 template <typename Arguments> /* apply_primitve_procedure overload */					\
 auto constexpr apply_primitve_procedure(name,Arguments){								\
@@ -100,6 +106,26 @@ auto constexpr apply_##name(list<integer<A>,Rest...>){									\
 PRIMITIVE_RELATIONAL_OP(equal,==);
 PRIMITIVE_RELATIONAL_OP(less,<);
 PRIMITIVE_RELATIONAL_OP(more,>);
+
+
+// --------------------------------------
+
+struct scm_if {};
+
+IS_SELF_EVALUATING(scm_if);
+IS_SELF_EVALUATING(scm_true);
+IS_SELF_EVALUATING(scm_false);
+
+template <typename Env,typename Predicate, typename Then, typename Else>
+auto constexpr if_proc(Predicate, Then, Else){
+	using res = decltype(IReval<Env>(Predicate{}));
+	if constexpr (is_same_type<scm_true,res>){
+		return IReval<Env>(quote<Then>{});
+	} else {
+		return IReval<Env>(quote<Else>{});
+	}													
+}
+
 
 //using testrelv24 = decltype(less(list<integer<3>>{}));
 using testrelv2 = decltype(apply_less(list<integer<2>,integer<3>,integer<4>>{}));
