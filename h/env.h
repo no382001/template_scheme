@@ -49,11 +49,11 @@ using sum_of_2 = decltype(c_list<c_<'s'>,c_<'u'>,c_<'m'>>{});
 
 using fib_name = decltype(c_list<c_<'f'>,c_<'i'>,c_<'b'>>{});
 using fib_proc_body = decltype(quote<list<scm_if,
-                                        list<equal,c_<'x'>,integer<2>>,
+                                        quote<list<lesseq,c_<'x'>,integer<2>>>,
                                         integer<1>,
                                             list<addition,
-                                                list<fib_name,list<subtraction,c_<'x'>,integer<1>>,
-                                                list<fib_name,list<subtraction,c_<'x'>,integer<3>>>>>>>{});
+                                                list<fib_name,quote<list<subtraction,c_<'x'>,integer<1>>>,
+                                                list<fib_name,quote<list<subtraction,c_<'x'>,integer<2>>>>>>>>{});
 // the problem here is that i should somehow replace the value of x, 
 // the deeper i get, the more it decreases, maybe create data with random names?
 // its tail recursion, 

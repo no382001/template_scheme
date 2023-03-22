@@ -106,7 +106,7 @@ auto constexpr apply_##name(list<integer<A>,Rest...>){									\
 PRIMITIVE_RELATIONAL_OP(equal,==);
 PRIMITIVE_RELATIONAL_OP(less,<);
 PRIMITIVE_RELATIONAL_OP(more,>);
-
+PRIMITIVE_RELATIONAL_OP(lesseq,<=);
 
 // --------------------------------------
 

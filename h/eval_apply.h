@@ -54,7 +54,7 @@ template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(quote<list<A,Args...>>){
     if constexpr (sizeof...(Args) == 0){
         using ev_curr = decltype(IReval<Env>(make_quote(A{})));
-        return make_list(ev_curr{});
+        return ev_curr{};
     } else {
         using ev_curr = decltype(IReval<Env>(make_quote(A{})));
 
@@ -72,7 +72,7 @@ template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
     if constexpr (sizeof...(Args) == 0){
         using ev_curr = decltype(IReval<Env>(make_quote(A{})));
-        return make_list(ev_curr{});
+        return ev_curr{};
     } else {
         using ev_curr = decltype(IReval<Env>(make_quote(A{})));
 
@@ -129,8 +129,6 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     using arglist = decltype(IRcaddr(comp_proc_entry{}));
     // cadddr is expression
     using expression = decltype(IRcadddr(comp_proc_entry{}));
-    // make arg and operand pair
-    // make map_pair return table_entry with env wrap]
 
     // handle pairing differently
     using single_pair = decltype(apply_compund_proc_pair_helper(arglist{},Evaluated_opnds{}));
@@ -138,7 +136,7 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     using temp_ext_env = decltype(extend_environment<init_env>(single_pair{}));
     using result = decltype(IReval<temp_ext_env>(expression{}));
 
-    if constexpr (is_integer_v<result>) { // needs all self evaluating types
+    if constexpr (is_integer_v<result>) { // TODO: add all self evaluating types
         return result{};
     } else {
         using op = decltype(IRcar(result{}));
@@ -176,8 +174,17 @@ auto constexpr IReval(quote<Exp>) {
 
         } else if constexpr (is_prim_proc(indicator{})){
             using app_operands = decltype(eval_members<Env>(IRcdr(Exp{})));
-            using proc_res = decltype(IRapply(indicator{},quote<app_operands>{}));
-            return proc_res{};
+
+            if constexpr (is_prim_proc(IRcar(app_operands{}))){
+
+                using evaluated_just_in_case = decltype(IReval<Env>(quote<app_operands>{}));
+                using proc_res = decltype(IRapply(indicator{},evaluated_just_in_case{}));
+                return proc_res{};
+            } else {
+
+                using proc_res = decltype(IRapply(indicator{},quote<app_operands>{}));
+                return proc_res{};
+            }
 
         } else if constexpr (is_same_type<scm_if,indicator>){
             using pred = decltype(IRcadr(Exp{}));

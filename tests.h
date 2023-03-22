@@ -127,6 +127,7 @@ using sssss = decltype(IReval<init_env>(quote<c_<110>>{}));
 static_assert(is_same_type<sssss,integer<1>>,"ireval on variable, with init env containing n as 1");
 
 using ssssaa = decltype(IReval<init_env>(quote<list<list<c_<110>,c_<110>>,c_<110>,c_<110>>>{}));
+
 static_assert(is_same_type<ssssaa,list<list<integer<1>, integer<1>>,integer<1>, integer<1>>>,"");
 
 // (eval '(apply addition '(1 2 3)))
@@ -182,31 +183,46 @@ static_assert(is_same_type<ifproc,integer<2>>,"2 arg copmp proc");
 // define fibonacchi
 /*
 (define (fib x)
-    (if (= x 2)
+    (if (<= x 2)
     1
     (+ (fib (- x 1)) (fib (- x 2))))))
 */
 
 // ---------------DEBUGGING-------------------------------------------------------------
 
-//using fibonacchi = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<3>>>>{}));
-// errs at eval 189 with assert from cdr
+using fibonacchi_base_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<1>>>>{}));
+static_assert(is_same_type<fibonacchi_base_case,integer<1>>,"fib 1");
 
-//using fibonacchi = decltype(eval_members<init_env>(quote<list<fib_name,quote<integer<3>>>>{}));
-// 63 apply comp
+using fibonacchi_base_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<2>>>>{}));
+static_assert(is_same_type<fibonacchi_base_case,integer<1>>,"fib 2");
 
-using comp_proc_entry = decltype(list_search(fib_name{},init_env{}));
+using resfib = decltype(make_list(fibonacchi_base_case{}));
+using fibonacchi_base_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<3>>>>{}));
 
-// fails on apply comp result
+using resfibasd = decltype(IReval<init_env>(quote<list<lesseq,c_<110>,integer<2>>>{}));
+// why the fuck does it evaluate to
 
-using arglist = decltype(IRcaddr(comp_proc_entry{}));
-// cadddr is expression
-using expression = decltype(IRcadddr(comp_proc_entry{}));
-// make arg and operand pair
-// make map_pair return table_entry with env wrap]
+/*
+in file included from h/env.h:6,
+                 from tests.h:5,
+                 from ground.cpp:1:
+h/primitive_operations.h: In instantiation of ‘constexpr auto apply_primitve_procedure(
+    lesseq, Arguments) [with Arguments = list<list<integer<2>, integer<1> >, integer<2> >]’:
+h/eval_apply.h:105:53:   required from ‘constexpr auto IRapply(Proc, quote<Exp>) [with 
+    Proc = lesseq; Args = list<list<integer<2>, integer<1> >, integer<2> >]’
+h/eval_apply.h:179:46:   required from ‘constexpr auto IReval(quote<Exp>)
 
-// handle pairing differently
-using single_pair = decltype(apply_compund_proc_pair_helper(arglist{},integer<3>{}));
-// extend env with argument a operand pair
-using temp_ext_env = decltype(extend_environment<init_env>(single_pair{}));
-using result = decltype(IReval<temp_ext_env>(expression{}));
+operands evaluate to a list, but the list does not collapse, maybe using make_list instead of explicit list<> could solve this?
+
+Evaluated_opnds = list<subtraction, subtraction, subtraction, subtraction, subtraction, subtraction, subtraction, subtraction, subtraction, integer<3>, integer<2>, integer<2>, integer<2>, integer<2>, integer<2>, integer<2>, integer<2>, integer<2>, integer<2> >]’
+
+
+appending there does not help
+
+*/
+
+using asdasdasdasd = decltype(list<list<integer<2>, integer<1> >, integer<2> >{});
+using asdasdasdasd2 = decltype(make_list(list<integer<2>, integer<1>>{},integer<2>{}));
+using asdasdasdasd3 = decltype(make_list(make_list(integer<2>{}, integer<1>{}),integer<2>{}));
+
+using asdasdasd = decltype(IReval<init_env>(quote<list<c_<110>,integer<1>>>{}));
