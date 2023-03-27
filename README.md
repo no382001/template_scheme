@@ -25,9 +25,9 @@ using fib_proc_body = decltype(
         quote<list<lesseq,c_<'x'>,integer<2>>>,
         integer<1>,
             list<addition,
-                list<fib_name,
+                list<c_list<c_<'f'>,c_<'i'>,c_<'b'>>,,
                   quote<list<subtraction,c_<'x'>,integer<1>>>>,
-                list<fib_name,
+                list<c_list<c_<'f'>,c_<'i'>,c_<'b'>>,,
                   quote<list<subtraction,c_<'x'>,integer<2>>>>>>>{});
 
 using init_env = decltype(
