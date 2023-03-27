@@ -113,6 +113,7 @@ auto constexpr IRapply(Proc,quote<Args>) {
     }
 }
 
+// if its a one one scenario just make the env, bc they are not lists they dont fall under map
 template <typename arglist, typename Evaluated_opnds>
 auto constexpr apply_compund_proc_pair_helper(arglist,Evaluated_opnds){
     if constexpr (is_c_list(arglist{}) || !is_list(arglist{})){
@@ -122,6 +123,8 @@ auto constexpr apply_compund_proc_pair_helper(arglist,Evaluated_opnds){
     }
 }
 
+// during recursive replacement, the compound proc dont actually get evaluated just replaced
+// so this fixes that
 template <typename Env, typename arglist>
 auto constexpr apply_compund_proc_argument_helper(arglist){
     if constexpr (!is_self_evaluating(arglist{})){
@@ -132,6 +135,21 @@ auto constexpr apply_compund_proc_argument_helper(arglist){
         }
     } else {
         return arglist{};
+    }
+}
+
+// during recursive replacement, the opnds dont actually get evaluated just replaced
+// so this fixes that
+template <typename Env, typename Evaluated_opnds>
+auto constexpr recursion_helper(Evaluated_opnds){
+    if constexpr (!is_self_evaluating(Evaluated_opnds{})){
+        if constexpr (is_prim_proc(IRcar(Evaluated_opnds{}))){
+            return IReval<Env>(quote<Evaluated_opnds>{});
+        } else {
+            return Evaluated_opnds{};
+        }
+    } else {
+        return Evaluated_opnds{};
     }
 }
 
@@ -147,8 +165,9 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     // cadddr is expression
     using expression = decltype(IRcadddr(comp_proc_entry{}));
 
+    using evald_opnds = decltype(recursion_helper<Env>(Evaluated_opnds{}));
     // handle pairing differently
-    using single_pair = decltype(apply_compund_proc_pair_helper(helped_arglist{},Evaluated_opnds{}));
+    using single_pair = decltype(apply_compund_proc_pair_helper(helped_arglist{},evald_opnds{}));
     // extend env with argument a operand pair
     using temp_ext_env = decltype(extend_environment<init_env>(single_pair{}));
     using result = decltype(IReval<temp_ext_env>(expression{}));

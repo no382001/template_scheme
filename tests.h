@@ -189,25 +189,34 @@ static_assert(is_same_type<ifproc,integer<2>>,"2 arg copmp proc");
 */
 
 // ---------------DEBUGGING-------------------------------------------------------------
-/*
+/**/
 using fibonacchi_base_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<1>>>>{}));
 static_assert(is_same_type<fibonacchi_base_case,integer<1>>,"fib 1");
 
-using fibonacchi_base_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<2>>>>{}));
-static_assert(is_same_type<fibonacchi_base_case,integer<1>>,"fib 2");
+using fibonacchi_base_case2 = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<2>>>>{}));
+static_assert(is_same_type<fibonacchi_base_case2,integer<1>>,"fib 2");
 
 using resfib = decltype(make_list(fibonacchi_base_case{}));
-using fibonacchi_base_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<3>>>>{}));
 
 using resfibasd = decltype(IReval<init_env>(quote<list<lesseq,c_<110>,integer<2>>>{}));
-
-
+using resfibasdsa = decltype(make_list(resfibasd{}));
 
 using asdasdasdasd = decltype(list<list<integer<2>, integer<1> >, integer<2> >{});
 using asdasdasdasd2 = decltype(make_list(list<integer<2>, integer<1>>{},integer<2>{}));
 using asdasdasdasd3 = decltype(make_list(make_list(integer<2>{}, integer<1>{}),integer<2>{}));
 
 
-
+// this isnt valid but this is what it gets, and it can still eval
 using asd0asidas = decltype(IRapply(lesseq{},quote<list<list<subtraction, integer<3>, integer<2>>, integer<2>>>{}));
-*/
+using asd0asidasasa = decltype(make_list(asd0asidas{}));
+/**/
+
+
+using fibonacchi_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<3>>>>{}));
+static_assert(is_same_type<fibonacchi_case,integer<2>>,"fib 3");
+
+using fibonacchi_case2 = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<4>>>>{}));
+static_assert(is_same_type<fibonacchi_case2,integer<3>>,"fib 4");
+
+using fibonacchi_case3 = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<6>>>>{}));
+static_assert(is_same_type<fibonacchi_case3,integer<8>>,"fib 6");
