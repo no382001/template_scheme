@@ -1,12 +1,56 @@
-this document is valid until `dc8078e` (HEAD of `old` branch), the repo is being reconstructed from the ground up, latest working example is `3d43df9` (HEAD of `2nd_revision` branch and currently `main`)<br>
-<br>
+
 all im using to compile is `g++ -std=c++20 ...`, which is the CPP20 standard, i believe this is when they introduced the constexpr lambdas that im using (question mark), i dont remember, i will look it up
 
+- [evaluating fibonacchi](#fib)
 - [working with strings in constexpr](#string)
 - [tokenizing with types](#token)
   - [n-digit integers](#n-digit)
 
+# <a name="fib">some form of bastard dialect of Scheme runs during compile time</a>
+this is all based on working code, that are in `tests.h`, this is only meant to be a demonstration
+
+how fibonacchi looks like in Scheme
+
+```scheme
+(define (fib x)
+    (if (<= x 2)
+    1
+    (+ (fib (- x 1)) (fib (- x 2))))))
+```
+how it looks like in cpp types:
+<i>(define is not implemented yet, so im going to show the env variable)</i>
+```cpp
+using fib_proc_body = decltype(
+    quote<list<scm_if,
+        quote<list<lesseq,c_<'x'>,integer<2>>>,
+        integer<1>,
+            list<addition,
+                list<fib_name,
+                  quote<list<subtraction,c_<'x'>,integer<1>>>>,
+                list<fib_name,
+                  quote<list<subtraction,c_<'x'>,integer<2>>>>>>>{});
+
+using init_env = decltype(
+    make_environment(
+      table_entry<
+        c_list<c_<'f'>,c_<'i'>,c_<'b'>>, // variable name
+        procedure,  // variable type
+        c_<'x'>, // arguments
+        fib_proc_body>{})); // procedure body
+
+using res =
+    decltype(IReval<init_env>(quote<
+      list<c_list<c_<'f'>,c_<'i'>,c_<'b'>>,quote<integer<30>>>>{}));
+
+static_assert(is_same_type<res,integer<832040>>,"fib 30");
+```
+
+
 # <a name="string">traversing a string in constexpr, how?</a>
+<i> (from here this document is valid until `dc8078e` (HEAD of `old` branch), the repo is being reconstructed from the ground up, latest working example is `3d43df9` (HEAD of `2nd_revision` branch and currently `main`))</i>
+<br>
+
+
 how? very easy, since we cant really manipulate or even look at std::string or char* in constexpr (they only work in runtime which is not our thing now) our only option is std::string_view which basically is just a constexpr char ptr, for our case anyways. <br><br>
 
 using this macro, we have our lambda object that returns its arguments in constexpr

@@ -188,7 +188,7 @@ static_assert(is_same_type<ifproc,integer<2>>,"2 arg copmp proc");
     (+ (fib (- x 1)) (fib (- x 2))))))
 */
 
-// ---------------DEBUGGING-------------------------------------------------------------
+// ---------------FIBONACCHI-------------------------------------------------------------
 /**/
 using fibonacchi_base_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<1>>>>{}));
 static_assert(is_same_type<fibonacchi_base_case,integer<1>>,"fib 1");
