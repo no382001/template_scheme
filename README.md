@@ -15,7 +15,7 @@ how fibonacchi looks like in Scheme
 (define (fib x)
     (if (<= x 2)
     1
-    (+ (fib (- x 1)) (fib (- x 2))))))
+    (+ (fib (- x 1)) (fib (- x 2)))))
 ```
 how it looks like in cpp types:
 <i>(define is not implemented yet, so im going to show the env variable)</i>
