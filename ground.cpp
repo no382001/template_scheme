@@ -83,11 +83,11 @@ void print_table(T t) {
 }
 
 
-/**/
 
 int main(){
 
-
 print_table(init_env{});
+
+
 return 0;
 }

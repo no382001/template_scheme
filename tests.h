@@ -189,7 +189,7 @@ static_assert(is_same_type<ifproc,integer<2>>,"2 arg copmp proc");
 */
 
 // ---------------DEBUGGING-------------------------------------------------------------
-
+/*
 using fibonacchi_base_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<1>>>>{}));
 static_assert(is_same_type<fibonacchi_base_case,integer<1>>,"fib 1");
 
@@ -200,29 +200,14 @@ using resfib = decltype(make_list(fibonacchi_base_case{}));
 using fibonacchi_base_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<3>>>>{}));
 
 using resfibasd = decltype(IReval<init_env>(quote<list<lesseq,c_<110>,integer<2>>>{}));
-// why the fuck does it evaluate to
-
-/*
-in file included from h/env.h:6,
-                 from tests.h:5,
-                 from ground.cpp:1:
-h/primitive_operations.h: In instantiation of ‘constexpr auto apply_primitve_procedure(
-    lesseq, Arguments) [with Arguments = list<list<integer<2>, integer<1> >, integer<2> >]’:
-h/eval_apply.h:105:53:   required from ‘constexpr auto IRapply(Proc, quote<Exp>) [with 
-    Proc = lesseq; Args = list<list<integer<2>, integer<1> >, integer<2> >]’
-h/eval_apply.h:179:46:   required from ‘constexpr auto IReval(quote<Exp>)
-
-operands evaluate to a list, but the list does not collapse, maybe using make_list instead of explicit list<> could solve this?
-
-Evaluated_opnds = list<subtraction, subtraction, subtraction, subtraction, subtraction, subtraction, subtraction, subtraction, subtraction, integer<3>, integer<2>, integer<2>, integer<2>, integer<2>, integer<2>, integer<2>, integer<2>, integer<2>, integer<2> >]’
 
 
-appending there does not help
-
-*/
 
 using asdasdasdasd = decltype(list<list<integer<2>, integer<1> >, integer<2> >{});
 using asdasdasdasd2 = decltype(make_list(list<integer<2>, integer<1>>{},integer<2>{}));
 using asdasdasdasd3 = decltype(make_list(make_list(integer<2>{}, integer<1>{}),integer<2>{}));
 
-using asdasdasd = decltype(IReval<init_env>(quote<list<c_<110>,integer<1>>>{}));
+
+
+using asd0asidas = decltype(IRapply(lesseq{},quote<list<list<subtraction, integer<3>, integer<2>>, integer<2>>>{}));
+*/

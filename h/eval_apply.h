@@ -102,7 +102,8 @@ IS_SELF_EVALUATING(eval);
 template < typename Proc, typename Args >
 auto constexpr IRapply(Proc,quote<Args>) {
 
-	using prim_proc = decltype(apply_primitve_procedure(Proc{},Args{}));
+    using evaluated_operands = decltype(IReval<init_env>(quote<Args>{}));
+	using prim_proc = decltype(apply_primitve_procedure(Proc{},evaluated_operands{}));
     
     // cant instantiate void, so:
     if constexpr (is_same_type<prim_proc,void>){
@@ -121,17 +122,33 @@ auto constexpr apply_compund_proc_pair_helper(arglist,Evaluated_opnds){
     }
 }
 
+template <typename Env, typename arglist>
+auto constexpr apply_compund_proc_argument_helper(arglist){
+    if constexpr (!is_self_evaluating(arglist{})){
+        if constexpr (is_prim_proc(IRcar(arglist{}))){
+            return IReval<Env>(quote<arglist>{});
+        } else {
+            return arglist{};
+        }
+    } else {
+        return arglist{};
+    }
+}
+
+
 template <typename Env, typename Op, typename Evaluated_opnds >
 auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     // its compound, look var in table
     using comp_proc_entry = decltype(list_search(Op{},Env{}));
     // caddr is arglist
     using arglist = decltype(IRcaddr(comp_proc_entry{}));
+    
+    using helped_arglist = decltype(apply_compund_proc_argument_helper<Env>(arglist{}));
     // cadddr is expression
     using expression = decltype(IRcadddr(comp_proc_entry{}));
 
     // handle pairing differently
-    using single_pair = decltype(apply_compund_proc_pair_helper(arglist{},Evaluated_opnds{}));
+    using single_pair = decltype(apply_compund_proc_pair_helper(helped_arglist{},Evaluated_opnds{}));
     // extend env with argument a operand pair
     using temp_ext_env = decltype(extend_environment<init_env>(single_pair{}));
     using result = decltype(IReval<temp_ext_env>(expression{}));
@@ -175,13 +192,18 @@ auto constexpr IReval(quote<Exp>) {
         } else if constexpr (is_prim_proc(indicator{})){
             using app_operands = decltype(eval_members<Env>(IRcdr(Exp{})));
 
-            if constexpr (is_prim_proc(IRcar(app_operands{}))){
+            if constexpr (!is_self_evaluating(app_operands{})){
+                if constexpr (is_prim_proc(IRcar(app_operands{}))){
 
-                using evaluated_just_in_case = decltype(IReval<Env>(quote<app_operands>{}));
-                using proc_res = decltype(IRapply(indicator{},evaluated_just_in_case{}));
-                return proc_res{};
+                    using evaluated_just_in_case = decltype(IReval<Env>(quote<app_operands>{}));
+                    using proc_res = decltype(IRapply(indicator{},quote<evaluated_just_in_case>{}));
+                    return proc_res{};
+                } else {
+
+                    using proc_res = decltype(IRapply(indicator{},quote<app_operands>{}));
+                    return proc_res{};
+                }
             } else {
-
                 using proc_res = decltype(IRapply(indicator{},quote<app_operands>{}));
                 return proc_res{};
             }
