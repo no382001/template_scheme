@@ -220,3 +220,8 @@ static_assert(is_same_type<fibonacchi_case2,integer<3>>,"fib 4");
 
 using fibonacchi_case3 = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<6>>>>{}));
 static_assert(is_same_type<fibonacchi_case3,integer<8>>,"fib 6");
+
+using fibonacchi_case4 =
+    decltype(IReval<init_env>(quote<list<fib_name,quote<integer<30>>>>{}));
+static_assert(is_same_type<fibonacchi_case4,integer<832040>>,"fib 30");
+    
