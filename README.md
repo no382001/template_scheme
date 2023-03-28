@@ -1,10 +1,29 @@
+`documentation is work in progress`
 
-all im using to compile is `g++ -std=c++20 ...`, which is the CPP20 standard, i believe this is when they introduced the constexpr lambdas that im using (question mark), i dont remember, i will look it up
+An over engineered scheme interpreter made with C++ templates that is able to evaluate fibonacchi in constexpr time, currently the project is in 2 parts
+-  a constexpr Scheme <b>tokenizer</b> abandoned at `dc8078e` (HEAD of `old` branch)
+- an <b>evaluator</b> simulating `eval/apply`
+these two work on their own but they are yet to be reconciled
+<br>
 
-- [evaluating fibonacchi](#fib)
-- [working with strings in constexpr](#string)
-- [tokenizing with types](#token)
-  - [n-digit integers](#n-digit)
+<b>as the repo stands right now, only the evaluator is in the codebase</b>
+
+## Table of Contents
+- The Evaluator
+  - [evaluating fibonacchi](#fib)
+  - [data structures](#datas)
+    - [atoms](#atoms)
+    - [primitive procedures](#primproc)
+    - ...
+- The Tokenizer
+  - [working with strings in constexpr](#string)
+  - [tokenizing with types](#token)
+    - [n-digit integers](#n-digit)
+
+<br>
+<br>
+
+# The Evaluator
 
 # <a name="fib">some form of bastard dialect of Scheme runs during compile time</a>
 this is all based on working code, that are in `tests.h`, this is only meant to be a demonstration
@@ -45,8 +64,180 @@ using res =
 static_assert(is_same_type<res,integer<832040>>,"fib 30");
 ```
 
+# <a name="datas">data structures</a>
+## <a name="atoms">atoms</a>
+templated int collections cannot be compared with others  bc they are different in structure
 
-# <a name="string">traversing a string in constexpr, how?</a>
+due to the nature of template arguments its not that trivial to compare one with another, take this for example
+```cpp
+template <typename A, typename B>
+constexpr inline bool is_same_type = std::is_same<A, B>::value;
+
+auto constexpr b = is_same_type<integer<1>,bool>; // false
+
+auto constexpr b2 = is_same_type<integer<1>,integer<2>>; // false
+```
+the templates are right in this case `integer<1>` is not the same type as `integer<2>`, they have different arguments so they are not the same type, we have been mislead by our own naming
+```cpp
+auto constexpr b3 = is_same_type<integer<2>,integer<2>>; // true
+```
+so if we want our function `is_same_type` to work like "it should", we need to create a specialization, but since we need to think forward and we know that we might have more data structures like `integer<int>`, lets define a "primitive" type checker for types like this
+
+first write a function to check identity
+```cpp
+template< typename Test, template < int... > class Type >
+struct is_templated_int : std::false_type {};
+
+template< template < int... > class Type, int ...Args >
+struct is_templated_int< Type< Args... >, Type > : std::true_type {};
+
+template < typename T >
+constexpr inline bool is_integer_t = is_templated_int< T, integer >::value;
+```
+lets start from the bottom, `is_integer_t` takes a typename and passes it on to `is_templated_int` with the struct name `integer` (passing `integer` like this is only possible bc `is_templated_int` expects `Type` in the second parameter and `Type` is defined `template < int... > class Type` and we know that `integer` is really `integer<int>`), if the deduction has succeeded the `value` of the struct `is_templated_int` is `std::true_type` otherwise the specialzation on the top turns it into `std::false_type`
+
+TODO binary compare
+...................
+
+## <a name="primproc">primitive procedures</a>
+
+### where they come from:
+
+primitive operations each have a struct dedicated to them, these names are used in eval like tags in lisp, but since i must evaluate everything and cannot use quotes, they each have their own struct to make this possible
+
+```scheme
+(eval '(+ 2 3) initial-env)
+;IReval<init_env>(quote<list<addition,integer<2>,integer<3>>>{})
+
+```
+in the implementation of `IReval` (IR for Intermediate Represenation, so the name doesnt conflict with the procedure `eval`itself), `IReval` uses `is_prim_proc` to determine if the list is tagged with a name of a primitive procedure, it evaluates the operands with `eval_members` and passes them on to`IRapply`
+
+```cpp
+/* ... */
+using tag = decltype(IRcar(Exp{})); // the tag at the beginning of the expression
+/* ... */
+else if constexpr (is_prim_proc(tag{})){
+            using app_operands = decltype(eval_members<Env>(IRcdr(Exp{})));
+
+            if constexpr (!is_self_evaluating(app_operands{})){
+                if constexpr (is_prim_proc(IRcar(app_operands{}))){
+
+                    using proc_res = decltype(IRapply(tag{},quote<app_operands>{}));
+                    return proc_res{};
+                } else {
+
+                    using proc_res = decltype(IRapply(tag{},quote<app_operands>{}));
+                    return proc_res{};
+                }
+            } else {
+                using proc_res = decltype(IRapply(tag{},quote<app_operands>{}));
+                return proc_res{};
+            }
+
+        }
+/* ... */
+```
+`IRapply` is a lame function that just calls `apply_primitve_procedure`
+```cpp
+template < typename Proc, typename Args >
+auto constexpr IRapply(Proc,quote<Args>) {
+
+	// returns void if procedure was not found...
+    // it means that its a compound proc, handled elsewhere
+    using prim_proc_res = decltype(apply_primitve_procedure(Proc{},Args{}));
+    
+    // cant instantiate void, so:
+    if constexpr (is_same_type<prim_proc_res,void>){
+        return;
+    } else {
+        return prim_proc_res{};
+    }
+}
+```
+### arithmetic operations:
+`apply_primitve_procedure` has template specializations for each primitive procedure, first lets look at the arithmetic operations, i put all the code in a macro called `PRIMITIVE_ARITHMETIC_OP` so that i dont need to write them a hundred times for each operation, for the operation `additon` the body of the macro after the preprocessor should look like this
+
+```cpp
+struct addition {}; /* identifying "quoted" name */
+
+template <> /* overload */
+constexpr bool is_prim_proc(addition){
+	return true;
+}
+
+template <typename Arguments> /* apply_primitve_procedure overload */
+auto constexpr apply_primitve_procedure(addition,Arguments){
+	return apply_addition(Arguments{});
+}
+
+template <int A, typename... Rest>
+auto constexpr sub_apply_addition(list<integer<A>, Rest...>) {
+	if constexpr (sizeof...(Rest) > 0)
+		return A + sub_apply_addition(list<Rest...>{});
+	else{ return A; }
+}
+
+template <int A, typename... Rest>
+auto constexpr apply_addition(list<integer<A>,Rest...>) {
+        static_assert((sizeof...(Rest) > 0), "addtion with no operands");
+		return integer<A + sub_apply_addition(list<Rest...>{})>{};
+}
+```
+in order to be able to construct an `integer<int>` as a result of the `apply_addition` operation im using the `sub_apply_addition` subroutine so i handle other type of data for most of the calculation. 
+
+### relational operations:
+relation operations are the same for the most part, except that im working woth booleans
+```cpp
+
+template <int A, typename... Rest>
+auto constexpr sub_apply_less(list<integer<A>,Rest...>){
+	if constexpr (sizeof...(Rest) == 0) {
+		return A;
+	} else {
+		auto constexpr second = sub_apply_less(list<Rest...>{});
+		if constexpr (second == 99999){
+			return 99999;
+		} else if constexpr (A < second){
+			return A;
+		} else {
+			return 99999;
+		}
+	}
+}
+
+template <int A, typename... Rest>
+auto constexpr apply_less(list<integer<A>,Rest...>){
+	static_assert((sizeof...(Rest) > 0),"no second operand, for relational operation");
+	auto constexpr second = sub_apply_less(list<Rest...>{});
+	if constexpr (second == 99999){
+		return scm_false{};
+	} else if constexpr (A < second){
+		return scm_true{};
+	} else {
+		return scm_false{};
+	}
+}
+```
+sadly looks uglier than it should be, the first version didnt have `99999`, i was using VS Code and IntelliSense could sometimes evaluate things that it shouldnt have, like multiple return types for an auto function, which would have made this a lot more readable<br>
+what i was trying to do is to return `scm_false{}` instead of `99999` because i thought that the way `if constexpr` works is like this
+```cpp
+if constexpr (1){
+    // something
+} else {
+    // something else that is discarded
+}
+```
+so this becomes this
+```cpp
+if constexpr (1){
+    // something
+} else {}
+```
+so for my use case it actually wouldnt matter that the return types are not the same, but as it turns out even <b>even discarded functions have to be syntactically correct</b>, but somehow this doesnt matter to IntelliSense
+
+# The Tokenizer
+
+## <a name="string">traversing a string in constexpr, how?</a>
 <i> (from here this document is valid until `dc8078e` (HEAD of `old` branch), the repo is being reconstructed from the ground up, latest working example is `3d43df9` (HEAD of `2nd_revision` branch and currently `main`))</i>
 <br>
 
@@ -79,7 +270,7 @@ we just have to make sure that our source file is formatted appropriately, in th
 R"=====(+ 1 1)====="
 ```
 
-# <a name="token">tokenizing with cpp types, how?</a>
+## <a name="token">tokenizing with cpp types, how?</a>
 lets start easy, we'd like to parse `(+ 1 1)`, how do we begin? <br>
 define the atoms as such
 ```cpp
