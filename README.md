@@ -2,7 +2,8 @@
 
 An over engineered scheme interpreter made with C++ templates that is able to evaluate fibonacchi in constexpr time, currently the project is in 2 parts
 -  a constexpr Scheme <b>tokenizer</b> abandoned at `dc8078e` (HEAD of `old` branch)
-- an <b>evaluator</b> simulating `eval/apply`<br>
+- an <b>evaluator</b> simulating `eval/apply`
+
 these two work on their own but they are yet to be reconciled
 <br>
 
