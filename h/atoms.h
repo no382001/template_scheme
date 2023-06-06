@@ -2,6 +2,16 @@
 #include "utils.h"
 #include "lists.h"
 
+
+constexpr int _pow(int base, int exp, int result = 1) {
+	return exp < 1 ? result : _pow(base * base, exp / 2, (exp % 2) ? result * base : result);
+}
+
+constexpr int _log(int b, int n) {
+	return n < b ? 0 : _log(b, n / b) + 1;
+}
+
+
 struct scm_false {};
 struct scm_true {};
 
@@ -11,13 +21,16 @@ struct c_ {};
 template <int Value>
 struct special_character {};
 
+struct non_integer {};
+
 template <int Value>
 struct integer{
-	//template < int A >
-	//static constexpr auto merge(integer<A>)->integer< _pow((Value * 10), (_log(10, A) + 1)) + A >; // int concatenation
-	//static constexpr auto merge(non_integer)->integer<Value>;
+	template < int A >
+	static constexpr auto merge(integer<A>)->integer< _pow((Value * 10), (_log(10, A) + 1)) + A >; // int concatenation
+	static constexpr auto merge(non_integer)->integer<Value>;
 	auto constexpr get_value() {return Value;};
 };
+
 
 
 // overload for specifics
@@ -50,7 +63,6 @@ static_assert(!is_same_type<integer<1>,bool>,"");
 static_assert(!is_same_type<bool,integer<1>>,"");
 static_assert(is_same_type<integer<1>,integer<1>>,"");
 static_assert(!is_same_type<integer<1>,c_<1>>,"");
-
 
 template <typename T>
 auto constexpr is_self_evaluating(T) { 
