@@ -35,7 +35,7 @@ auto constexpr map_pair_inner(One<A,Args...>,Two<B,Brgs...>){
 template <template <class,class> typename One, typename... Args, template <class,class> typename Two, typename... Brgs>
 auto constexpr map_pair(One<Args...>,Two<Brgs...>){
     if constexpr (sizeof...(Args) != sizeof...(Brgs)){
-        static_assert(!is_same_type<int,int>,"lists are not the same size");
+        static_assert(DELAYED_FALSE,"lists are not the same size");
     } else {
         return map_pair_inner(One<Args...>{},Two<Brgs...>{});
     }
@@ -195,7 +195,7 @@ auto constexpr IReval(quote<Exp>) {
             // return the value of the variable
             return IRcaddr(var_res{});
         } else {
-            //static_assert(!is_same_type<int,int>,"self evaluating variable not found, or is a procedure");
+            //static_assert(DELAYED_FALSE,"self evaluating variable not found, or is a procedure");
             return;
         }
 
