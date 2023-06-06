@@ -20,17 +20,36 @@ struct integer{
 };
 
 
+// overload for specifics
 template< typename Test, template < int... > class Type >
-struct is_templated_int_collection : std::false_type {};
+struct is_specific_templated_int_collection : std::false_type {};
 
 template< template < int... > class Type, int ...Args >
-struct is_templated_int_collection< Type< Args... >, Type > : std::true_type {};
+struct is_specific_templated_int_collection< Type< Args... >, Type > : std::true_type {};
 
 template < typename T >
-constexpr inline bool is_integer_v = is_templated_int_collection< T, integer >::value;
+constexpr inline bool is_integer_v = is_specific_templated_int_collection< T, integer >::value;
 
 template <typename T>
-constexpr inline bool is_char_v = is_templated_int_collection< T, c_ >::value;
+constexpr inline bool is_char_v = is_specific_templated_int_collection< T, c_ >::value;
+
+
+template <typename A, typename B>
+struct is_same_type_impl {
+	static constexpr auto value = std::is_same<A, B>::value;
+}; 
+
+template <template <int...> class Type, int... Args>
+struct is_same_type_impl<Type<Args...>, Type<Args...>> : std::true_type {};
+
+template <typename A, typename B>
+constexpr inline bool is_same_type = is_same_type_impl<A, B>::value;
+
+static_assert(is_same_type<bool,bool>,"");
+static_assert(!is_same_type<integer<1>,bool>,"");
+static_assert(!is_same_type<bool,integer<1>>,"");
+static_assert(is_same_type<integer<1>,integer<1>>,"");
+static_assert(!is_same_type<integer<1>,c_<1>>,"");
 
 
 template <typename T>
