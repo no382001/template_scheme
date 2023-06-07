@@ -140,6 +140,20 @@ constexpr auto tokenize(Lambda str_lambda) {
 }
 
 
-auto str = constexpr_string("(+ 11 11)");
-using tokens = decltype(tokenize(str));
+// replace outer list with another
+template <template<class> class T, template<class> class Replacement, typename... Args,typename... Brgs>
+constexpr auto replace_wrapper(T<Args...>,Replacement<Brgs...>){
+	return Replacement<Args...>{};
+}
 
+LIST(tokenized);
+
+template <typename Lambda, size_t Index = 0>
+constexpr auto tokenizer(Lambda str_lambda) {
+	using result = decltype(tokenize<Lambda, Index>(str_lambda));
+	return replace_wrapper(result{},tokenized{});
+}
+
+
+auto str = constexpr_string("(+ 11 (+ 11 2))");
+using tokens = decltype(tokenizer(str));
