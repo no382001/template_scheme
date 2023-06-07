@@ -55,13 +55,6 @@ using fib_proc_body = decltype(
             list<addition,
                 list<fib_name,quote<list<subtraction,c_<'x'>,integer<1>>>>,
                 list<fib_name,quote<list<subtraction,c_<'x'>,integer<2>>>>>>>{});
-// the problem here is that i should somehow replace the value of x, 
-// the deeper i get, the more it decreases, maybe create data with random names?
-// its tail recursion, 
-
-// the inner arg should pass the arg rn and the equation
-
-// if before the fib is expanded, all its arguments are evaluated then this should work
 
 using init_env = decltype(
     make_environment(table_entry<c_<110>,variable,integer<1>>{},  //));

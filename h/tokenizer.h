@@ -106,12 +106,14 @@ constexpr auto tokenize(Lambda str_lambda) {
 		} else if constexpr (is_same_type<curr, list_end>) {
 			// base case for tokenize_list
 			return make_token_list();
+		
 		} else if constexpr (is_integer_v<curr>) {
 			// make a multi character integer if possible
 			constexpr auto first_non_integer = find_first_non_integer< Index + 1 >(str_lambda);
 			using integer_type = decltype(make_integer< Index, first_non_integer >(str_lambda));
 			using second = decltype(tokenize< Lambda, first_non_integer >(str_lambda));
 			return make_token_list(integer_type{}, second{});
+		
 		} else if constexpr (is_char_v<curr>) {
 			//if something starts with a character, find the next non character
 			constexpr auto end_of_char_list = find_first_non_c< Index >(str_lambda);
@@ -119,13 +121,14 @@ constexpr auto tokenize(Lambda str_lambda) {
 			if constexpr (end_of_char_list > 0) {
 				using char_list = decltype(tokenize_char_list< Lambda, Index, end_of_char_list >(str_lambda));
 				
-        using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
-        return make_token_list(char_list{}, second{});
+				using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
+				return make_token_list(char_list{}, second{});
 				
 			} else {
 				using second = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
 				return make_token_list(curr{}, second{});
 			}
+		
 		} else if constexpr (is_same_type<curr,whitespace>) {
 			// if its not a specially handled token
 			return tokenize< Lambda, Index + 1 >(str_lambda);
@@ -153,7 +156,3 @@ constexpr auto tokenizer(Lambda str_lambda) {
 	using result = decltype(tokenize<Lambda, Index>(str_lambda));
 	return replace_wrapper(result{},tokenized{});
 }
-
-
-auto str = constexpr_string("(+ 11 (+ 11 2))");
-using tokens = decltype(tokenizer(str));

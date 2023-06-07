@@ -60,3 +60,16 @@ void print_table(T t) {
     }
     std::cout << "------------------------" << '\n';
 }
+
+#include "h/tokenizer.h"
+
+
+auto str = constexpr_string("(+ 11 (+ 11 2))");
+using tokens = decltype(tokenizer(str));
+
+// makes sense that eval takes a quoted expr and all my examples are like that
+// but this way i will not be able to eval any correct code from the tokenizer
+// nice...
+
+using fibonacchi_case4 = 
+    decltype(IReval<init_env>(quote<list<fib_name,quote<integer<30>>>>{}));
