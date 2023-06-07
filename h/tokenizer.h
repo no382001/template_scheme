@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "lists.h"
 #include "deduce.h"
+#include "car_cdr.h"
 
 template <template <class> typename A, typename... Rest>
 bool constexpr is_empty_list(A<Rest...>){
@@ -100,11 +101,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 			using l = decltype(make_list(tokenize< Lambda, Index + 1>(str_lambda)));
 			using second = decltype(tokenize<Lambda, end_of_list + 1>(str_lambda));
 
-			if constexpr (is_empty_list(l{})){ // drop empty expressions, define handling
-				return make_token_list(second{});
-			} else {
-				return make_token_list(l{}, second{});
-			} 
+			return make_token_list(l{}, second{});
 
 		} else if constexpr (is_same_type<curr, list_end>) {
 			// base case for tokenize_list
@@ -143,6 +140,6 @@ constexpr auto tokenize(Lambda str_lambda) {
 }
 
 
-auto str = constexpr_string("(+ 11 11) (+ 1 1)");
+auto str = constexpr_string("(+ 11 11)");
 using tokens = decltype(tokenize(str));
 

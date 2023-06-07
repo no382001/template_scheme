@@ -16,19 +16,21 @@ static constexpr auto append(list_type< A, B, Args... >) {						\
 }
 
 // the basic functions to make a list object
-#define MAKE_LIST_FUNCTIONS(list_type)																	\
-template < typename T, typename ...Rest>																\
-auto constexpr make_##list_type(T, Rest...) -> decltype(list_type< T >::append(list_type< Rest... >{}));\
-template < typename T, typename ...Rest>																\
-auto constexpr make_##list_type(list_type<T>, Rest...) -> decltype(list_type<T>::append(list_type< Rest... >{}));\
-auto constexpr make_##list_type()->list_type<>;															\
-template <typename... Args>																				\
-auto constexpr make_##list_type(list_type<Args...>) -> decltype(make_##list_type (Args{}...));			\
-template < typename ...Types >																			\
-using make_##list_type##_t = decltype(make_##list_type (Types{}...));									\
-template < typename ...Types >																			\
-using list_type##_t = decltype(make_##list_type());														\
-template < typename ...Rest>																			\
+#define MAKE_LIST_FUNCTIONS(list_type)																				\
+template < typename T, typename ...Rest>																			\
+auto constexpr make_##list_type(T, Rest...) -> decltype(list_type< T >::append(list_type< Rest... >{}));			\
+template < typename T, typename ...Rest>																			\
+auto constexpr make_##list_type(list_type<T>, Rest...) -> decltype(list_type<T>::append(list_type< Rest... >{}));	\
+template <typename ...Rest>																							\
+auto constexpr make_##list_type(list_type<>, Rest...) -> decltype(make_##list_type(Rest{}...));						\
+auto constexpr make_##list_type()->list_type<>;																		\
+template <typename... Args>																							\
+auto constexpr make_##list_type(list_type<Args...>) -> decltype(make_##list_type (Args{}...));						\
+template < typename ...Types >																						\
+using make_##list_type##_t = decltype(make_##list_type (Types{}...));												\
+template < typename ...Types >																						\
+using list_type##_t = decltype(make_##list_type());																	\
+template < typename ...Rest>																						\
 auto constexpr make_##list_type(list_type<>)->list_type<>;
 
 
@@ -58,7 +60,6 @@ LIST(list);
 LIST(c_list);
 // IR list 
 LIST(IRL);
-LIST(w);
 LIST(token_list);
 
 // quotation

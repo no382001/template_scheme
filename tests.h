@@ -74,7 +74,7 @@ static_assert(is_same_type<listtest4,listres4>,"obj in list constructor and empt
 
 using listtest41 = decltype(make_list(make_list(),make_list(testobj{}),make_list()));
 using listres41 = decltype(list<testobj>{});
-//static_assert(is_same_type<listtest41,listres41>,"obj in list constructor and empty list on either side, collapses into obj in list");
+static_assert(is_same_type<listtest41,listres41>,"obj in list constructor and empty list on either side, collapses into obj in list");
 
 using listtest5 = decltype(make_list(list<testobj>{},list<>{},list<testobj>{},list<testobj>{}));
 using listres5 = decltype(list<testobj,testobj,testobj>{});
