@@ -67,9 +67,14 @@ void print_table(T t) {
 auto str = constexpr_string("(+ 11 (+ 11 2))");
 using tokens = decltype(tokenizer(str));
 
-// makes sense that eval takes a quoted expr and all my examples are like that
-// but this way i will not be able to eval any correct code from the tokenizer
-// nice...
-
 using fibonacchi_case4 = 
     decltype(IReval<init_env>(quote<list<fib_name,quote<integer<30>>>>{}));
+
+// i dont even have define implemented
+// take a list of expressions
+// evaluate them 'line by line'
+// pass the env to the next
+template <typename Env, typename... Tokenized>
+auto constexpr EvaluateExpressions(tokenized<Tokenized...>) {
+    // return IReval<Env>(make_quote(IRcdr(Exp{})));
+}

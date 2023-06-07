@@ -2,7 +2,6 @@
 #include "utils.h"
 #include "lists.h"
 
-
 constexpr int _pow(int base, int exp, int result = 1) {
 	return exp < 1 ? result : _pow(base * base, exp / 2, (exp % 2) ? result * base : result);
 }
@@ -76,3 +75,5 @@ auto constexpr is_self_evaluating(T) {
 #define IS_SELF_EVALUATING(name)							\
 template <>													\
 auto constexpr is_self_evaluating(name) { return true; }
+
+

@@ -26,7 +26,6 @@ auto constexpr extend_environment(Entry){
 
 // search a list of lists, where the car of entry list is the identifier
 // returns void if entry was not found
-// log(n)
 template <typename candidate, typename A, typename... Args>
 auto constexpr list_search(candidate,environment<A,Args...>){
     using car_of_entry = decltype(IRcar(A{}));

@@ -41,8 +41,6 @@ auto constexpr map_pair(One<Args...>,Two<Brgs...>){
     }
 }
 
-// map pair is trying yo map each member of the clist to the members of the list
-
 template <template <int...> typename One, int... A, template <int...> typename Two, int... B>
 auto constexpr map_pair(One<A...>,Two<B...>){
     return make_environment(table_entry<One<A...>,variable,Two<B...>>{});
@@ -113,7 +111,7 @@ auto constexpr IRapply(Proc,quote<Args>) {
     }
 }
 
-// if its a one one scenario just make the env, bc they are not lists they dont fall under map
+// if its a one to one scenario just make the env, bc they are not lists they dont fall under map
 template <typename arglist, typename Evaluated_opnds>
 auto constexpr apply_compund_proc_pair_helper(arglist,Evaluated_opnds){
     if constexpr (is_c_list(arglist{}) || !is_list(arglist{})){
@@ -123,6 +121,7 @@ auto constexpr apply_compund_proc_pair_helper(arglist,Evaluated_opnds){
     }
 }
 
+// needs refactor
 // during recursive replacement, the compound proc dont actually get evaluated just replaced
 // so this fixes that
 template <typename Env, typename arglist>
@@ -138,6 +137,7 @@ auto constexpr apply_compund_proc_argument_helper(arglist){
     }
 }
 
+// needs refactor
 // during recursive replacement, the opnds dont actually get evaluated just replaced
 // so this fixes that
 template <typename Env, typename Evaluated_opnds>
@@ -184,11 +184,12 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
 // returns with void if "self evaluating variable not found, or is a procedure"
 template <typename Env, typename Exp>
 auto constexpr IReval(quote<Exp>) {
-    // this is the problem
+
+    // if it is a proc or variable
     if constexpr (is_char_v<Exp> || is_c_list(Exp{})){
-        // it is a proc or variable
-        // look it up
+        // look it up in env
         using var_res = decltype(list_search(Exp{},Env{}));
+        // get the type of expression
         using tag = decltype(IRcadr(var_res{}));
 
         if constexpr (is_same_type<tag,variable>){
@@ -198,7 +199,6 @@ auto constexpr IReval(quote<Exp>) {
             //static_assert(DELAYED_FALSE,"self evaluating variable not found, or is a procedure");
             return;
         }
-
 
     } else if constexpr (is_self_evaluating(Exp{})){
         return Exp{};
@@ -243,7 +243,7 @@ auto constexpr IReval(quote<Exp>) {
                 using members = decltype(eval_members<Env>(Exp{}));
 
                 return members{};
-            // maybe here if its not a tagged list its a normal one right?s
+                // maybe here if its not a tagged list its a normal one right?
             }
         }
     }

@@ -56,11 +56,6 @@ struct name { LIST_BODY(name);};					\
 MAKE_LIST_FUNCTIONS(name);                          \
 IS_X_LIST(name);
 
-LIST(list);
-LIST(c_list);
-// IR list 
-LIST(IRL);
-LIST(token_list);
 
 // quotation
 template <typename ...Types>
@@ -76,3 +71,10 @@ auto constexpr make_quote(Types... types){
     static_assert(sizeof...(Types) > 0,"make_quote has no arguments");
     return quote<Types...>{};
 }
+
+
+LIST(list);
+LIST(c_list);
+// IR list 
+LIST(IRL);
+LIST(token_list);

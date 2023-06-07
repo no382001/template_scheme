@@ -15,6 +15,10 @@ bool constexpr is_same_list_t(A<First...> a,B<Second...> b){
 	}
 }
 
+
+
 // for static asserts that need delayed constexpr evaluation
-// when a branch needs to fail but not bring the whole tree with it
+//  - static assert willl always fail with a constexpr konw value during template generation
+//  - even when the branch is not used and will be omitted
+//  - delay the evaluation of the false value to throw a static assert only when the branch is evaluated
 #define DELAYED_FALSE !is_same_type<int,int>
