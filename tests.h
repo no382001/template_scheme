@@ -90,8 +90,6 @@ static_assert(is_same_type<map_pair_test,environment<table_entry<integer<1>,vari
 
 
 // list search tests
-
-
 template <typename name>
 struct p_name {};
 template <typename... args>

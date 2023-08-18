@@ -143,7 +143,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 }
 
 
-// replace outer list with another
+// replace outer list with another supplied in the parameter
 template <template<class> class T, template<class> class Replacement, typename... Args,typename... Brgs>
 constexpr auto replace_wrapper(T<Args...>,Replacement<Brgs...>){
 	return Replacement<Args...>{};

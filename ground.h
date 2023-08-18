@@ -31,44 +31,69 @@ void pretty_print(std::string str) {
     std::cout << clean << '\n';
 }
 
-template <typename T>
-void print_table(T t) {
-    auto str = demangle<T>();
-
-	// delete all instances of struct and any whitespace in the string
-	auto clean = std::regex_replace(str, std::regex(R"((struct )|( ))"), "");
-    std::cout << "-- contents of environment: " << '\n'; 
-    
-    auto lptr = 0;
-    auto rptr = 0;
-    auto indent = 0;
-
-    while ((lptr = clean.find("table_entry<",rptr)) != std::string::npos){
-        lptr += 11;
-        rptr = lptr;
-        indent = 1;
-
-        while (indent != 0) {
-            rptr = clean.find_first_of("<>", rptr+1);
-
-            switch (clean[rptr]) {
-                case '<': indent++; break;
-                case '>': indent--; break;
-            }
-        }
-        std::cout << clean.substr(lptr-11,rptr - lptr + 12) << '\n';
-    }
-    std::cout << "------------------------" << '\n';
-}
-
 #include "h/tokenizer.h"
 
 
 auto str = constexpr_string("(+ 11 (+ 11 2))");
-using tokens = decltype(tokenizer(str));
+using tokens = decltype(IRcar(tokenizer(str)));
 
 using fibonacchi_case4 = 
     decltype(IReval<init_env>(quote<list<fib_name,quote<integer<30>>>>{}));
+
+
+// list<token_list<
+//   addition, integer<11>, list<token_list<
+//     addition, integer<11>, integer<2>>>>>>
+
+using wraooertest = decltype(IReval<init_env>(
+    quote<list<
+      addition, integer<11>, quote<list<
+        addition, integer<11>, integer<2>>>>>{}));
+
+static_assert(is_same_type<wraooertest,integer<24>>,"");
+
+
+
+// recursively replace every list and token_list token, to make sure i dont break anything
+template <
+	template<class> class R, template<class,class> class innerR,
+	typename A, typename... Args,typename... Brgs>
+constexpr auto replace_wrapper(R<innerR<Brgs...>>,Args...){
+    if constexpr (sizeof...(Args) > 0) {
+	    using second = decltype(replace_wrapper(R<innerR<Brgs...>>{},IRcar(Args{}...)));
+        return list<second,Args...>{};
+    } else {
+        return list<>{};
+    }
+}
+/** /
+template <
+	template<class> class T, template<class,class> class innerT,
+	template<class> class R, template<class> class innerR,
+	typename A, typename... Args,typename... Brgs>
+constexpr auto replace_wrapper(T<innerT<A,Args...>>,R<innerR<Brgs...>>){
+    using second = replace_wrapper(T<innerT<Args...>>,R<innerR<Brgs...>>);
+	return R<innerR<second>>{};
+}
+// need to check every member
+// wrapper around for quote wrap
+// go and apply replace_wrapper on any matching list
+// 
+/**/
+
+
+using wrap_replace_res = decltype(replace_wrapper(tokens{},quote<list<>>{}));
+
+
+// prio list:
+
+// - the token list wrapper
+// -- you can even have nested defines right? it is basically let, but i imagine its the same
+
+// - probably need to handle multiple statements, like (define n 1) (+ 1 n)
+// -- this is easy bs theres only one value return statement
+// -- there needs to be a failsafe to ensure that only one function like that gets passed
+
 
 // i dont even have define implemented
 // take a list of expressions
