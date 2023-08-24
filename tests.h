@@ -4,6 +4,7 @@
 #include "h/utils.h"
 #include "h/env.h"
 #include "h/eval_apply.h"
+#include "h/tokenizer.h"
 
 struct testobj {};
 struct fooobj {};
@@ -222,4 +223,27 @@ static_assert(is_same_type<fibonacchi_case3,integer<8>>,"fib 6");
 using fibonacchi_case4 =
     decltype(IReval<init_env>(quote<list<fib_name,quote<integer<30>>>>{}));
 static_assert(is_same_type<fibonacchi_case4,integer<832040>>,"fib 30");
-    
+
+
+
+// rec list replacement test
+
+auto test_str = constexpr_string("(+ 11 (+ 11 2))");
+using test_tokens = decltype(IRcar(tokenizer(test_str))); // raw token list
+
+// some basic expression
+using wraooertest = decltype(IReval<init_env>(
+    quote<list<
+      addition, integer<11>, quote<list<
+        addition, integer<11>, integer<2>>>>>{}));
+
+static_assert(is_same_type<wraooertest,integer<24>>,""); // check if eval works, get result
+
+using replaced_expression = typename replace_nested_list<test_tokens>::type; // replace
+using expected_type = quote<list<addition, integer<11>, quote<list<addition, integer<11>, integer<2>>>>>; // this is how it should look after
+
+static_assert(is_same_type<replaced_expression, expected_type>, "recursive replacement"); // check if same
+
+using after_replacement_evaluation = decltype(IReval<init_env>(replaced_expression{}));
+
+static_assert(is_same_type<wraooertest,after_replacement_evaluation>,""); // check if they both get the same result

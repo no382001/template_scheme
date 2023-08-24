@@ -78,3 +78,20 @@ LIST(c_list);
 // IR list 
 LIST(IRL);
 LIST(token_list);
+
+
+// janky unreadable but compact recursive replacement of list wrappers list<token_list<...>> -> quote<list<...>>
+template<typename T>
+struct replace_nested_list {
+    using type = T;
+};
+
+// list<token_list<...>> -> quote<list<...>>
+template<typename T> struct replace_nested_list<list<T>> {
+    using type = quote<typename replace_nested_list<T>::type>;
+};
+
+// list<token_list<...>> -> quote<list<...>>
+template<typename... Args> struct replace_nested_list<token_list<Args...>> {
+    using type = list<typename replace_nested_list<Args>::type...>;
+};
