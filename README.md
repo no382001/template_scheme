@@ -1,22 +1,24 @@
-`documentation is work in progress`
 
-An over engineered scheme interpreter made with C++ templates that is able to evaluate fibonacchi in constexpr time, currently the project is in 2 parts
--  a constexpr Scheme <b>tokenizer</b> abandoned at `dc8078e` (HEAD of `old` branch)
-- an <b>evaluator</b> simulating `eval/apply`
-
-these two work on their own but they are yet to be reconciled
-<br>
-
-<b>as the repo stands right now, only the evaluator is in the codebase</b>
+A rudimentary scheme interpreter made with C++ templates. After reaching chapter 4 in SICP while messing around in CPP i had this bright idea, since templates are Turing complete why not try to make the Scheme meta-circular evaluator all in constexpr time.<br>
+I've seen some similar projects but I never could comprehend the code. Lot of the code is not uniform, has questionable design flaws (maybe I'll fix them sometime), this is thanks to the fact that when starting this project I knew little to nothing about template meta programming. I'd like to think I know a little bit more now, and I'am not just bashing away on my keyboard until something works.<br>
+So yeah, no meta-circular evaluator (yet?), but I've got to the first big milestone.<br>
+## goals
+### [x] being able to evaluate Fibonacchi
+#### steps required:
+ - [x] implement a type system
+ - [x] lisp like helper functions for working with lists
+ - [x] implement `eval/apply` based on the meta-circular evaluator in SICP chapter 4
+ - [x] implement a tokenizer from string to types in compile time
+ - [x] plug them together
 
 ## Table of Contents
-- The Evaluator
-  - [evaluating fibonacchi](#fib)
+- the evaluator
+  - [evaluating Fibonacchi](#fib)
   - [data structures](#datas)
     - [atoms](#atoms)
     - [primitive procedures](#primproc)
     - ...
-- The Tokenizer
+- the tokenizer
   - [working with strings in constexpr](#string)
   - [tokenizing with types](#token)
     - [n-digit integers](#n-digit)
@@ -24,12 +26,12 @@ these two work on their own but they are yet to be reconciled
 <br>
 <br>
 
-# The Evaluator
+# the evaluator
 
-# <a name="fib">some form of bastard dialect of Scheme runs during compile time</a>
-this is all based on working code, that are in `tests.h`, this is only meant to be a demonstration
+## <a name="fib">Fibonacchi</a>
+<i>this is all based on working code (so if it doesnt work see `tests.h`)</i>
 
-how fibonacchi looks like in Scheme
+The goal is to evaluate something that looks like this in `mit-scheme`
 
 ```scheme
 (define (fib x)
@@ -37,7 +39,7 @@ how fibonacchi looks like in Scheme
     1
     (+ (fib (- x 1)) (fib (- x 2)))))
 ```
-how it looks like in cpp types:
+Should look something like this if you wanted `(eval '(define ...) init-env)`<br>
 <i>(define is not implemented yet, so im going to show the env variable)</i>
 ```cpp
 using fib_proc_body = decltype(
@@ -65,27 +67,35 @@ using res =
 static_assert(is_same_type<res,integer<832040>>,"fib 30");
 ```
 
-# <a name="datas">data structures</a>
+# data structures
 ## <a name="atoms">atoms</a>
-templated int collections cannot be compared with others  bc they are different in structure
 
-due to the nature of template arguments its not that trivial to compare one with another, take this for example
+here is our first type
+```cpp
+template <int>
+class integer {};
+
+// if i do this, i can store an int there
+using i = integer<1>;
+```
+its still a type and doesnt do anything, but i have a way to store integers type variables, plus i can give them names
+
+### <b>PROBLEM [1]: templated int collections cannot be compared with others bc the template argument designates an instance</b>
+i can compare `integer<1>` with `integer<1>` but not with `integer<2>`, they are a different instance. <br>
+okay but then how can i tell if two of my variables are the same type?
+
 ```cpp
 template <typename A, typename B>
-constexpr inline bool is_same_type = std::is_same<A, B>::value;
+constexpr inline bool is_same_type = std::is_same<A, B>::value; // it really should be called is_same_type_v
 
-auto constexpr b = is_same_type<integer<1>,bool>; // false
-
-auto constexpr b2 = is_same_type<integer<1>,integer<2>>; // false
+auto constexpr b1 = is_same_type<integer<1>,integer<1>>; // true
+auto constexpr b2 = is_same_type<integer<1>,bool>; // false
+auto constexpr b3 = is_same_type<integer<1>,integer<2>>; // false
 ```
-the templates are right in this case `integer<1>` is not the same type as `integer<2>`, they have different arguments so they are not the same type, we have been mislead by our own naming
-```cpp
-auto constexpr b3 = is_same_type<integer<2>,integer<2>>; // true
-```
-so if we want our function `is_same_type` to work like "it should", we need to create a specialization, but since we need to think forward and we know that we might have more data structures like `integer<int>`, lets define a "primitive" type checker for types like this
+if we want our function `is_same_type` to work like "it should", we need to create a specialization, but since we want to think forward and we know that we might want similar data structures to `integer<int>`, lets define a "primitive" type checker for types like this
 
-first write a function to check identity
 ```cpp
+// check identity
 template< typename Test, template < int... > class Type >
 struct is_templated_int : std::false_type {};
 
@@ -95,14 +105,12 @@ struct is_templated_int< Type< Args... >, Type > : std::true_type {};
 template < typename T >
 constexpr inline bool is_integer_t = is_templated_int< T, integer >::value;
 ```
-lets start from the bottom, `is_integer_t` takes a typename and passes it on to `is_templated_int` with the struct name `integer` (passing `integer` like this is only possible bc `is_templated_int` expects `Type` in the second parameter and `Type` is defined `template < int... > class Type` and we know that `integer` is really `integer<int>`), if the deduction has succeeded the `value` of the struct `is_templated_int` is `std::true_type` otherwise the specialzation on the top turns it into `std::false_type`
+lets start from the bottom, `is_integer_t` takes a typename and passes it on to `is_templated_int` with the struct name `integer` (passing `integer` like this is only possible bc `is_templated_int` expects `Type` in the second parameter and `Type` is defined `template < int... > class Type` and we know that `integer` takes one parameter `int`), if the deduction has succeeded the `value` of the struct `is_templated_int` is `std::true_type` otherwise the specialzation on the top turns it into `std::false_type`
 
 TODO binary compare
 ...................
 
 ## <a name="primproc">primitive procedures</a>
-
-### where they come from:
 
 primitive operations each have a struct dedicated to them, these names are used in eval like tags in lisp, but since i must evaluate everything and cannot use quotes, they each have their own struct to make this possible
 
@@ -111,7 +119,7 @@ primitive operations each have a struct dedicated to them, these names are used 
 ;IReval<init_env>(quote<list<addition,integer<2>,integer<3>>>{})
 
 ```
-in the implementation of `IReval` (IR for Intermediate Represenation, so the name doesnt conflict with the procedure `eval`itself), `IReval` uses `is_prim_proc` to determine if the list is tagged with a name of a primitive procedure, it evaluates the operands with `eval_members` and passes them on to`IRapply`
+in the implementation of `IReval` (IR for Intermediate Represenation, so the name doesnt conflict with the procedure `eval` itself), `IReval` uses `is_prim_proc` to determine if the list is tagged with a name of a primitive procedure, it evaluates the operands with `eval_members` and passes them on to`IRapply`
 
 ```cpp
 /* ... */
@@ -138,7 +146,7 @@ else if constexpr (is_prim_proc(tag{})){
         }
 /* ... */
 ```
-`IRapply` is a lame function that just calls `apply_primitve_procedure`
+`IRapply` is a wrapper function that just calls `apply_primitve_procedure`
 ```cpp
 template < typename Proc, typename Args >
 auto constexpr IRapply(Proc,quote<Args>) {
