@@ -1,7 +1,7 @@
 #pragma once
 #include "utils.h"
 
-// the basic attributes of a list object
+/** \brief the basic attributes of a list object */
 #define LIST_BODY(list_type)													\
 static constexpr auto append(list_type<>)->list_type< Types... >;				\
 static constexpr auto append(list_type<>,list_type<>)->list_type< Types... >;	\
@@ -15,7 +15,7 @@ static constexpr auto append(list_type< A, B, Args... >) {						\
 	return decltype(curr::append(list_type< B, Args... >{})){};					\
 }
 
-// the basic functions to make a list object
+/** \brief basic functions of a list object */
 #define MAKE_LIST_FUNCTIONS(list_type)																				\
 template < typename T, typename ...Rest>																			\
 auto constexpr make_##list_type(T, Rest...) -> decltype(list_type< T >::append(list_type< Rest... >{}));			\
@@ -33,7 +33,7 @@ using list_type##_t = decltype(make_##list_type());																	\
 template < typename ...Rest>																						\
 auto constexpr make_##list_type(list_type<>)->list_type<>;
 
-
+/** \brief helper macros to determine properties of a list */
 #define IS_X_LIST(name)							\
 template< typename T>							\
 auto constexpr is_##name(T t) {					\
@@ -49,7 +49,7 @@ auto constexpr is_##name(name<> l) {			\
 }
 
 
-// names are just typename wrappers around the list data structure
+/** \brief a list prototype */
 #define LIST(name)									\
 template < typename ...Types >						\
 struct name { LIST_BODY(name);};					\
@@ -57,41 +57,44 @@ MAKE_LIST_FUNCTIONS(name);                          \
 IS_X_LIST(name);
 
 
-// quotation
+/** \brief quotation */
 template <typename ...Types>
 struct quote {};
 
+/** \brief determines if a variable is quoted */
 template <typename T>
 constexpr inline bool is_quoted(T){
     return is_same_list_t(T{},quote<>{});
 }
 
+/** \brief wraps something in quotation */
 template <typename ...Types>
 auto constexpr make_quote(Types... types){
     static_assert(sizeof...(Types) > 0,"make_quote has no arguments");
     return quote<Types...>{};
 }
 
-
 LIST(list);
 LIST(c_list);
+
 // IR list 
 LIST(IRL);
 LIST(token_list);
 
 
-// janky unreadable but compact recursive replacement of list wrappers list<token_list<...>> -> quote<list<...>>
+/** \brief janky unreadable but compact recursive replacement of list wrappers
+ * list<token_list<...>> -> quote<list<...>> (this is a base case) */
 template<typename T>
 struct replace_nested_list {
     using type = T;
 };
 
-// list<token_list<...>> -> quote<list<...>>
+/** \brief spec for outer 'list' */
 template<typename T> struct replace_nested_list<list<T>> {
     using type = quote<typename replace_nested_list<T>::type>;
 };
 
-// list<token_list<...>> -> quote<list<...>>
+/** \brief spec for inner 'token_list' */
 template<typename... Args> struct replace_nested_list<token_list<Args...>> {
     using type = list<typename replace_nested_list<Args>::type...>;
 };

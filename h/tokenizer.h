@@ -8,6 +8,7 @@
 #include "deduce.h"
 #include "car_cdr.h"
 
+/** \brief checks if list is empty */
 template <template <class> typename A, typename... Rest>
 bool constexpr is_empty_list(A<Rest...>){
 	if constexpr (sizeof...(Rest) > 0) {
@@ -16,7 +17,7 @@ bool constexpr is_empty_list(A<Rest...>){
         return true;
     }
 }
-
+/** \brief find first non integer in list */
 template < int Index, typename Lambda >
 constexpr auto find_first_non_integer(Lambda lambda) {
 	constexpr auto str = lambda();
@@ -28,6 +29,7 @@ constexpr auto find_first_non_integer(Lambda lambda) {
 	}
 }
 
+/** \brief find first non char in list */
 template < int Index, typename Lambda >
 constexpr auto find_first_non_c(Lambda lambda) {
 	constexpr auto str = lambda();
@@ -39,7 +41,7 @@ constexpr auto find_first_non_c(Lambda lambda) {
 	}
 }
 
-// returns the index of the end of the list, layer safe
+/** \brief  the index of the end of the list, layer safe */
 template < int Index, int layer = 0, typename Lambda>
 constexpr auto find_end_of_list(Lambda lambda){
 	constexpr auto str = lambda();
@@ -57,7 +59,7 @@ constexpr auto find_end_of_list(Lambda lambda){
 	}
 }
   
-// only c_ is a character, ints are currently not even if they are in the same stream as the char list
+/** \brief only c_ is a character, ints are currently not even if they are in the same stream as the char list */
 template <typename Lambda, size_t Index = 0, size_t end_of_char_list>
 constexpr auto tokenize_char_list(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
@@ -70,6 +72,7 @@ constexpr auto tokenize_char_list(Lambda str_lambda) {
 	}
 }
 
+/** \brief concatenate integers next to each other to form a single one*/
 template < int Start, int End, typename Lambda >
 constexpr auto make_integer(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
@@ -81,12 +84,11 @@ constexpr auto make_integer(Lambda str_lambda) {
 	}
 }
 
-// list parsing works
-// quote parsing works
 #include <string_view>
+/** \brief constexpr string hack */
 #define constexpr_string(...) ([]() constexpr -> std::string_view { return __VA_ARGS__; })
 
-// tokenize does not handle (define ...) type expressions, if they are found, the node is terminated, see table.h
+/** \brief tokenize does not handle (define ...) type expressions, if they are found, the node is terminated, see table.h */
 template <typename Lambda, size_t Index = 0>
 constexpr auto tokenize(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
@@ -143,7 +145,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 }
 
 
-// replace outer list with another supplied in the parameter
+/** \brief replace outer list with another supplied in the parameter */
 template <template<class> class T, template<class> class Replacement, typename... Args,typename... Brgs>
 constexpr auto replace_wrapper(T<Args...>,Replacement<Brgs...>){
 	return Replacement<Args...>{};
@@ -151,6 +153,7 @@ constexpr auto replace_wrapper(T<Args...>,Replacement<Brgs...>){
 
 LIST(tokenized);
 
+/** \brief tokenizer function wrapper*/
 template <typename Lambda, size_t Index = 0>
 constexpr auto tokenizer(Lambda str_lambda) {
 	using result = decltype(tokenize<Lambda, Index>(str_lambda));

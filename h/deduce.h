@@ -4,16 +4,22 @@
 #include "primitive_operations.h"
 #include "utils.h"
 
+/** \brief list_start token*/
 struct list_start {};
+/** \brief list_end token*/
 struct list_end {};
 
+/** \brief quote_start token*/
 struct quote_start {};
+/** \brief quote_end token*/
 struct quote_end {};
 
+/** \brief whitespace token*/
 struct whitespace {};
 
 // TODO: handle multi character symbols
 
+/** \brief given an character, return the token type*/
 template <int C>
 constexpr auto deduce_token_type() {
 	if constexpr (C == '(') {

@@ -5,7 +5,7 @@
 
 #include "atoms.h"
 
-
+/** \brief is the list type as the other one? */
 template <template <class> typename A, template <class> typename B, typename... First, typename... Second>
 bool constexpr is_same_list_t(A<First...> a,B<Second...> b){ 
 	using derivedA = decltype(A{});
@@ -18,20 +18,20 @@ bool constexpr is_same_list_t(A<First...> a,B<Second...> b){
 	}
 }
 
-// for static asserts that need delayed constexpr evaluation
-//  - static assert willl always fail with a constexpr konw value during template generation
-//  - even when the branch is not used and will be omitted
-//  - delay the evaluation of the false value to throw a static assert only when the branch is evaluated
+/** \brief for static asserts that need delayed constexpr evaluation
+*  - static assert willl always fail with a constexpr konw value during template generation
+*  - even when the branch is not used and will be omitted
+*  - delay the evaluation of the false value to throw a static assert only when the branch is evaluated */
 #define DELAYED_FALSE !is_same_type<int,int>
 
-// preproc eval defer
+/** \brief preproc eval defer */
 #define EMPTY()
 #define DEFER_INNER(m) m EMPTY EMPTY EMPTY()
 #define DEFER(m) DEFER_INNER(m)
 
 
 
-
+/** \brief function to demangle structs */
 template <typename T>
 constexpr auto demangle() -> std::string {
 #if defined(__clang__)
@@ -55,6 +55,7 @@ constexpr auto demangle() -> std::string {
     return std::string(function.substr(start, size)).data();
 }
 
+/** \brief print typenames */
 void pretty_print(std::string str) {
 	// delete all instances of struct and any whitespace in the string
 	auto clean = std::regex_replace(str, std::regex(R"((struct )|( ))"), "");

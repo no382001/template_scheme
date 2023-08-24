@@ -5,27 +5,25 @@
 #include "atoms.h"
 #include "primitive_operations.h"
 
-// self evaluating symbol
+/** \brief self evaluating symbol */
 struct variable {};
-// takes atleast one argument, applied
+/** \brief takes atleast one argument, is applied */
 struct procedure {};
 
-// -----------------------------------------------------------------------------------------------------
-// setting up an init-env for eval
-
-// environment table is a list of lists, or pairs
+/** \brief environment is a list of lists, or pairs */
 LIST(environment);
 
+/** \brief wrapper for table data */
 template <typename... columns>
 struct table_entry {};
 
+/** \brief given an entry and an Env return the appended Env */
 template <typename Env, typename Entry>
 auto constexpr extend_environment(Entry){
     return Env::append(Entry{});
 }
-
-// search a list of lists, where the car of entry list is the identifier
-// returns void if entry was not found
+/** \brief search a list of lists, where the car of entry list is 
+ * the identifier returns void if entry was not found */
 template <typename candidate, typename A, typename... Args>
 auto constexpr list_search(candidate,environment<A,Args...>){
     using car_of_entry = decltype(IRcar(A{}));
