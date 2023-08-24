@@ -4,22 +4,19 @@
 #include "utils.h"
 #include "atoms.h"
 
-/** \brief prim proc checker base, all prim proc has own spec*/
+
 template <typename T>
 constexpr bool is_prim_proc(T){
 	return false;
 }
-
-/** \brief base case for apply_primitve_procedure
- * template arguments are oveloaded in each macro,
- * if the proc is not primitive, it returns with void */
+// base case for apply_primitve_procedure
+// template arguments are oveloaded in each macro, if the proc is not primitive, it returns with void
 template <typename T, typename Arguments> 
 auto constexpr apply_primitve_procedure(T,Arguments){
 	//static_assert(DELAYED_FALSE,"no such primitive procedure T");
 	return;
 }
 
-/** \brief macro for arithmetic operation properties */
 #define PRIMITIVE_ARITHMETIC_OP(name,sign)                                          	\
 																						\
 struct name {}; /* identifying, "quoted" name */										\
@@ -56,10 +53,10 @@ using testaddev = decltype(apply_addition(list<integer<2>,integer<3>>{}));
 using testaddevres = decltype(integer<5>{});
 static_assert(is_same_type<testaddev,testaddevres>,"additon of two integers");
 
-/** since the constexpr discarded functions have to be syntactically correct
- * it still cant deduct two different types, in the preprocessor it works flawlessly
- * with me returning scm_false{} and integer<>{}, but the compioler will not allow that
- * so i will have to establish and use integer edge cases, in this case number 99999 for a false return */
+// since the constexpr discarded functions have to be syntactically correct
+// it still cant deduct two different types, in the preprocessor it works flawlessly
+// with me returning scm_false{} and integer<>{}, but the compioler will not allow that
+// so i will have to establish and use integer edge cases, in this case number 99999 for a false return
 #define PRIMITIVE_RELATIONAL_OP(name,sign)												\
 																						\
 struct name {}; /* identifying name, "quoted" name */									\
@@ -108,15 +105,14 @@ PRIMITIVE_RELATIONAL_OP(less,<);
 PRIMITIVE_RELATIONAL_OP(more,>);
 PRIMITIVE_RELATIONAL_OP(lesseq,<=);
 
+// --------------------------------------
 
-/** \brief token for conditional */
 struct scm_if {};
 
 IS_SELF_EVALUATING(scm_if);
 IS_SELF_EVALUATING(scm_true);
 IS_SELF_EVALUATING(scm_false);
 
-/** \brief impl of the if procedure */
 template <typename Env,typename Predicate, typename Then, typename Else>
 auto constexpr if_proc(Predicate, Then, Else){
 	using res = decltype(IReval<Env>(Predicate{}));
@@ -126,3 +122,31 @@ auto constexpr if_proc(Predicate, Then, Else){
 		return IReval<Env>(quote<Else>{});
 	}													
 }
+
+
+//using testrelv24 = decltype(less(list<integer<3>>{}));
+using testrelv2 = decltype(apply_less(list<integer<2>,integer<3>,integer<4>>{}));
+using testrelres2 = decltype(scm_true{});
+static_assert(is_same_type<testrelv2,testrelres2>,"rel of two integers: positive test");
+using testrelv24 = decltype(apply_less(list<integer<3>,integer<2>>{}));
+using testrelres24 = decltype(scm_false{});
+static_assert(is_same_type<testrelv24,testrelres24>,"rel of two integers: negative test");
+
+using testrelv2s = decltype(apply_more(list<integer<2>,integer<3>,integer<4>>{}));
+using testrelres2s = decltype(scm_false{});
+static_assert(is_same_type<testrelv2s,testrelres2s>,"rel of two integers: positive test");
+using testrelv24aa = decltype(apply_more(list<integer<3>,integer<2>>{}));
+using testrelres24aa = decltype(scm_true{});
+static_assert(is_same_type<testrelv24aa,testrelres24aa>,"rel of two integers: negative test");
+
+using testrelv2sa = decltype(apply_equal(list<integer<2>,integer<2>,integer<2>>{}));
+using testrelres2sa = decltype(scm_true{});
+static_assert(is_same_type<testrelv2sa,testrelres2sa>,"rel of two integers: positive test");
+using testrelv24aaa = decltype(apply_equal(list<integer<3>,integer<2>>{}));
+using dfff = decltype(scm_false{});
+static_assert(is_same_type<testrelv24aaa,dfff>,"rel of two integers: negative test");
+
+using testr22elv2 = decltype(apply_primitve_procedure(addition{},list<integer<2>,integer<3>,integer<4>>{}));
+
+using testr22elv22 = decltype(apply_primitve_procedure(int{},list<integer<2>,integer<3>,integer<4>>{}));
+static_assert(is_same_type<testr22elv22,void>,"not prim proc");

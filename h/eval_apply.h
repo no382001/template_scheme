@@ -18,7 +18,7 @@ auto constexpr IReval(quote<Exp>);
 // temp location for map_pair
 LIST(pair);
 
-/** \brief helper function for map_pair */
+
 template <template <class,class> typename One, typename A, typename... Args, template <class,class> typename Two, typename B, typename... Brgs>
 auto constexpr map_pair_inner(One<A,Args...>,Two<B,Brgs...>){
     using p = decltype(table_entry<A,variable,B>{});
@@ -29,8 +29,9 @@ auto constexpr map_pair_inner(One<A,Args...>,Two<B,Brgs...>){
 		return make_environment(p{},second{});
 	}
 }
-/** \brief map two lists, create a table entry with variable 
- * as a tag return table_entries with env wrap */
+
+// map two lists, create a table entry with variable as a tag
+// return table_entries with env wrap
 template <template <class,class> typename One, typename... Args, template <class,class> typename Two, typename... Brgs>
 auto constexpr map_pair(One<Args...>,Two<Brgs...>){
     if constexpr (sizeof...(Args) != sizeof...(Brgs)){
@@ -40,14 +41,13 @@ auto constexpr map_pair(One<Args...>,Two<Brgs...>){
     }
 }
 
-/** \brief spec for one to one mapping? */
 template <template <int...> typename One, int... A, template <int...> typename Two, int... B>
 auto constexpr map_pair(One<A...>,Two<B...>){
     return make_environment(table_entry<One<A...>,variable,Two<B...>>{});
 }
 
 
-/** \brief evaluates every member, needs refactoring!! */
+// needs refactoring
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(quote<list<A,Args...>>){
     if constexpr (sizeof...(Args) == 0){
@@ -65,7 +65,7 @@ auto constexpr eval_members(quote<list<A,Args...>>){
     }
 }
 
-/** \brief evaluates every member, needs refactoring!! */
+// needs refactoring
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
     if constexpr (sizeof...(Args) == 0){
@@ -86,7 +86,6 @@ auto constexpr eval_members(list<A,Args...>){
     }
 }
 
-/** \brief evaluates every member, needs refactoring!! */
 template <typename Env, template <int...> typename templated_int, int a>
 auto constexpr eval_members(quote<templated_int<a>>){
     return IReval<Env>(quote<templated_int<a>>{});
@@ -98,7 +97,6 @@ struct eval {};
 IS_SELF_EVALUATING(apply);
 IS_SELF_EVALUATING(eval);
 
-/** \brief takes a procedure and applies it to arguments */
 template < typename Proc, typename Args >
 auto constexpr IRapply(Proc,quote<Args>) {
 
@@ -113,9 +111,7 @@ auto constexpr IRapply(Proc,quote<Args>) {
     }
 }
 
-/** \brief apply_comp_proc helper for special case
-* if its a one to one scenario just make the env, bc they are not lists they dont fall under map
- */
+// if its a one to one scenario just make the env, bc they are not lists they dont fall under map
 template <typename arglist, typename Evaluated_opnds>
 auto constexpr apply_compund_proc_pair_helper(arglist,Evaluated_opnds){
     if constexpr (is_c_list(arglist{}) || !is_list(arglist{})){
@@ -124,11 +120,10 @@ auto constexpr apply_compund_proc_pair_helper(arglist,Evaluated_opnds){
         return map_pair(arglist{},Evaluated_opnds{});
     }
 }
-/** 
- * \brief apply_comp_proc helper for special case
- * needs refactor
- * during recursive replacement, the compound proc dont actually get evaluated just replaced
- * so this fixes that */
+
+// needs refactor
+// during recursive replacement, the compound proc dont actually get evaluated just replaced
+// so this fixes that
 template <typename Env, typename arglist>
 auto constexpr apply_compund_proc_argument_helper(arglist){
     if constexpr (!is_self_evaluating(arglist{})){
@@ -142,11 +137,9 @@ auto constexpr apply_compund_proc_argument_helper(arglist){
     }
 }
 
-/** 
- * \brief apply_comp_proc helper for special case
- * needs refactor
- * during recursive replacement, the compound proc dont actually get evaluated just replaced
- * so this fixes that */
+// needs refactor
+// during recursive replacement, the opnds dont actually get evaluated just replaced
+// so this fixes that
 template <typename Env, typename Evaluated_opnds>
 auto constexpr recursion_helper(Evaluated_opnds){
     if constexpr (!is_self_evaluating(Evaluated_opnds{})){
@@ -160,7 +153,7 @@ auto constexpr recursion_helper(Evaluated_opnds){
     }
 }
 
-/** \brief get operation from env and apply it to operands */
+
 template <typename Env, typename Op, typename Evaluated_opnds >
 auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     // its compound, look var in table
@@ -188,7 +181,7 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     }
 }
 
-/** \brief with void if "self evaluating variable not found, or is a procedure" */
+// returns with void if "self evaluating variable not found, or is a procedure"
 template <typename Env, typename Exp>
 auto constexpr IReval(quote<Exp>) {
 
@@ -256,7 +249,7 @@ auto constexpr IReval(quote<Exp>) {
     }
 }
 
-/** (list-of-values exps env) */
+// (list-of-values exps env)
 template <typename Env, typename A, typename... Args>
 auto constexpr list_of_values(A,Args...){
     if constexpr (sizeof...(Args) == 0){

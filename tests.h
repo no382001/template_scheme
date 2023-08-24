@@ -179,35 +179,6 @@ static_assert(is_same_type<simpleeval,scm_false>,"2 arg copmp proc");
 using ifproc = decltype(IReval<init_env>(quote<list<scm_if,quote<list<equal,quote<list<integer<1>,integer<2>>>>>,integer<1>,integer<2>>>{}));
 static_assert(is_same_type<ifproc,integer<2>>,"2 arg copmp proc");
 
-
-//using testrelv24 = decltype(less(list<integer<3>>{}));
-using testrelv2 = decltype(apply_less(list<integer<2>,integer<3>,integer<4>>{}));
-using testrelres2 = decltype(scm_true{});
-static_assert(is_same_type<testrelv2,testrelres2>,"rel of two integers: positive test");
-using testrelv24 = decltype(apply_less(list<integer<3>,integer<2>>{}));
-using testrelres24 = decltype(scm_false{});
-static_assert(is_same_type<testrelv24,testrelres24>,"rel of two integers: negative test");
-
-using testrelv2s = decltype(apply_more(list<integer<2>,integer<3>,integer<4>>{}));
-using testrelres2s = decltype(scm_false{});
-static_assert(is_same_type<testrelv2s,testrelres2s>,"rel of two integers: positive test");
-using testrelv24aa = decltype(apply_more(list<integer<3>,integer<2>>{}));
-using testrelres24aa = decltype(scm_true{});
-static_assert(is_same_type<testrelv24aa,testrelres24aa>,"rel of two integers: negative test");
-
-using testrelv2sa = decltype(apply_equal(list<integer<2>,integer<2>,integer<2>>{}));
-using testrelres2sa = decltype(scm_true{});
-static_assert(is_same_type<testrelv2sa,testrelres2sa>,"rel of two integers: positive test");
-using testrelv24aaa = decltype(apply_equal(list<integer<3>,integer<2>>{}));
-using dfff = decltype(scm_false{});
-static_assert(is_same_type<testrelv24aaa,dfff>,"rel of two integers: negative test");
-
-using testr22elv2 = decltype(apply_primitve_procedure(addition{},list<integer<2>,integer<3>,integer<4>>{}));
-
-using testr22elv22 = decltype(apply_primitve_procedure(int{},list<integer<2>,integer<3>,integer<4>>{}));
-static_assert(is_same_type<testr22elv22,void>,"not prim proc");
-
-
 // define fibonacchi
 /*
 (define (fib x)
