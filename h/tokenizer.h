@@ -70,6 +70,33 @@ constexpr auto tokenize_char_list(Lambda str_lambda) {
 	}
 }
 
+// KEYWORDS ----
+
+template <typename Lambda>
+constexpr auto make_keyword_name(Lambda str_lambda) {
+    auto constexpr end = str_lambda().size();
+	return tokenize_char_list<Lambda,0,end>(str_lambda);
+}
+
+template <typename... Args>
+constexpr auto deduce_keyword_type(c_list<Args...>) {
+	return whitespace{};	
+}
+
+#define KEYWORD(name,corresponding_type) 	                                                \
+using keyword_##corresponding_type = decltype(make_keyword_name(constexpr_string(name)));   \
+template <> 				                                                                \
+constexpr auto deduce_keyword_type(keyword_##corresponding_type) { 	                        \
+	return corresponding_type{};			                                                \
+}
+
+KEYWORD("if",scm_if);
+KEYWORD("define",scm_define);
+
+// KEYWORDS ----
+
+
+
 template < int Start, int End, typename Lambda >
 constexpr auto make_integer(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
@@ -80,11 +107,6 @@ constexpr auto make_integer(Lambda str_lambda) {
 		return non_integer{};
 	}
 }
-
-// list parsing works
-// quote parsing works
-#include <string_view>
-#define constexpr_string(...) ([]() constexpr -> std::string_view { return __VA_ARGS__; })
 
 // tokenize does not handle (define ...) type expressions, if they are found, the node is terminated, see table.h
 template <typename Lambda, size_t Index = 0>
@@ -121,8 +143,15 @@ constexpr auto tokenize(Lambda str_lambda) {
 			if constexpr (end_of_char_list > 0) {
 				using char_list = decltype(tokenize_char_list< Lambda, Index, end_of_char_list >(str_lambda));
 				
-				using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
-				return make_token_list(char_list{}, second{});
+				// check if the string is a keyword
+				using query_result = decltype(deduce_keyword_type(char_list{}));
+				if constexpr (!is_same_type<whitespace,query_result>){
+					using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
+					return make_token_list(query_result{}, second{});
+				} else {
+					using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
+					return make_token_list(char_list{}, second{});
+				}
 				
 			} else {
 				using second = decltype(tokenize< Lambda, Index + 1 >(str_lambda));

@@ -3,6 +3,7 @@
 #include "lists.h"
 #include "primitive_operations.h"
 #include "utils.h"
+#include "car_cdr.h"
 
 struct list_start {};
 struct list_end {};
@@ -12,7 +13,6 @@ struct quote_end {};
 
 struct whitespace {};
 
-// TODO: handle multi character symbols
 
 template <int C>
 constexpr auto deduce_token_type() {
