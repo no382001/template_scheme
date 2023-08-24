@@ -46,26 +46,14 @@ auto constexpr map_pair(One<A...>,Two<B...>){
     return make_environment(table_entry<One<A...>,variable,Two<B...>>{});
 }
 
+template <typename Env, typename A, typename... Args>
+auto constexpr eval_members(list<A,Args...>); // fwd dclr
 
-// needs refactoring
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(quote<list<A,Args...>>){
-    if constexpr (sizeof...(Args) == 0){
-        using ev_curr = decltype(IReval<Env>(make_quote(A{})));
-        return ev_curr{};
-    } else {
-        using ev_curr = decltype(IReval<Env>(make_quote(A{})));
-
-        using ev_second = decltype(IReval<Env>(make_quote(make_list(Args{}...))));
-        if constexpr (is_same_type<void,ev_curr>){
-            return apply_compund_proc<Env>(A{},ev_second{});
-        } else {
-            return make_list(ev_curr{},ev_second{});
-        }
-    }
+    return eval_members<Env>(list<A,Args...>{});
 }
 
-// needs refactoring
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
     if constexpr (sizeof...(Args) == 0){
@@ -121,23 +109,6 @@ auto constexpr apply_compund_proc_pair_helper(arglist,Evaluated_opnds){
     }
 }
 
-// needs refactor
-// during recursive replacement, the compound proc dont actually get evaluated just replaced
-// so this fixes that
-template <typename Env, typename arglist>
-auto constexpr apply_compund_proc_argument_helper(arglist){
-    if constexpr (!is_self_evaluating(arglist{})){
-        if constexpr (is_prim_proc(IRcar(arglist{}))){
-            return IReval<Env>(quote<arglist>{});
-        } else {
-            return arglist{};
-        }
-    } else {
-        return arglist{};
-    }
-}
-
-// needs refactor
 // during recursive replacement, the opnds dont actually get evaluated just replaced
 // so this fixes that
 template <typename Env, typename Evaluated_opnds>
@@ -161,7 +132,7 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     // caddr is arglist
     using arglist = decltype(IRcaddr(comp_proc_entry{}));
     
-    using helped_arglist = decltype(apply_compund_proc_argument_helper<Env>(arglist{}));
+    using helped_arglist = decltype(recursion_helper<Env>(arglist{}));
     // cadddr is expression
     using expression = decltype(IRcadddr(comp_proc_entry{}));
 
