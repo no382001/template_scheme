@@ -109,6 +109,7 @@ PRIMITIVE_RELATIONAL_OP(lesseq,<=);
 
 struct scm_if {};
 struct scm_define {};
+struct scm_let {};
 
 IS_SELF_EVALUATING(scm_if);
 IS_SELF_EVALUATING(scm_true);

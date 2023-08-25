@@ -92,6 +92,7 @@ constexpr auto deduce_keyword_type(keyword_##corresponding_type) { 	            
 
 KEYWORD("if",scm_if);
 KEYWORD("define",scm_define);
+KEYWORD("let",scm_let);
 
 // KEYWORDS ----
 
@@ -140,7 +141,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 			//if something starts with a character, find the next non character
 			constexpr auto end_of_char_list = find_first_non_c< Index >(str_lambda);
 			// tokenize the contents of the list and return it in a wrapper
-			if constexpr (end_of_char_list > 0) {
+			if constexpr (end_of_char_list - Index > 1) {
 				using char_list = decltype(tokenize_char_list< Lambda, Index, end_of_char_list >(str_lambda));
 				
 				// check if the string is a keyword
@@ -183,5 +184,6 @@ LIST(tokenized);
 template <typename Lambda, size_t Index = 0>
 constexpr auto tokenizer(Lambda str_lambda) {
 	using result = decltype(tokenize<Lambda, Index>(str_lambda));
-	return replace_wrapper(result{},tokenized{});
+	using clean_expression = typename replace_nested_list<result>::type; // convert list
+	return replace_wrapper(clean_expression{},tokenized{});
 }

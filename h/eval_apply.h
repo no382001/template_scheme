@@ -54,23 +54,70 @@ auto constexpr eval_members(quote<list<A,Args...>>){
     return eval_members<Env>(list<A,Args...>{});
 }
 
+// this helped solve a problem with the c_list bug
+template <typename A>
+auto constexpr define_var_name_helper(A){
+    if constexpr (is_c_list(A{})){
+        return A{};
+    } else {
+        return A{};
+    }
+}
+
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
+    
+    using ev_curr = decltype(IReval<Env>(make_quote(A{})));
+    
     if constexpr (sizeof...(Args) == 0){
-        using ev_curr = decltype(IReval<Env>(make_quote(A{})));
         return ev_curr{};
     } else {
-        using ev_curr = decltype(IReval<Env>(make_quote(A{})));
+        if constexpr (is_same_type<ev_curr,scm_define>) {
+            return define_tag{};
+        } else if constexpr (is_same_type<ev_curr,define_tag>){
+            // handle define and extend env here
+            using without_wrapper = decltype(IRcar(A{}));
+            using params = decltype(IRcadr(without_wrapper{}));
+            using body = decltype(IRcddr(without_wrapper{}));
+            // if there is no argument, only a name, then its a variable, otherwise a procedure
+            // count the number of parameters, if its more than one its a procedure
+            using name = decltype(define_var_name_helper(params{}));
+            
+            /**/
+            if constexpr (is_c_list(params{}) || is_char_v<params>){ // variable
+                using entry = table_entry<name,variable,body>;
+                
+                //return A{};
+                //return entry{};
+                //return extend_environment<Env>(entry{});
+                using extended_environment = decltype(extend_environment<Env>(entry{}));
+                return eval_members<extended_environment>(make_quote(make_list(Args{}...)));
 
-        using ev_second = decltype(IReval<Env>(make_quote(make_list(Args{}...))));
-        // (inc '1) is valid
-        
-        // if car of list is a procedure, (it also could be an unbound variable but the list serach should have already thrown an error)
-        if constexpr (is_same_type<void,ev_curr>){
-            return apply_compund_proc<Env>(A{},ev_second{});
+            } else { // procedure
+                //auto constexpr count_of_parameters = count_list(params{}); // it ma be not a list tho
+                using arguments = decltype(IRcdr(params{}));
+                using entry = table_entry<name,procedure,arguments,body>;
+                //return extend_environment<Env>(entry{});
+                
+                //return A{};
+                //return entry{};
+                using extended_environment = decltype(extend_environment<Env>(entry{}));
+                return eval_members<extended_environment>(make_quote(make_list(Args{}...)));
+            }
+            /**/
         } else {
-            return make_list(ev_curr{},ev_second{});
-        }
+            using ev_curr = decltype(IReval<Env>(make_quote(A{})));
+
+            using ev_second = decltype(IReval<Env>(make_quote(make_list(Args{}...))));
+            // (inc '1) is valid
+            
+            // if car of list is a procedure, (it also could be an unbound variable but the list serach should have already thrown an error)
+            if constexpr (is_same_type<void,ev_curr>){
+                return apply_compund_proc<Env>(A{},ev_second{});
+            } else {
+                return make_list(ev_curr{},ev_second{});
+            }
+        } 
     }
 }
 
@@ -173,6 +220,9 @@ auto constexpr IReval(quote<Exp>) {
 
     } else if constexpr (is_self_evaluating(Exp{})){
         return Exp{};
+    } else if constexpr (is_same_type<Exp,define_tag>) { // never hit
+        static_assert(DELAYED_FALSE,""); 
+        return make_list();
     } else {
         using indicator = decltype(IRcar(Exp{}));
         // if it is an application

@@ -75,3 +75,7 @@ auto constexpr is_self_evaluating(T) {
 #define IS_SELF_EVALUATING(name)							\
 template <>													\
 auto constexpr is_self_evaluating(name) { return true; }
+
+
+struct define_tag {};
+IS_SELF_EVALUATING(define_tag);

@@ -18,6 +18,7 @@ LIST(environment);
 
 template <typename... columns>
 struct table_entry {};
+IS_X_LIST(table_entry);
 
 template <typename Env, typename Entry>
 auto constexpr extend_environment(Entry){
@@ -60,3 +61,6 @@ using init_env = decltype(
                     table_entry<inc_c_list,procedure,c_<'a'>,quote<list<addition,c_<'a'>,integer<1>>>>{},
                     table_entry<sum_of_2,procedure,list<c_<'a'>,c_<'b'>>,quote<list<addition,c_<'a'>,c_<'b'>>>>{},
                     table_entry<fib_name,procedure,c_<'x'>,fib_proc_body>{}));
+
+
+// if it does not have an argument then its a variable, basically
