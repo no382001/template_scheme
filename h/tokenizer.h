@@ -63,7 +63,9 @@ constexpr auto tokenize_char_list(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
 	if constexpr (Index < end_of_char_list) {
 		using curr = decltype(deduce_token_type< str[Index] >());
+		
 		using second = decltype(tokenize_char_list< Lambda, Index + 1, end_of_char_list >(str_lambda));
+		
 		return make_c_list(curr{}, second{});
 	} else {
 		return make_c_list();
@@ -114,59 +116,66 @@ template <typename Lambda, size_t Index = 0>
 constexpr auto tokenize(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
 
+
 	if constexpr (Index < str.size()) {
 		// deduce the type of the current char
 		using curr = decltype(deduce_token_type< str[Index] >());
 
-		if constexpr (is_same_type<curr, list_start>) {
-			constexpr auto end_of_list = find_end_of_list< Index >(str_lambda);
-			// tokenize the contents of the list and return it in a wrapper
-			using l = decltype(make_list(tokenize< Lambda, Index + 1>(str_lambda)));
-			using second = decltype(tokenize<Lambda, end_of_list + 1>(str_lambda));
-
-			return make_token_list(l{}, second{});
-
-		} else if constexpr (is_same_type<curr, list_end>) {
-			// base case for tokenize_list
-			return make_token_list();
-		
-		} else if constexpr (is_integer_v<curr>) {
-			// make a multi character integer if possible
-			constexpr auto first_non_integer = find_first_non_integer< Index + 1 >(str_lambda);
-			using integer_type = decltype(make_integer< Index, first_non_integer >(str_lambda));
-			using second = decltype(tokenize< Lambda, first_non_integer >(str_lambda));
-			return make_token_list(integer_type{}, second{});
-		
-		} else if constexpr (is_char_v<curr>) {
-			//if something starts with a character, find the next non character
-			constexpr auto end_of_char_list = find_first_non_c< Index >(str_lambda);
-			// tokenize the contents of the list and return it in a wrapper
-			if constexpr (end_of_char_list - Index > 1) {
-				using char_list = decltype(tokenize_char_list< Lambda, Index, end_of_char_list >(str_lambda));
-				
-				// check if the string is a keyword
-				using query_result = decltype(deduce_keyword_type(char_list{}));
-				if constexpr (!is_same_type<whitespace,query_result>){
-					using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
-					return make_token_list(query_result{}, second{});
-				} else {
-					using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
-					return make_token_list(char_list{}, second{});
-				}
-				
-			} else {
-				using second = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
-				return make_token_list(curr{}, second{});
-			}
-		
-		} else if constexpr (is_same_type<curr,whitespace>) {
+		if constexpr (is_same_type<curr,whitespace>) {
 			// if its not a specially handled token
 			return tokenize< Lambda, Index + 1 >(str_lambda);
 		} else {
-			// if its not a specially handled token
-			using next = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
-			return make_token_list(curr{}, next{});
+			if constexpr (is_same_type<curr, list_start>) {
+				constexpr auto end_of_list = find_end_of_list< Index >(str_lambda);
+				// tokenize the contents of the list and return it in a wrapper
+				using l = decltype(make_list(tokenize< Lambda, Index + 1>(str_lambda)));
+				using second = decltype(tokenize<Lambda, end_of_list + 1>(str_lambda));
+
+				return make_token_list(l{}, second{});
+
+			} else if constexpr (is_same_type<curr, list_end>) {
+				// base case for tokenize_list
+				return make_token_list();
+			
+			} else if constexpr (is_integer_v<curr>) {
+				// make a multi character integer if possible
+				constexpr auto first_non_integer = find_first_non_integer< Index + 1 >(str_lambda);
+				using integer_type = decltype(make_integer< Index, first_non_integer >(str_lambda));
+				using second = decltype(tokenize< Lambda, first_non_integer >(str_lambda));
+				return make_token_list(integer_type{}, second{});
+			
+			} else if constexpr (is_char_v<curr>) {
+				//if something starts with a character, find the next non character
+				constexpr auto end_of_char_list = find_first_non_c< Index + 1 >(str_lambda);
+
+				constexpr auto one_char = Index == end_of_char_list - 1;
+
+				// the tokeniser does not know anything about
+
+				if constexpr (one_char){
+					using second = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
+					return make_token_list(curr{}, second{});
+				} else {
+					using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
+					
+					using char_list = decltype(tokenize_char_list< Lambda, Index, end_of_char_list >(str_lambda));
+					using query_result = decltype(deduce_keyword_type(char_list{}));
+					
+					// check if the string is a keyword
+					if constexpr (!is_same_type<whitespace,query_result>){
+						return make_token_list(query_result{}, second{});
+					} else {
+						return make_token_list(char_list{}, second{});
+					}
+				}
+
+			} else {
+				// if its not a specially handled token
+				using next = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
+				return make_token_list(curr{}, next{});
+			}
 		}
+		
 	} else {
 		return make_token_list();
 	}

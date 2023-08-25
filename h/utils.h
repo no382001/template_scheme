@@ -29,6 +29,10 @@ bool constexpr is_same_list_t(A<First...> a,B<Second...> b){
 #define DEFER_INNER(m) m EMPTY EMPTY EMPTY()
 #define DEFER(m) DEFER_INNER(m)
 
+// a compile time warning, problem wont come up until the branch is preprocessed
+#define COMPILE_TIME_WARNING "Compile time warning"
+// struct COMPILE_TIME_WARNING {};
+
 
 
 

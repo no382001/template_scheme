@@ -88,7 +88,7 @@ auto constexpr eval_members(list<A,Args...>){
                 using entry = table_entry<name,variable,body>;
                 
                 //return A{};
-                //return entry{};
+                return entry{};
                 //return extend_environment<Env>(entry{});
                 using extended_environment = decltype(extend_environment<Env>(entry{}));
                 return eval_members<extended_environment>(make_quote(make_list(Args{}...)));
@@ -100,9 +100,13 @@ auto constexpr eval_members(list<A,Args...>){
                 //return extend_environment<Env>(entry{});
                 
                 //return A{};
-                //return entry{};
+                return entry{};
                 using extended_environment = decltype(extend_environment<Env>(entry{}));
-                return eval_members<extended_environment>(make_quote(make_list(Args{}...)));
+                //return eval_members<extended_environment>(make_quote(make_list(Args{}...)));
+
+                // i need to catch the rest of the evaluated things instead
+                // rn im getting the rest of eval_members bc define is an applied procedure, i dont think ive had one before
+                // maybe i should return a result line by line? good for debugging
             }
             /**/
         } else {

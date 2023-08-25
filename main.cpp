@@ -1,8 +1,8 @@
 #include "tests.h"
 #include "ground.h"
 
-auto m = constexpr_string("((define ss 11) (+ ss 1))"); // fix char and define bug
-//auto m = constexpr_string("((define s 11) ())");
+//auto m = constexpr_string("(( define ss 11) (+ ss (+ ss 1)))"); // fix char and define bug
+auto m = constexpr_string("((define (fib n) (+ n 2)) (fib 3))");
 using tokens = decltype(IRcar(tokenizer(m))); // raw token list without the tokenized<...> wrapper
 using result_of_expression = decltype(IReval<environment<>>(tokens{}));
 
