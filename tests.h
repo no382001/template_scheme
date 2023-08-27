@@ -280,3 +280,15 @@ static_assert(is_same_type<replaced_expression, expected_type>, "recursive repla
 using after_replacement_evaluation = decltype(IReval<init_env>(replaced_expression{}));
 
 static_assert(is_same_type<wraooertest,after_replacement_evaluation>,""); // check if they both get the same result
+
+// DEFINE
+
+auto one_parameter_define = constexpr_string("((define (inc a) (+ 1 a)) (inc 1))");
+using one_parameter_define_tokens = decltype(IRcar(tokenizer(one_parameter_define))); // raw token list without the tokenized<...> wrapper
+using one_parameter_define_result = decltype(IReval<environment<>>(one_parameter_define_tokens{}));
+static_assert(is_same_type<one_parameter_define_result,integer<2>>);
+
+auto two_parameter_define = constexpr_string("( (define (sum a b) (+ b a)) (sum 1 2))");
+using two_parameter_define_tokens = decltype(IRcar(tokenizer(two_parameter_define))); // raw token list without the tokenized<...> wrapper
+using two_parameter_define_result = decltype(IReval<environment<>>(two_parameter_define_tokens{}));
+static_assert(is_same_type<two_parameter_define_result,integer<3>>);

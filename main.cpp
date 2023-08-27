@@ -2,25 +2,27 @@
 #include "ground.h"
 
 //auto m = constexpr_string("(( define ss 11) (+ ss (+ ss 1)))"); // fix char and define bug
-auto m = constexpr_string("((define (fib n) (+ n 2)) (fib 3))");
-using tokens = decltype(IRcar(tokenizer(m))); // raw token list without the tokenized<...> wrapper
-using result_of_expression = decltype(IReval<environment<>>(tokens{}));
-
-
-
-constexpr auto end_of_char_list = find_first_non_c< 0 >(constexpr_string("dd "));
+//auto m = constexpr_string("((define (fib n) (+ n 2)) (fib 3))");
+//auto m = constexpr_string("((define n 1) (+ n 3))");
+//auto m = constexpr_string("((define (sum a b) (+ a b)) (sum 1 2)))"); // this is fine
+/** /
+auto one_parameter_define = constexpr_string("((define (inc a) (+ 1 a)) (inc 1)))");
+using one_parameter_define_tokens = decltype(IRcar(tokenizer(one_parameter_define))); // raw token list without the tokenized<...> wrapper
+using one_parameter_define_result = decltype(IReval<environment<>>(one_parameter_define_tokens{}));
+static_assert(is_same_type<one_parameter_define_result,integer<2>>);
+/**/
+auto no_parameter_define = constexpr_string("( (define n 1) (+ n 2))");
+using no_parameter_define_tokens = decltype(IRcar(tokenizer(no_parameter_define))); // raw token list without the tokenized<...> wrapper
+using no_parameter_define_result = decltype(IReval<environment<>>(no_parameter_define_tokens{}));
+//static_assert(is_same_type<no_parameter_define_result,integer<3>>);
 
 int main(){
     //pretty_print(demangle<init_env>());
     //pretty_print(demangle<clean_expression>());
     std::cout << "-----" << '\n';
-    pretty_print(demangle<result_of_expression>());
+    pretty_print(demangle<no_parameter_define_result>());
     return 0;
 }
-
-// keywords are in, now i need to implement define,
-// probably need to use a lookahead, collect all of them in order (or not),
-// apply each to the environment, then execute all other code
 
 
 // if define gets evaluated, it could return a tagged thing that extends the env of the current layer

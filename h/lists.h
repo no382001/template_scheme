@@ -100,7 +100,7 @@ template<typename... Args> struct replace_nested_list<token_list<Args...>> {
 template <typename A, typename... Args>
 auto constexpr count_list_helper(A,Args...){
     if constexpr (sizeof...(Args) == 0){
-        return 1;
+        return 0;
     } else {
         return count_list_helper(Args{}...) + 1;
     }
