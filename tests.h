@@ -14,18 +14,18 @@ struct plus {};
 // QUOTE
 // (quoted? exp)
 // -------------
-//using quotetewwst = decltype(make_quote()); //empty quote
-using quotetest = decltype(make_quote(testobj{},testobj{}));
-using quotetestres = quote<testobj,testobj>;
+//using quotetewwst = decltype(make_wrap()); //empty quote
+using quotetest = decltype(make_wrap(testobj{},testobj{}));
+using quotetestres = wrap<testobj,testobj>;
 static_assert(is_same_type<quotetest,quotetestres>,"");
-static_assert(is_quoted(quotetest{}),"quoted?");
+static_assert(is_wrapped(quotetest{}),"quoted?");
 
 // CAR
 // (car '()) ; err
 // (car '(testobj)) ; testobj
 // --------------------------
 //using cartest = decltype(car(make_list())); // car of empty list
-using cartest = decltype(car(make_quote(make_list(testobj{}))));
+using cartest = decltype(car(make_wrap(make_list(testobj{}))));
 using cartestres = testobj;
 static_assert(is_same_type<cartest,cartestres>,"(car '(testobj)) ;testobj");
 
@@ -34,12 +34,12 @@ static_assert(is_same_type<cartest,cartestres>,"(car '(testobj)) ;testobj");
 // (car '(testobj)) ; ()
 // (cdr '(test test2)) ; (test2)
 // -----------------------------
-//using cdrtest1 = decltype(cdr(make_quote(make_list()))); // cdr of empty list
-using cdrtest2 = decltype(cdr(make_quote(make_list(testobj{})))); //cdr of last element
+//using cdrtest1 = decltype(cdr(make_wrap(make_list()))); // cdr of empty list
+using cdrtest2 = decltype(cdr(make_wrap(make_list(testobj{})))); //cdr of last element
 //using cdrtestres2 = list<>; // removed bc types mangle in the tests and corrupt results
 static_assert(is_same_type<cdrtest2,list<>>,"(car '(testobj)) ;()");
 
-using cdrtest = decltype(cdr(make_quote(make_list(testobj{},testobj{}))));
+using cdrtest = decltype(cdr(make_wrap(make_list(testobj{},testobj{}))));
 using cdrtestres = list<testobj>;
 static_assert(is_same_type<cdrtest,cdrtestres>,"(cdr '(test test2)) ;(test2)");
 
@@ -48,11 +48,11 @@ static_assert(is_same_type<cdrtest,cdrtestres>,"(cdr '(test test2)) ;(test2)");
 // (cadr '(test test2 test)) ; test2
 // (cadr  '(test test2)) ; test2
 // -----------------------------
-//using cadrtest1 = decltype(cadr(make_quote(make_list()))); // cdr of empty list
-using cadrtest2 = decltype(cadr(make_quote(make_list(testobj{},fooobj{},testobj{}))));
+//using cadrtest1 = decltype(cadr(make_wrap(make_list()))); // cdr of empty list
+using cadrtest2 = decltype(cadr(make_wrap(make_list(testobj{},fooobj{},testobj{}))));
 static_assert(is_same_type<cadrtest2,fooobj>,"(cadr '(testobj foobj testobj)) ; foobj");
 
-using cadrtest = decltype(cadr(make_quote(make_list(testobj{},testobj{}))));
+using cadrtest = decltype(cadr(make_wrap(make_list(testobj{},testobj{}))));
 static_assert(is_same_type<cadrtest,testobj>,"(cdr '(test test2)) ; test2");
 
 // LIST behaviour tests
@@ -82,7 +82,7 @@ using listres5 = decltype(list<testobj,testobj,testobj>{});
 static_assert(is_same_type<listtest5,listres5>,"3 list<obj> in list constructor and empty list inbetween them, collapses into 3 list<obj> in list");
 
 // (apply addtion '(1 2 3))
-using appltest1 = decltype(IRapply(addition{},quote<list<integer<1>,integer<2>,integer<3>>>{}));
+using appltest1 = decltype(IRapply(addition{},wrap<list<integer<1>,integer<2>,integer<3>>>{}));
 
 
 using map_pair_test = decltype(map_pair(list<integer<1>>{},list<integer<1>>{}));
@@ -122,61 +122,61 @@ static_assert(is_same_type<void,search_res3>, "non existent entry");
 using list_of_test = decltype(list_of_values<init_env>(c_<110>{},c_<110>{}));
 static_assert(is_same_type<list_of_test,list<integer<1>, integer<1>>>,"serach and replace, with init env containing n as 1");
 
-using sssss = decltype(IReval<init_env>(quote<c_<110>>{}));
+using sssss = decltype(IReval<init_env>(wrap<c_<110>>{}));
 static_assert(is_same_type<sssss,integer<1>>,"ireval on variable, with init env containing n as 1");
 
-using ssssaa = decltype(IReval<init_env>(quote<list<list<c_<110>,c_<110>>,c_<110>,c_<110>>>{}));
+using ssssaa = decltype(IReval<init_env>(wrap<list<list<c_<110>,c_<110>>,c_<110>,c_<110>>>{}));
 
 static_assert(is_same_type<ssssaa,list<list<integer<1>, integer<1>>,integer<1>, integer<1>>>,"");
 
 // (eval '(apply addition '(1 2 3)))
-using evaltest1 = decltype(IReval<init_env>(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
+using evaltest1 = decltype(IReval<init_env>(wrap<list<apply,addition,wrap<list<integer<1>,integer<2>,integer<3>>>>>{}));
 using evaltest21 = decltype(integer<6>{});
 static_assert(is_same_type<evaltest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
 
 // (eval '(apply proc 'body 'param '(1 2 3) 'env))
-using proctest1 = decltype(IReval<init_env>(quote<list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>{}));
+using proctest1 = decltype(IReval<init_env>(wrap<list<apply,addition,wrap<list<integer<1>,integer<2>,integer<3>>>>>{}));
 static_assert(is_same_type<proctest1,evaltest21>,"(eval '(apply addition '(1 2 3)))");
 
-using vartest = decltype(IReval<init_env>(quote<list<apply,addition,quote<list<c_<110>,integer<2>>>>>{}));
+using vartest = decltype(IReval<init_env>(wrap<list<apply,addition,wrap<list<c_<110>,integer<2>>>>>{}));
 static_assert(is_same_type<vartest,integer<3>>,"(define x 1) (eval '(apply addition '(x 2)))");
 
-using test_em = decltype(eval_members<init_env>(quote<list<integer<1>,integer<2>>>{}));
+using test_em = decltype(eval_members<init_env>(wrap<list<integer<1>,integer<2>>>{}));
 static_assert(is_same_type<test_em,list<integer<1>,integer<2>>>,"self evaluating");
 
-using test_em_var = decltype(eval_members<init_env>(quote<list<c_<110>,integer<2>>>{}));
+using test_em_var = decltype(eval_members<init_env>(wrap<list<c_<110>,integer<2>>>{}));
 static_assert(is_same_type<test_em_var,list<integer<1>,integer<2>>>,"self eval and variable");
 
-using evaluated_symbol = decltype(IReval<init_env>(quote<c_<110>>{}));
+using evaluated_symbol = decltype(IReval<init_env>(wrap<c_<110>>{}));
 using testaddev22 = decltype(apply_addition(list<evaluated_symbol,integer<3>>{}));
 using testaddevres22 = decltype(integer<4>{});
 static_assert(is_same_type<testaddev22,testaddevres22>,"additon of symbol and integer");
 
-using nesttest1 = decltype(IReval<init_env>(quote<list<apply,addition,quote<list<integer<1>,integer<2>,list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>>>>>{}));
+using nesttest1 = decltype(IReval<init_env>(wrap<list<apply,addition,wrap<list<integer<1>,integer<2>,list<apply,addition,wrap<list<integer<1>,integer<2>,integer<3>>>>>>>>{}));
 static_assert(is_same_type<nesttest1,integer<9>>,"(eval '(apply 'addition '(1 2 '(apply 'addition '(1 2 3)))");
 
-using nesttest2 = decltype(IReval<init_env>(quote<list<apply,addition,quote<list<integer<1>,list<apply,addition,quote<list<integer<1>,integer<2>,integer<3>>>>,integer<3>>>>>{}));
+using nesttest2 = decltype(IReval<init_env>(wrap<list<apply,addition,wrap<list<integer<1>,list<apply,addition,wrap<list<integer<1>,integer<2>,integer<3>>>>,integer<3>>>>>{}));
 static_assert(is_same_type<nesttest2,integer<10>>,"nesstest 2");
 
-using comproc = decltype(IReval<init_env>(quote<list<apply,inc_c_list,quote<c_<110>>>>{}));
+using comproc = decltype(IReval<init_env>(wrap<list<apply,inc_c_list,wrap<c_<110>>>>{}));
 static_assert(is_same_type<comproc,integer<2>>,"apply com proc, 1 arg and 1 operand");
 
 // if there is no apply it will think that its a variable and replace it with the cadr of the entry,
 // quot gets removed when integer self elvaulates in normal workflow
 // have another column in the env table for the type of the variable, and the procedure that is needed to emplace into the expression
-using comproc2 = decltype(IReval<init_env>(quote<list<inc_c_list,quote<integer<1>>>>{}));
+using comproc2 = decltype(IReval<init_env>(wrap<list<inc_c_list,wrap<integer<1>>>>{}));
 static_assert(is_same_type<comproc2,integer<2>>,"apply com proc 1 arg 1 operand");
                                             
-using comproc3 = decltype(IReval<init_env>(quote<list<inc_c_list,list<inc_c_list,quote<integer<1>>>>>{}));
+using comproc3 = decltype(IReval<init_env>(wrap<list<inc_c_list,list<inc_c_list,wrap<integer<1>>>>>{}));
 static_assert(is_same_type<comproc3,integer<3>>,"(inc (inc '1))"); // (inc (inc '1) '1) works too with 4 as a result so a new branch is launched when inc processes the operands
 
-using comproc4 = decltype(IReval<init_env>(quote<list<sum_of_2,quote<list<integer<1>,integer<2>>>>>{}));
+using comproc4 = decltype(IReval<init_env>(wrap<list<sum_of_2,wrap<list<integer<1>,integer<2>>>>>{}));
 static_assert(is_same_type<comproc4,integer<3>>,"2 arg copmp proc");
 
-using simpleeval = decltype(IReval<init_env>(quote<list<equal,quote<list<integer<1>,integer<2>>>>>{}));
+using simpleeval = decltype(IReval<init_env>(wrap<list<equal,wrap<list<integer<1>,integer<2>>>>>{}));
 static_assert(is_same_type<simpleeval,scm_false>,"2 arg copmp proc");
 
-using ifproc = decltype(IReval<init_env>(quote<list<scm_if,quote<list<equal,quote<list<integer<1>,integer<2>>>>>,integer<1>,integer<2>>>{}));
+using ifproc = decltype(IReval<init_env>(wrap<list<scm_if,wrap<list<equal,wrap<list<integer<1>,integer<2>>>>>,integer<1>,integer<2>>>{}));
 static_assert(is_same_type<ifproc,integer<2>>,"2 arg copmp proc");
 
 
@@ -222,15 +222,15 @@ static_assert(is_same_type<testr22elv22,void>,"not prim proc");
 
 // ---------------FIBONACCHI-------------------------------------------------------------
 /**/
-using fibonacchi_base_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<1>>>>{}));
+using fibonacchi_base_case = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<1>>>>{}));
 static_assert(is_same_type<fibonacchi_base_case,integer<1>>,"fib 1");
 
-using fibonacchi_base_case2 = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<2>>>>{}));
+using fibonacchi_base_case2 = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<2>>>>{}));
 static_assert(is_same_type<fibonacchi_base_case2,integer<1>>,"fib 2");
 
 using resfib = decltype(make_list(fibonacchi_base_case{}));
 
-using resfibasd = decltype(IReval<init_env>(quote<list<lesseq,c_<110>,integer<2>>>{}));
+using resfibasd = decltype(IReval<init_env>(wrap<list<lesseq,c_<110>,integer<2>>>{}));
 using resfibasdsa = decltype(make_list(resfibasd{}));
 
 using asdasdasdasd = decltype(list<list<integer<2>, integer<1> >, integer<2> >{});
@@ -239,22 +239,22 @@ using asdasdasdasd3 = decltype(make_list(make_list(integer<2>{}, integer<1>{}),i
 
 
 // this isnt valid but this is what it gets, and it can still eval
-using asd0asidas = decltype(IRapply(lesseq{},quote<list<list<subtraction, integer<3>, integer<2>>, integer<2>>>{}));
+using asd0asidas = decltype(IRapply(lesseq{},wrap<list<list<subtraction, integer<3>, integer<2>>, integer<2>>>{}));
 using asd0asidasasa = decltype(make_list(asd0asidas{}));
 /**/
 
 
-using fibonacchi_case = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<3>>>>{}));
+using fibonacchi_case = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<3>>>>{}));
 static_assert(is_same_type<fibonacchi_case,integer<2>>,"fib 3");
 
-using fibonacchi_case2 = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<4>>>>{}));
+using fibonacchi_case2 = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<4>>>>{}));
 static_assert(is_same_type<fibonacchi_case2,integer<3>>,"fib 4");
 
-using fibonacchi_case3 = decltype(IReval<init_env>(quote<list<fib_name,quote<integer<6>>>>{}));
+using fibonacchi_case3 = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<6>>>>{}));
 static_assert(is_same_type<fibonacchi_case3,integer<8>>,"fib 6");
 
 using fibonacchi_case4 =
-    decltype(IReval<init_env>(quote<list<fib_name,quote<integer<30>>>>{}));
+    decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<30>>>>{}));
 static_assert(is_same_type<fibonacchi_case4,integer<832040>>,"fib 30");
 
 
@@ -266,14 +266,14 @@ using test_tokens = decltype(IRcar(tokenizer(test_str))); // raw token list
 
 // some basic expression
 using wraooertest = decltype(IReval<init_env>(
-    quote<list<
-      addition, integer<11>, quote<list<
+    wrap<list<
+      addition, integer<11>, wrap<list<
         addition, integer<11>, integer<2>>>>>{}));
 
 static_assert(is_same_type<wraooertest,integer<24>>,""); // check if eval works, get result
 
 using replaced_expression = typename replace_nested_list<test_tokens>::type; // replace
-using expected_type = quote<list<addition, integer<11>, quote<list<addition, integer<11>, integer<2>>>>>; // this is how it should look after
+using expected_type = wrap<list<addition, integer<11>, wrap<list<addition, integer<11>, integer<2>>>>>; // this is how it should look after
 
 static_assert(is_same_type<replaced_expression, expected_type>, "recursive replacement"); // check if same
 

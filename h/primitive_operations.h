@@ -120,8 +120,8 @@ template <typename Env,typename Predicate, typename Then, typename Else>
 auto constexpr if_proc(Predicate, Then, Else){
 	using res = decltype(IReval<Env>(Predicate{}));
 	if constexpr (is_same_type<scm_true,res>){
-		return IReval<Env>(quote<Then>{});
+		return IReval<Env>(wrap<Then>{});
 	} else {
-		return IReval<Env>(quote<Else>{});
+		return IReval<Env>(wrap<Else>{});
 	}													
 }

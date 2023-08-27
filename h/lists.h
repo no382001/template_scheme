@@ -59,17 +59,17 @@ IS_X_LIST(name);
 
 // quotation
 template <typename ...Types>
-struct quote {};
+struct wrap {};
 
 template <typename T>
-constexpr inline bool is_quoted(T){
-    return is_same_list_t(T{},quote<>{});
+constexpr inline bool is_wrapped(T){
+    return is_same_list_t(T{},wrap<>{});
 }
 
 template <typename ...Types>
-auto constexpr make_quote(Types... types){
-    static_assert(sizeof...(Types) > 0,"make_quote has no arguments");
-    return quote<Types...>{};
+auto constexpr make_wrap(Types... types){
+    static_assert(sizeof...(Types) > 0,"make_wrap has no arguments");
+    return wrap<Types...>{};
 }
 
 
@@ -80,18 +80,18 @@ LIST(IRL);
 LIST(token_list);
 
 
-// janky unreadable but compact recursive replacement of list wrappers list<token_list<...>> -> quote<list<...>>
+// janky unreadable but compact recursive replacement of list wrappers list<token_list<...>> -> wrap<list<...>>
 template<typename T>
 struct replace_nested_list {
     using type = T;
 };
 
-// list<token_list<...>> -> quote<list<...>>
+// list<token_list<...>> -> wrap<list<...>>
 template<typename T> struct replace_nested_list<list<T>> {
-    using type = quote<typename replace_nested_list<T>::type>;
+    using type = wrap<typename replace_nested_list<T>::type>;
 };
 
-// list<token_list<...>> -> quote<list<...>>
+// list<token_list<...>> -> wrap<list<...>>
 template<typename... Args> struct replace_nested_list<token_list<Args...>> {
     using type = list<typename replace_nested_list<Args>::type...>;
 };

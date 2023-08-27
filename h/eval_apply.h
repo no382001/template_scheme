@@ -12,7 +12,7 @@ template <typename Env = init_env, typename A, typename... Args>
 auto constexpr list_of_values(A,Args...);
 
 template <typename Env, typename Exp>
-auto constexpr IReval(quote<Exp>);
+auto constexpr IReval(wrap<Exp>);
 
 
 // temp location for map_pair
@@ -50,7 +50,7 @@ template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>); // fwd dclr
 
 template <typename Env, typename A, typename... Args>
-auto constexpr eval_members(quote<list<A,Args...>>){
+auto constexpr eval_members(wrap<list<A,Args...>>){
     return eval_members<Env>(list<A,Args...>{});
 }
 
@@ -75,7 +75,7 @@ auto constexpr define_var_name_helper_integer(A){
 
 // really stupid, instead of car but whatever
 template <typename A,typename B,typename... Params>
-auto constexpr define_arg_number_helper(quote<list<A,B,Params...>>){
+auto constexpr define_arg_number_helper(wrap<list<A,B,Params...>>){
     if constexpr (sizeof...(Params) == 0){
         return B{};
     } else {
@@ -86,7 +86,7 @@ auto constexpr define_arg_number_helper(quote<list<A,B,Params...>>){
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
     
-    using ev_curr = decltype(IReval<Env>(make_quote(A{})));
+    using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
     
     if constexpr (sizeof...(Args) == 0){
         return ev_curr{};
@@ -113,23 +113,23 @@ auto constexpr eval_members(list<A,Args...>){
                 using entry = table_entry<name,variable,extracted_body>;
                 using extended_environment = decltype(extend_environment<Env>(entry{}));
                 
-                using return_value = decltype(eval_members<extended_environment>(make_quote(make_list(Args{}...))));
-                return IReval<Env>(make_quote(return_value{}));
+                using return_value = decltype(eval_members<extended_environment>(make_wrap(make_list(Args{}...))));
+                return IReval<Env>(make_wrap(return_value{}));
 
             } else { // procedure
                 using arguments = decltype(define_arg_number_helper(params{}));
                 using entry = table_entry<name,procedure,arguments,extracted_body>;
 
                 using extended_environment = decltype(extend_environment<Env>(entry{}));
-                return eval_members<extended_environment>(make_quote(make_list(Args{}...)));
+                return eval_members<extended_environment>(make_wrap(make_list(Args{}...)));
                 
                 // maybe i should return a result line by line? could be good for debugging
             }
 
         } else {
-            using ev_curr = decltype(IReval<Env>(make_quote(A{})));
+            using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
 
-            using ev_second = decltype(IReval<Env>(make_quote(make_list(Args{}...))));
+            using ev_second = decltype(IReval<Env>(make_wrap(make_list(Args{}...))));
             // (inc '1) is valid
             
             // if car of list is a procedure, (it also could be an unbound variable but the list serach should have already thrown an error)
@@ -143,8 +143,8 @@ auto constexpr eval_members(list<A,Args...>){
 }
 
 template <typename Env, template <int...> typename templated_int, int a>
-auto constexpr eval_members(quote<templated_int<a>>){
-    return IReval<Env>(quote<templated_int<a>>{});
+auto constexpr eval_members(wrap<templated_int<a>>){
+    return IReval<Env>(wrap<templated_int<a>>{});
 }
 
 struct apply {};
@@ -154,9 +154,9 @@ IS_SELF_EVALUATING(apply);
 IS_SELF_EVALUATING(eval);
 
 template < typename Proc, typename Args >
-auto constexpr IRapply(Proc,quote<Args>) {
+auto constexpr IRapply(Proc,wrap<Args>) {
 
-    using evaluated_operands = decltype(IReval<init_env>(quote<Args>{}));
+    using evaluated_operands = decltype(IReval<init_env>(wrap<Args>{}));
 	using prim_proc = decltype(apply_primitve_procedure(Proc{},evaluated_operands{}));
     
     // cant instantiate void, so:
@@ -183,7 +183,7 @@ template <typename Env, typename Evaluated_opnds>
 auto constexpr recursion_helper(Evaluated_opnds){
     if constexpr (!is_self_evaluating(Evaluated_opnds{})){
         if constexpr (is_prim_proc(IRcar(Evaluated_opnds{}))){
-            return IReval<Env>(quote<Evaluated_opnds>{});
+            return IReval<Env>(wrap<Evaluated_opnds>{});
         } else {
             return Evaluated_opnds{};
         }
@@ -217,13 +217,13 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     } else {
         using op = decltype(IRcar(result{}));
         using opnds = decltype(IRcdr(result{})); 
-        return IRapply(op{},quote<opnds>{});
+        return IRapply(op{},wrap<opnds>{});
     }
 }
 
 // returns with void if "self evaluating variable not found, or is a procedure"
 template <typename Env, typename Exp>
-auto constexpr IReval(quote<Exp>) {
+auto constexpr IReval(wrap<Exp>) {
 
     // if it is a proc or variable
     if constexpr (is_char_v<Exp> || is_c_list(Exp{})){
@@ -249,7 +249,7 @@ auto constexpr IReval(quote<Exp>) {
         using indicator = decltype(IRcar(Exp{}));
         // if it is an application
         if constexpr (is_same_type<apply,indicator>){
-           return IReval<Env>(make_quote(IRcdr(Exp{})));
+           return IReval<Env>(make_wrap(IRcdr(Exp{})));
 
         } else if constexpr (is_prim_proc(indicator{})){
             using app_operands = decltype(eval_members<Env>(IRcdr(Exp{})));
@@ -257,16 +257,16 @@ auto constexpr IReval(quote<Exp>) {
             if constexpr (!is_self_evaluating(app_operands{})){
                 if constexpr (is_prim_proc(IRcar(app_operands{}))){
 
-                    using evaluated_just_in_case = decltype(IReval<Env>(quote<app_operands>{}));
-                    using proc_res = decltype(IRapply(indicator{},quote<evaluated_just_in_case>{}));
+                    using evaluated_just_in_case = decltype(IReval<Env>(wrap<app_operands>{}));
+                    using proc_res = decltype(IRapply(indicator{},wrap<evaluated_just_in_case>{}));
                     return proc_res{};
                 } else {
 
-                    using proc_res = decltype(IRapply(indicator{},quote<app_operands>{}));
+                    using proc_res = decltype(IRapply(indicator{},wrap<app_operands>{}));
                     return proc_res{};
                 }
             } else {
-                using proc_res = decltype(IRapply(indicator{},quote<app_operands>{}));
+                using proc_res = decltype(IRapply(indicator{},wrap<app_operands>{}));
                 return proc_res{};
             }
 
@@ -296,10 +296,10 @@ auto constexpr IReval(quote<Exp>) {
 template <typename Env, typename A, typename... Args>
 auto constexpr list_of_values(A,Args...){
     if constexpr (sizeof...(Args) == 0){
-        using only_operand = decltype(IReval<Env>(quote<A>{}));
+        using only_operand = decltype(IReval<Env>(wrap<A>{}));
         return only_operand{};
     } else {
-        using first_operand = decltype(IReval<Env>(quote<A>{}));
+        using first_operand = decltype(IReval<Env>(wrap<A>{}));
         using second = decltype(list_of_values(Args{}...));
         return make_list(first_operand{},second{});
     }

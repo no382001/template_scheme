@@ -2,7 +2,7 @@
 #include "lists.h"
 
 //template <typename T>
-//concept car_cdr_operable_list = is_same_list_t<T,table_entry> || is_quoted(T{}); // howtf do i enforce this in the template argument? ohwell, lets just use list instead of table ernty
+//concept car_cdr_operable_list = is_same_list_t<T,table_entry> || is_wrapped(T{}); // howtf do i enforce this in the template argument? ohwell, lets just use list instead of table ernty
 
 // -----------------------------------------------------------------------
 // car and cdr only accepts quoted lists as arguments
@@ -13,7 +13,7 @@ auto constexpr car_inner(A,Args...){
 }
 
 template <template<class> class T, typename... Args>
-auto constexpr car(quote<T<Args...>>){
+auto constexpr car(wrap<T<Args...>>){
     static_assert(sizeof...(Args) > 0,"car on empty list");
     return car_inner(Args{}...);
 }
@@ -24,16 +24,16 @@ auto constexpr cdr_inner(A,Args...){
 }
 
 template <template<class> class T, typename... Args>
-auto constexpr cdr(quote<T<Args...>>){
+auto constexpr cdr(wrap<T<Args...>>){
     static_assert(sizeof...(Args) > 0,"cdr on empty list");
     return cdr_inner<T>(Args{}...);
 }
 
 template <template<class> class T, typename... Args>
-auto constexpr cadr(quote<T<Args...>>){
+auto constexpr cadr(wrap<T<Args...>>){
     static_assert(sizeof...(Args) > 0,"cadr on empty list");
-    using the_cdr = decltype(cdr(quote<T<Args...>>{}));
-    return car(make_quote(the_cdr{}));
+    using the_cdr = decltype(cdr(wrap<T<Args...>>{}));
+    return car(make_wrap(the_cdr{}));
 }
 
 // -----------------------------------------------------------------------
