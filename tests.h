@@ -292,3 +292,8 @@ auto two_parameter_define = constexpr_string("( (define (sum a b) (+ b a)) (sum 
 using two_parameter_define_tokens = decltype(IRcar(tokenizer(two_parameter_define))); // raw token list without the tokenized<...> wrapper
 using two_parameter_define_result = decltype(IReval<environment<>>(two_parameter_define_tokens{}));
 static_assert(is_same_type<two_parameter_define_result,integer<3>>);
+
+auto multi_char_var_name = constexpr_string("(( define ss 11) (+ ss 1))"); // fix char and define bug
+using multi_char_var_name_tokens = decltype(IRcar(tokenizer(multi_char_var_name))); // raw token list without the tokenized<...> wrapper
+using multi_char_var_name_result = decltype(IReval<environment<>>(multi_char_var_name_tokens{}));
+static_assert(is_same_type<multi_char_var_name_result,integer<12>>);

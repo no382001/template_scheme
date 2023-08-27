@@ -57,7 +57,7 @@ auto constexpr eval_members(quote<list<A,Args...>>){
 // this helped solve a problem with the c_list bug
 template <typename A>
 auto constexpr define_var_name_helper_char(A){
-    if constexpr (is_char_v<A>){
+    if constexpr (is_char_v<A> || is_c_list(A{})){
         return A{};
     } else {
         return IRcar(IRcar(A{}));
@@ -96,26 +96,25 @@ auto constexpr eval_members(list<A,Args...>){
         } else if constexpr (is_same_type<ev_curr,define_tag>){
             // handle define and extend env here
             
-            // look out for '(' on c_list, c_ does not have this
-            
             using without_wrapper = decltype(IRcar(A{}));
             using params = decltype(IRcadr(without_wrapper{}));
             using body = decltype(IRcddr(without_wrapper{}));
             using extracted_body = decltype(define_var_name_helper_integer(body{}));
 
             // if there is no argument, only a name, then its a variable, otherwise a procedure
-            // count the number of parameters, if its more than one its a procedure
             using name = decltype(define_var_name_helper_char(params{}));
             
-            /**/
             if constexpr (is_c_list(params{}) || is_char_v<params>){ // variable
                 
                 // whenever a variable gets replaced the expression does not evaluate but waits for this layer to do that
                 // the procedure has apply and is collapsed to the result
+                // so evaluate again, just to be sure
 
                 using entry = table_entry<name,variable,extracted_body>;
                 using extended_environment = decltype(extend_environment<Env>(entry{}));
-                return eval_members<extended_environment>(make_quote(make_list(Args{}...)));
+                
+                using return_value = decltype(eval_members<extended_environment>(make_quote(make_list(Args{}...))));
+                return IReval<Env>(make_quote(return_value{}));
 
             } else { // procedure
                 using arguments = decltype(define_arg_number_helper(params{}));
@@ -123,12 +122,10 @@ auto constexpr eval_members(list<A,Args...>){
 
                 using extended_environment = decltype(extend_environment<Env>(entry{}));
                 return eval_members<extended_environment>(make_quote(make_list(Args{}...)));
-
-                // i need to catch the rest of the evaluated things instead
-                // rn im getting the rest of eval_members bc define is an applied procedure, i dont think ive had one before
-                // maybe i should return a result line by line? good for debugging
+                
+                // maybe i should return a result line by line? could be good for debugging
             }
-            /**/
+
         } else {
             using ev_curr = decltype(IReval<Env>(make_quote(A{})));
 
@@ -198,9 +195,6 @@ auto constexpr recursion_helper(Evaluated_opnds){
 
 template <typename Env, typename Op, typename Evaluated_opnds >
 auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
-
-    // there is a problem with pairing, i didnt implement things having more than one arguments (i think)
-    // (yeah so it works, theres just problem with eval)
 
     // its compound, look var in table
     using comp_proc_entry = decltype(list_search(Op{},Env{}));
