@@ -6,6 +6,8 @@
 #include "h/eval_apply.h"
 #include "h/tokenizer.h"
 
+namespace Tests {
+
 struct testobj {};
 struct fooobj {};
 struct plus {};
@@ -297,3 +299,21 @@ auto multi_char_var_name = constexpr_string("(( define ss 11) (+ ss 1))"); // fi
 using multi_char_var_name_tokens = decltype(IRcar(tokenizer(multi_char_var_name))); // raw token list without the tokenized<...> wrapper
 using multi_char_var_name_result = decltype(IReval<environment<>>(multi_char_var_name_tokens{}));
 static_assert(is_same_type<multi_char_var_name_result,integer<12>>);
+
+namespace double_define {
+    auto str = constexpr_string("(( define ss 11) ( define aa 11) (+ ss aa))");
+    using tokenization_result = decltype(IRcar(tokenizer(str)));
+    using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
+    static_assert(is_same_type<eval_result,integer<22>>);
+};
+
+
+namespace FullyEvaldFib {
+    auto main_str = constexpr_string("((define (fib x) (if (< x 3) 1 (+ (fib (- x 1)) (fib (- x 2))))) (fib 3))");
+    using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
+    using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
+    static_assert(is_same_type<eval_result,integer<2>>);
+};
+
+
+};

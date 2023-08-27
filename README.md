@@ -43,14 +43,14 @@ Should look something like this if you wanted `(eval '(define ...) init-env)`<br
 <i>(define is not implemented yet, so im going to show the env variable)</i>
 ```cpp
 using fib_proc_body = decltype(
-    quote<list<scm_if,
-        quote<list<lesseq,c_<'x'>,integer<2>>>,
+    wrap<list<scm_if,
+        wrap<list<lesseq,c_<'x'>,integer<2>>>,
         integer<1>,
             list<addition,
                 list<c_list<c_<'f'>,c_<'i'>,c_<'b'>>,,
-                  quote<list<subtraction,c_<'x'>,integer<1>>>>,
+                  wrap<list<subtraction,c_<'x'>,integer<1>>>>,
                 list<c_list<c_<'f'>,c_<'i'>,c_<'b'>>,,
-                  quote<list<subtraction,c_<'x'>,integer<2>>>>>>>{});
+                  wrap<list<subtraction,c_<'x'>,integer<2>>>>>>>{});
 
 using init_env = decltype(
     make_environment(
@@ -61,8 +61,8 @@ using init_env = decltype(
         fib_proc_body>{})); // procedure body
 
 using res =
-    decltype(IReval<init_env>(quote<
-      list<c_list<c_<'f'>,c_<'i'>,c_<'b'>>,quote<integer<30>>>>{}));
+    decltype(IReval<init_env>(wrap<
+      list<c_list<c_<'f'>,c_<'i'>,c_<'b'>>,wrap<integer<30>>>>{}));
 
 static_assert(is_same_type<res,integer<832040>>,"fib 30");
 ```
@@ -116,7 +116,7 @@ primitive operations each have a struct dedicated to them, these names are used 
 
 ```scheme
 (eval '(+ 2 3) initial-env)
-;IReval<init_env>(quote<list<addition,integer<2>,integer<3>>>{})
+;IReval<init_env>(wrap<list<addition,integer<2>,integer<3>>>{})
 
 ```
 in the implementation of `IReval` (IR for Intermediate Represenation, so the name doesnt conflict with the procedure `eval` itself), `IReval` uses `is_prim_proc` to determine if the list is tagged with a name of a primitive procedure, it evaluates the operands with `eval_members` and passes them on to`IRapply`
@@ -131,15 +131,15 @@ else if constexpr (is_prim_proc(tag{})){
             if constexpr (!is_self_evaluating(app_operands{})){
                 if constexpr (is_prim_proc(IRcar(app_operands{}))){
 
-                    using proc_res = decltype(IRapply(tag{},quote<app_operands>{}));
+                    using proc_res = decltype(IRapply(tag{},wrap<app_operands>{}));
                     return proc_res{};
                 } else {
 
-                    using proc_res = decltype(IRapply(tag{},quote<app_operands>{}));
+                    using proc_res = decltype(IRapply(tag{},wrap<app_operands>{}));
                     return proc_res{};
                 }
             } else {
-                using proc_res = decltype(IRapply(tag{},quote<app_operands>{}));
+                using proc_res = decltype(IRapply(tag{},wrap<app_operands>{}));
                 return proc_res{};
             }
 
@@ -149,7 +149,7 @@ else if constexpr (is_prim_proc(tag{})){
 `IRapply` is a wrapper function that just calls `apply_primitve_procedure`
 ```cpp
 template < typename Proc, typename Args >
-auto constexpr IRapply(Proc,quote<Args>) {
+auto constexpr IRapply(Proc,wrap<Args>) {
 
 	// returns void if procedure was not found...
     // it means that its a compound proc, handled elsewhere
