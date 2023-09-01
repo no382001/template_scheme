@@ -8,9 +8,6 @@
 struct list_start {};
 struct list_end {};
 
-struct quote_start {};
-struct quote_end {};
-
 struct whitespace {};
 
 // this could be replaced with the KEYWORD in tokenizer.h
@@ -27,7 +24,7 @@ constexpr auto deduce_token_type() {
 	} else if constexpr (C >= 'A' && C <= 'Z') {
 		return c_<C>{};
 	} else if constexpr (C == '\'') {
-		return quote_start{};
+		return quote{};
 	} else if constexpr (C == '+') {
 		return addition{};
 	} else if constexpr (C == '-') {

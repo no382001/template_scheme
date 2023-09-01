@@ -3,10 +3,11 @@
 
 
 
-auto main_str = constexpr_string("((define (fib x) (if (< x 3) 1 (+ (fib (- x 1)) (fib (- x 2))))) (fib 3))");
+auto main_str = constexpr_string("('(+ 1 1))");
+//using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
 using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
 using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
-static_assert(is_same_type<eval_result,integer<2>>);
+//static_assert(is_same_type<eval_result,integer<2>>);
 
 
 int main(){
@@ -26,3 +27,7 @@ int main(){
 // - i could make quote, self evaluating and return its own wrapped value
 //  - have to look into this, but the IR quote is definitely not the same as in Scheme
 //  - make the IR more like scheme
+
+// eval wrap<list<...>>
+// eval quote<wrap<list<..>>>
+// eval wrap<list<..>>  quote does not matter here, probably eval is redundant when there is no quote

@@ -14,7 +14,6 @@ auto constexpr list_of_values(A,Args...);
 template <typename Env, typename Exp>
 auto constexpr IReval(wrap<Exp>);
 
-
 // temp location for map_pair
 LIST(pair);
 
@@ -93,7 +92,7 @@ auto constexpr eval_members(list<A,Args...>){
     } else {
         if constexpr (is_same_type<ev_curr,scm_define>) {
             return define_tag{};
-        } else if constexpr (is_same_type<ev_curr,define_tag>){
+        }else if constexpr (is_same_type<ev_curr,define_tag>){
             // handle define and extend env here
             
             using without_wrapper = decltype(IRcar(A{}));
@@ -128,15 +127,19 @@ auto constexpr eval_members(list<A,Args...>){
 
         } else {
             using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
-
-            using ev_second = decltype(IReval<Env>(make_wrap(make_list(Args{}...))));
-            // (inc '1) is valid
             
-            // if car of list is a procedure, (it also could be an unbound variable but the list serach should have already thrown an error)
-            if constexpr (is_same_type<void,ev_curr>){
-                return apply_compund_proc<Env>(A{},ev_second{});
+            if constexpr (is_same_type<ev_curr,quote>){
+                return make_wrap(Args{}...);
             } else {
-                return make_list(ev_curr{},ev_second{});
+                using ev_second = decltype(IReval<Env>(make_wrap(make_list(Args{}...))));
+                // (inc '1) is valid
+                
+                // if car of list is a procedure, (it also could be an unbound variable but the list serach should have already thrown an error)
+                if constexpr (is_same_type<void,ev_curr>){
+                    return apply_compund_proc<Env>(A{},ev_second{});
+                } else {
+                    return make_list(ev_curr{},ev_second{});
+                }
             }
         } 
     }

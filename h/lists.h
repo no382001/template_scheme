@@ -56,10 +56,7 @@ struct name { LIST_BODY(name);};					\
 MAKE_LIST_FUNCTIONS(name);                          \
 IS_X_LIST(name);
 
-
-// quotation
-template <typename ...Types>
-struct wrap {};
+LIST(wrap);
 
 template <typename T>
 constexpr inline bool is_wrapped(T){
