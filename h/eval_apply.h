@@ -87,6 +87,24 @@ auto constexpr define_arg_number_helper(wrap<list<A,B,Params...>>){
 
 // -- very ugly instantiation delay, i did this somewhere already but in a different way
 template <typename T>
+struct delayed_application_helper;
+
+// if ev_curr is scm_apply
+template <>
+struct delayed_application_helper<scm_apply> {
+    template <typename A,typename... Args>
+    static auto apply(A,quote,wrap<list<Args...>>) {
+        return IRapply(A{},wrap<list<Args...>>{});
+    }
+    template <typename A,typename... Args>
+    static auto apply(A,wrap<list<Args...>>) {
+        static_assert(DELAYED_FALSE,"(apply procedure '(list ...)) QUOTE IS MISSING FROM LIST");
+    }
+};
+
+
+// if ev_curr is anything else
+template <typename T>
 struct delayed_application_helper {
     template <typename... Args>
     static auto apply(Args... args) {
@@ -94,13 +112,7 @@ struct delayed_application_helper {
     }
 };
 
-template <>
-struct delayed_application_helper<scm_apply> {
-    template <typename A, typename... Args>
-    static auto apply(A,Args...) {
-        return IRapply(A{},wrap<list<Args...>>{});
-    }
-};
+
 
 template <typename T, typename... Args>
 auto constexpr delayed_application(Args... args) {
@@ -154,6 +166,9 @@ auto constexpr eval_members(list<A,Args...>){
         } else {
             using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
             
+            // i need to know if the parameters are quoted
+            // in which case (cdr args) should be a single quote wrap
+            // i dont check for types like i should, its a rushed project
             using delayed_app_res = decltype(delayed_application<ev_curr>(Args{}...));
 
             if constexpr (!is_same_type<void,delayed_app_res>){
