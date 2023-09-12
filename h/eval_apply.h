@@ -85,7 +85,7 @@ auto constexpr define_arg_number_helper(wrap<list<A,B,Params...>>){
     }
 }
 
-
+// -- very ugly instantiation delay, i did this somewhere already but in a different way
 template <typename T>
 struct delayed_application_helper {
     template <typename... Args>
@@ -106,7 +106,7 @@ template <typename T, typename... Args>
 auto constexpr delayed_application(Args... args) {
     return delayed_application_helper<T>::apply(args...);
 }
-
+// -- 
 
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
