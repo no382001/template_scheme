@@ -102,7 +102,6 @@ struct delayed_application_helper<scm_apply> {
     }
 };
 
-
 // if ev_curr is anything else
 template <typename T>
 struct delayed_application_helper {
@@ -112,13 +111,21 @@ struct delayed_application_helper {
     }
 };
 
-
-
 template <typename T, typename... Args>
 auto constexpr delayed_application(Args... args) {
     return delayed_application_helper<T>::apply(args...);
 }
 // -- 
+
+template <typename Env, typename... Args>
+auto constexpr scm_eval_helper(quote,wrap<list<Args...>>) {
+    return IReval<Env>(wrap<list<Args...>>{});
+}
+
+template <typename Env, typename... Args>
+auto constexpr scm_eval_helper(wrap<list<Args...>>) {
+    static_assert(DELAYED_FALSE,"(eval '(list ...)) QUOTE IS MISSING FROM LIST");
+}
 
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
@@ -166,14 +173,15 @@ auto constexpr eval_members(list<A,Args...>){
         } else {
             using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
             
-            // i need to know if the parameters are quoted
-            // in which case (cdr args) should be a single quote wrap
-            // i dont check for types like i should, its a rushed project
+            // if ev_curr is an explicit call to apply
             using delayed_app_res = decltype(delayed_application<ev_curr>(Args{}...));
 
             if constexpr (!is_same_type<void,delayed_app_res>){
                 return delayed_app_res{};
+            } else if constexpr (is_same_type<ev_curr,scm_eval>){
+                return scm_eval_helper<Env>(Args{}...);
             } else if constexpr (is_same_type<ev_curr,quote>){
+                // return the body
                 return make_wrap(Args{}...);
             } else {
                 using ev_second = decltype(IReval<Env>(make_wrap(make_list(Args{}...))));

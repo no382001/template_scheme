@@ -3,7 +3,7 @@
 
 
 
-auto main_str = constexpr_string("(apply + '(1 1))");
+auto main_str = constexpr_string("(eval '(+ 1 1))");
 //using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
 using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
 using eval_result = decltype(IReval<environment<>>(tokenization_result{}));

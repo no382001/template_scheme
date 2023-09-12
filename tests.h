@@ -325,7 +325,13 @@ namespace Quoteiung {
 
 namespace ApplyProper {
     auto main_str = constexpr_string("(apply + '(1 1))");
-    //using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
+    using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
+    using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
+    static_assert(is_same_type<eval_result,integer<2>>);
+};
+
+namespace EvalProper {
+    auto main_str = constexpr_string("(eval '(+ 1 1))");
     using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
     using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
     static_assert(is_same_type<eval_result,integer<2>>);
