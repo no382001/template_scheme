@@ -3,12 +3,11 @@
 
 
 
-auto main_str = constexpr_string("('(+ 1 1))");
+auto main_str = constexpr_string("(apply + 1 1)");
 //using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
 using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
 using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
 //static_assert(is_same_type<eval_result,integer<2>>);
-
 
 int main(){
     //pretty_print(demangle<init_env>());
@@ -23,10 +22,6 @@ int main(){
 // lambda is also missing
 // - implement apply and eval
 // - so i can define lambda
-
-// - i could make quote, self evaluating and return its own wrapped value
-//  - have to look into this, but the IR quote is definitely not the same as in Scheme
-//  - make the IR more like scheme
 
 // eval wrap<list<...>>
 // eval quote<wrap<list<..>>>

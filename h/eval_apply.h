@@ -14,6 +14,9 @@ auto constexpr list_of_values(A,Args...);
 template <typename Env, typename Exp>
 auto constexpr IReval(wrap<Exp>);
 
+template < typename Proc, typename Args >
+auto constexpr IRapply(Proc,wrap<Args>);
+
 // temp location for map_pair
 LIST(pair);
 
@@ -82,6 +85,29 @@ auto constexpr define_arg_number_helper(wrap<list<A,B,Params...>>){
     }
 }
 
+
+template <typename T>
+struct delayed_application_helper {
+    template <typename... Args>
+    static auto apply(Args... args) {
+        return;
+    }
+};
+
+template <>
+struct delayed_application_helper<scm_apply> {
+    template <typename A, typename... Args>
+    static auto apply(A,Args...) {
+        return IRapply(A{},wrap<list<Args...>>{});
+    }
+};
+
+template <typename T, typename... Args>
+auto constexpr delayed_application(Args... args) {
+    return delayed_application_helper<T>::apply(args...);
+}
+
+
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
     
@@ -92,7 +118,7 @@ auto constexpr eval_members(list<A,Args...>){
     } else {
         if constexpr (is_same_type<ev_curr,scm_define>) {
             return define_tag{};
-        }else if constexpr (is_same_type<ev_curr,define_tag>){
+        } else if constexpr (is_same_type<ev_curr,define_tag>){
             // handle define and extend env here
             
             using without_wrapper = decltype(IRcar(A{}));
@@ -105,7 +131,7 @@ auto constexpr eval_members(list<A,Args...>){
             
             if constexpr (is_c_list(params{}) || is_char_v<params>){ // variable
                 
-                // whenever a variable gets replaced the expression does not evaluate but waits for this layer to do that
+                // whenever a variable gets replaced the expression gets passed back to this layer to do that
                 // the procedure has apply and is collapsed to the result
                 // so evaluate again, just to be sure
 
@@ -128,7 +154,11 @@ auto constexpr eval_members(list<A,Args...>){
         } else {
             using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
             
-            if constexpr (is_same_type<ev_curr,quote>){
+            using delayed_app_res = decltype(delayed_application<ev_curr>(Args{}...));
+
+            if constexpr (!is_same_type<void,delayed_app_res>){
+                return delayed_app_res{};
+            } else if constexpr (is_same_type<ev_curr,quote>){
                 return make_wrap(Args{}...);
             } else {
                 using ev_second = decltype(IReval<Env>(make_wrap(make_list(Args{}...))));

@@ -10,6 +10,7 @@ constexpr int _log(int b, int n) {
 	return n < b ? 0 : _log(b, n / b) + 1;
 }
 
+
 struct scm_false {};
 struct scm_true {};
 
@@ -78,6 +79,12 @@ auto constexpr is_self_evaluating(name) { return true; }
 
 struct define_tag {};
 IS_SELF_EVALUATING(define_tag);
+
+struct scm_apply {};
+struct scm_eval {};
+
+IS_SELF_EVALUATING(scm_apply);
+IS_SELF_EVALUATING(scm_eval);
 
 struct quote {};
 IS_SELF_EVALUATING(quote);

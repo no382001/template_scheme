@@ -94,7 +94,10 @@ constexpr auto deduce_keyword_type(keyword_##corresponding_type) { 	            
 
 KEYWORD("if",scm_if);
 KEYWORD("define",scm_define);
-KEYWORD("let",scm_let);
+//KEYWORD("let",scm_let);
+
+KEYWORD("apply",scm_apply);
+KEYWORD("eval",scm_eval);
 
 // KEYWORDS ----
 
