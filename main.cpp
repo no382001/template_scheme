@@ -1,8 +1,6 @@
 #include "tests.h"
 #include "ground.h"
 
-
-
 auto main_str = constexpr_string("(eval '(+ 1 1))");
 //using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
 using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
@@ -20,8 +18,6 @@ int main(){
 
 
 // lambda is also missing
-// - implement apply and eval
-// - so i can define lambda
 
 // eval wrap<list<...>>
 // eval quote<wrap<list<..>>>

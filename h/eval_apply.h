@@ -128,6 +128,64 @@ auto constexpr scm_eval_helper(wrap<list<Args...>>) {
 }
 
 template <typename Env, typename A, typename... Args>
+auto constexpr eval_members(list<A,Args...>);
+
+template <typename Env, typename A, typename... Args>
+auto constexpr eval_define_impl(list<A,Args...>){
+    // handle define and extend env here
+            
+    using without_wrapper = decltype(IRcar(A{}));
+    using params = decltype(IRcadr(without_wrapper{}));
+    using body = decltype(IRcddr(without_wrapper{}));
+    using extracted_body = decltype(define_var_name_helper_integer(body{}));
+
+    // if there is no argument, only a name, then its a variable, otherwise a procedure
+    using name = decltype(define_var_name_helper_char(params{}));
+    
+    if constexpr (is_c_list(params{}) || is_char_v<params>){ // variable
+
+        // whenever a variable gets replaced the expression gets passed back to this layer
+        // the procedure will have apply and is collapsed as the result
+        // so we need evaluate again, just to be sure
+
+        using entry = table_entry<name,variable,extracted_body>;
+        using extended_environment = decltype(extend_environment<Env>(entry{}));
+        
+        using return_value = decltype(eval_members<extended_environment>(make_wrap(make_list(Args{}...))));
+        return IReval<Env>(make_wrap(return_value{}));
+
+    } else { // procedure
+        using arguments = decltype(define_arg_number_helper(params{}));
+        using entry = table_entry<name,procedure,arguments,extracted_body>;
+
+        using extended_environment = decltype(extend_environment<Env>(entry{}));
+        return eval_members<extended_environment>(make_wrap(make_list(Args{}...)));
+        
+        // maybe i should return a result line by line? could be good for debugging
+    }
+}
+
+template <typename Env, typename A, typename... Args>
+auto constexpr eval_lambda_impl(list<A,Args...>){
+    using without_wrapper = decltype(IRcar(A{}));
+    using params = decltype(IRcadr(without_wrapper{}));
+    using body = decltype(IRcddr(without_wrapper{}));
+    using extracted_body = decltype(define_var_name_helper_integer(body{}));
+
+    // if there is no argument, only a name, then its a variable, otherwise a procedure
+    using name = decltype(define_var_name_helper_char(params{}));
+    
+    if constexpr (is_c_list(params{}) || is_char_v<params>){ // variable
+    
+        using return_value = decltype(eval_members<Env>(make_wrap(make_list(Args{}...))));
+        return IReval<Env>(make_wrap(return_value{}));
+
+    } else { // procedure
+        return eval_members<Env>(make_wrap(make_list(Args{}...)));        
+    }
+}
+
+template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
     
     using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
@@ -138,38 +196,7 @@ auto constexpr eval_members(list<A,Args...>){
         if constexpr (is_same_type<ev_curr,scm_define>) {
             return define_tag{};
         } else if constexpr (is_same_type<ev_curr,define_tag>){
-            // handle define and extend env here
-            
-            using without_wrapper = decltype(IRcar(A{}));
-            using params = decltype(IRcadr(without_wrapper{}));
-            using body = decltype(IRcddr(without_wrapper{}));
-            using extracted_body = decltype(define_var_name_helper_integer(body{}));
-
-            // if there is no argument, only a name, then its a variable, otherwise a procedure
-            using name = decltype(define_var_name_helper_char(params{}));
-            
-            if constexpr (is_c_list(params{}) || is_char_v<params>){ // variable
-                
-                // whenever a variable gets replaced the expression gets passed back to this layer to do that
-                // the procedure has apply and is collapsed to the result
-                // so evaluate again, just to be sure
-
-                using entry = table_entry<name,variable,extracted_body>;
-                using extended_environment = decltype(extend_environment<Env>(entry{}));
-                
-                using return_value = decltype(eval_members<extended_environment>(make_wrap(make_list(Args{}...))));
-                return IReval<Env>(make_wrap(return_value{}));
-
-            } else { // procedure
-                using arguments = decltype(define_arg_number_helper(params{}));
-                using entry = table_entry<name,procedure,arguments,extracted_body>;
-
-                using extended_environment = decltype(extend_environment<Env>(entry{}));
-                return eval_members<extended_environment>(make_wrap(make_list(Args{}...)));
-                
-                // maybe i should return a result line by line? could be good for debugging
-            }
-
+            return eval_define_impl<Env>(list<A,Args...>{});
         } else {
             using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
             
@@ -179,6 +206,7 @@ auto constexpr eval_members(list<A,Args...>){
             if constexpr (!is_same_type<void,delayed_app_res>){
                 return delayed_app_res{};
             } else if constexpr (is_same_type<ev_curr,scm_eval>){
+                // strip the quote and eval
                 return scm_eval_helper<Env>(Args{}...);
             } else if constexpr (is_same_type<ev_curr,quote>){
                 // return the body
@@ -203,11 +231,7 @@ auto constexpr eval_members(wrap<templated_int<a>>){
     return IReval<Env>(wrap<templated_int<a>>{});
 }
 
-struct apply {};
-struct eval {};
 
-IS_SELF_EVALUATING(apply);
-IS_SELF_EVALUATING(eval);
 
 template < typename Proc, typename Args >
 auto constexpr IRapply(Proc,wrap<Args>) {

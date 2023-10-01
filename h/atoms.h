@@ -76,15 +76,17 @@ auto constexpr is_self_evaluating(T) {
 template <>													\
 auto constexpr is_self_evaluating(name) { return true; }
 
-
 struct define_tag {};
 IS_SELF_EVALUATING(define_tag);
-
+struct lambda_tag {};
+IS_SELF_EVALUATING(lambda_tag);
 struct scm_apply {};
-struct scm_eval {};
-
 IS_SELF_EVALUATING(scm_apply);
+struct scm_eval {};
 IS_SELF_EVALUATING(scm_eval);
-
 struct quote {};
 IS_SELF_EVALUATING(quote);
+struct apply {};
+IS_SELF_EVALUATING(apply);
+struct eval {};
+IS_SELF_EVALUATING(eval);
