@@ -8,16 +8,8 @@
 #include "deduce.h"
 #include "car_cdr.h"
 
-template <template <class> typename A, typename... Rest>
-bool constexpr is_empty_list(A<Rest...>){
-	if constexpr (sizeof...(Rest) > 0) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-template < int Index, typename Lambda >
+// its a templated int so refactor later
+template < int Index, typename Lambda>
 constexpr auto find_first_non_integer(Lambda lambda) {
 	constexpr auto str = lambda();
 	using type = decltype(deduce_token_type< str[Index] >());
@@ -114,11 +106,9 @@ constexpr auto make_integer(Lambda str_lambda) {
 	}
 }
 
-// tokenize does not handle (define ...) type expressions, if they are found, the node is terminated, see table.h
 template <typename Lambda, size_t Index = 0>
 constexpr auto tokenize(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
-
 
 	if constexpr (Index < str.size()) {
 		// deduce the type of the current char

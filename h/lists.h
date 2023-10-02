@@ -72,8 +72,7 @@ auto constexpr make_wrap(Types... types){
 
 LIST(list);
 LIST(c_list);
-// IR list 
-LIST(IRL);
+
 LIST(token_list);
 
 
@@ -106,4 +105,14 @@ auto constexpr count_list_helper(A,Args...){
 template <template <class> typename T, typename... Args>
 auto constexpr count_list(T<Args...>){
     return count_list_helper(Args{}...);
+}
+
+
+template <template <class> typename A, typename... Rest>
+bool constexpr is_empty_list(A<Rest...>){
+	if constexpr (sizeof...(Rest) > 0) {
+        return false;
+    } else {
+        return true;
+    }
 }

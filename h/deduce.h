@@ -7,10 +7,10 @@
 
 struct list_start {};
 struct list_end {};
-
 struct whitespace {};
 
-// this could be replaced with the KEYWORD in tokenizer.h
+
+// this could be replaced with the something like the KEYWORD in tokenizer.h
 template <int C>
 constexpr auto deduce_token_type() {
 	if constexpr (C == '(') {

@@ -21,7 +21,7 @@ using quotetest = decltype(make_wrap(testobj{},testobj{}));
 using quotetestres = wrap<testobj,testobj>;
 static_assert(is_same_type<quotetest,quotetestres>,"");
 static_assert(is_wrapped(quotetest{}),"quoted?");
-
+/** /
 // CAR
 // (car '()) ; err
 // (car '(testobj)) ; testobj
@@ -56,7 +56,7 @@ static_assert(is_same_type<cadrtest2,fooobj>,"(cadr '(testobj foobj testobj)) ; 
 
 using cadrtest = decltype(cadr(make_wrap(make_list(testobj{},testobj{}))));
 static_assert(is_same_type<cadrtest,testobj>,"(cdr '(test test2)) ; test2");
-
+/**/
 // LIST behaviour tests
 
 using listtest1 = decltype(make_list());

@@ -27,13 +27,13 @@ auto constexpr extend_environment(Entry){
 
 // search a list of lists, where the car of entry list is the identifier
 // returns void if entry was not found
-template <typename candidate, typename A, typename... Args>
-auto constexpr list_search(candidate,environment<A,Args...>){
+template <typename candidate,template <class,class> typename T, typename A, typename... Args>
+auto constexpr list_search(candidate,T<A,Args...>){
     using car_of_entry = decltype(IRcar(A{}));
     if constexpr (is_same_type<candidate,car_of_entry>){
         return A{};
 	} else if constexpr (sizeof...(Args) > 0) { // if there are still entries left to search
-        return list_search(candidate{},environment<Args...>{});
+        return list_search(candidate{},T<Args...>{});
     } else {
         return;
     }

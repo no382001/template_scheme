@@ -1,40 +1,30 @@
 #pragma once
 #include "lists.h"
 
-//template <typename T>
-//concept car_cdr_operable_list = is_same_list_t<T,table_entry> || is_wrapped(T{}); // howtf do i enforce this in the template argument? ohwell, lets just use list instead of table ernty
 
-// -----------------------------------------------------------------------
-// car and cdr only accepts quoted lists as arguments
+struct not_found {};
 
-template <typename A, typename... Args>
-auto constexpr car_inner(A,Args...){
-    return A{};
+template <int N,int Acc,typename A,typename... Args>
+auto constexpr impl_return_nth_element(list<A,Args...>){
+    if constexpr (N == Acc){
+        return A{};
+    } else if constexpr (sizeof...(Args) == 0){
+       return not_found{};
+    } else {
+        return impl_return_nth_element<N,Acc +1>(list<Args...>{});
+    }
 }
 
-template <template<class> class T, typename... Args>
-auto constexpr car(wrap<T<Args...>>){
-    static_assert(sizeof...(Args) > 0,"car on empty list");
-    return car_inner(Args{}...);
+
+template <int N,typename... Args>
+auto constexpr return_nth_element(list<Args...>){
+    static_assert(sizeof...(Args) > 0,"return_nth_element on empty list!");
+    return impl_return_nth_element<N,1>(list<Args...>{});
 }
 
-template <template<class> class T, typename A, typename... Args>
-auto constexpr cdr_inner(A,Args...){
-    return T<Args...>{};
-}
-
-template <template<class> class T, typename... Args>
-auto constexpr cdr(wrap<T<Args...>>){
-    static_assert(sizeof...(Args) > 0,"cdr on empty list");
-    return cdr_inner<T>(Args{}...);
-}
-
-template <template<class> class T, typename... Args>
-auto constexpr cadr(wrap<T<Args...>>){
-    static_assert(sizeof...(Args) > 0,"cadr on empty list");
-    using the_cdr = decltype(cdr(wrap<T<Args...>>{}));
-    return car(make_wrap(the_cdr{}));
-}
+using second_retn = decltype(return_nth_element<2>(list<void,int,char>{}));
+using second_retn2 = decltype(return_nth_element<2>(list<void>{}));
+//using second_retn3 = decltype(return_nth_element<2>(list<>{}));
 
 // -----------------------------------------------------------------------
 // for IR use only, accepts any type

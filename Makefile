@@ -5,4 +5,4 @@ debug:
 clang:
 	clang-13 -std=c++2b main.cpp
 run: 
-	make && ./build/a.out 
+	make && ./build/a.out

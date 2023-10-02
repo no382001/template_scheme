@@ -65,7 +65,5 @@ void pretty_print(std::string str) {
     std::cout << clean << '\n';
 }
 
-// list parsing works
-// quote parsing works
 #include <string_view>
 #define constexpr_string(...) ([]() constexpr -> std::string_view { return __VA_ARGS__; })

@@ -166,26 +166,6 @@ auto constexpr eval_define_impl(list<A,Args...>){
 }
 
 template <typename Env, typename A, typename... Args>
-auto constexpr eval_lambda_impl(list<A,Args...>){
-    using without_wrapper = decltype(IRcar(A{}));
-    using params = decltype(IRcadr(without_wrapper{}));
-    using body = decltype(IRcddr(without_wrapper{}));
-    using extracted_body = decltype(define_var_name_helper_integer(body{}));
-
-    // if there is no argument, only a name, then its a variable, otherwise a procedure
-    using name = decltype(define_var_name_helper_char(params{}));
-    
-    if constexpr (is_c_list(params{}) || is_char_v<params>){ // variable
-    
-        using return_value = decltype(eval_members<Env>(make_wrap(make_list(Args{}...))));
-        return IReval<Env>(make_wrap(return_value{}));
-
-    } else { // procedure
-        return eval_members<Env>(make_wrap(make_list(Args{}...)));        
-    }
-}
-
-template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
     
     using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
