@@ -1,14 +1,18 @@
 
-A rudimentary scheme interpreter made with C++ templates. After reaching chapter 4 in SICP while messing around in CPP i had this bright idea, since templates are Turing complete why not try to make the Scheme meta-circular evaluator all in constexpr time.<br>
-I've seen some similar projects but I never could comprehend the code. Lot of the code is not uniform, has questionable design flaws (maybe I'll fix them sometime), this is thanks to the fact that when starting this project I knew little to nothing about template meta programming. I'd like to think I know a little bit more now, and I'am not just bashing away on my keyboard until something works.<br>
+A rudimentary scheme interpreter made with C++ templates. After reaching chapter 4 in SICP while messing around in CPP i had this bright idea, since templates are Turing complete why not try to make the Scheme meta-circular evaluator all in constexpr time.
+<br><br>
+I've seen some similar projects but they used metaprogramming techniques that were totally foreign to me then so the code is not uniform at all, sometimes i use `decltype` sometimes i dont, sometimes its <b>trailing type</b> sometimes its not, so that might make it hard to read (maybe I'll fix them sometime).
+<br><br>
 So yeah, no meta-circular evaluator (yet?), but I've got to the first big milestone.<br>
 ## goals
 ### [x] being able to evaluate Fibonacchi
 #### steps required:
- - [x] implement a type system
+ - [x] implement a lisp `atoms` with templates
+ - [x] implement primitive procedures
  - [x] lisp like helper functions for working with lists
- - [x] implement `eval/apply` based on the meta-circular evaluator in SICP chapter 4
+ - [x] implement `eval/apply` based on the meta-circular evaluator in SICP C.4
  - [x] implement a tokenizer from string to types in compile time
+ - [x] implement `define`
  - [x] plug them together
 
 ## Table of Contents
@@ -17,7 +21,6 @@ So yeah, no meta-circular evaluator (yet?), but I've got to the first big milest
   - [data structures](#datas)
     - [atoms](#atoms)
     - [primitive procedures](#primproc)
-    - ...
 - the tokenizer
   - [working with strings in constexpr](#string)
   - [tokenizing with types](#token)
@@ -39,8 +42,7 @@ The goal is to evaluate something that looks like this in `mit-scheme`
     1
     (+ (fib (- x 1)) (fib (- x 2)))))
 ```
-Should look something like this if you wanted `(eval '(define ...) init-env)`<br>
-<i>(define is not implemented yet, so im going to show the env variable)</i>
+Should look something like this in its IR if you wanted to define `(fib n)` as a procedure<br>
 ```cpp
 using fib_proc_body = decltype(
     wrap<list<scm_if,
@@ -106,9 +108,6 @@ template < typename T >
 constexpr inline bool is_integer_t = is_templated_int< T, integer >::value;
 ```
 lets start from the bottom, `is_integer_t` takes a typename and passes it on to `is_templated_int` with the struct name `integer` (passing `integer` like this is only possible bc `is_templated_int` expects `Type` in the second parameter and `Type` is defined `template < int... > class Type` and we know that `integer` takes one parameter `int`), if the deduction has succeeded the `value` of the struct `is_templated_int` is `std::true_type` otherwise the specialzation on the top turns it into `std::false_type`
-
-TODO binary compare
-...................
 
 ## <a name="primproc">primitive procedures</a>
 
@@ -372,12 +371,10 @@ using tokens = decltype(tokenize(str));
 ```
 ## <a name="n-digit">n-digit integer token as type</a>
 to tokenize an n digit integer we just need to implement the following expression<br>
-<img src="https://user-images.githubusercontent.com/102482527/205129800-c9465d3b-91b0-46b0-a601-ca6c4a43eb4e.svg" width="25%"></img><br>
-where<br>
-<img src="https://user-images.githubusercontent.com/102482527/205129790-5dd31fe9-2f07-4f29-b561-7e5b8609684d.svg" width="25%"></img>
+$$ p||q = pb^{l(q)} $$
+$$ l(q) = \lfloor \log_{b}(q) \rfloor + 1 $$
 <br>
-<i>(this was very fun to do, but on certain numbers in the template argument it just fails, i have yet to figure out why, it works on most smaller than 4-5 digit numbers tho)</i>
-
+<i>(on high enough numbers, expect an integer overflow)</i>
 
 sadly we cant use the C implementation of `log` and `pow` as we need a constexpr solution which is not yet available. We need to implement it ourselves, and the solution can only be purely functional.
 ```cpp
@@ -394,7 +391,8 @@ now we can finally implement the concatenation itself
 template <int Value>
 struct integer{
   template < int A >
-  static constexpr auto merge(integer<A>)->integer< _pow((Value * 10), (_log(10, A) + 1)) + A >;
+  static constexpr auto merge(integer<A>)
+    -> integer< _pow((Value * 10), (_log(10, A) + 1)) + A >;
 };
 ```
 ```cpp
