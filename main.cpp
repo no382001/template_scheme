@@ -30,14 +30,15 @@ auto main_str = constexpr_string(R"(
 )");
 
 using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
-//using eval_result = typename eval_result_helper<tokenization_result>::type;
+using eval_result = typename eval_result_helper<tokenization_result>::type;
 
 int main(){
-    //pretty_print(demangle<init_env>());
-    std::cout << "-----" << '\n';
+    std::cout << "-env----" << '\n';
+    pretty_print(demangle<init_env>());
+    std::cout << "-tokens-" << '\n';
     pretty_print(demangle<tokenization_result>());
-    std::cout << "-----" << '\n';
-  //  pretty_print(demangle<eval_result>());
+    std::cout << "-result-" << '\n';
+    pretty_print(demangle<eval_result>());
     return 0;
 }
 

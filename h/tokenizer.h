@@ -24,7 +24,10 @@ template < int Index, typename Lambda >
 constexpr auto find_first_non_c(Lambda lambda) {
 	constexpr auto str = lambda();
 	using type = decltype(deduce_token_type< str[Index] >());
-	if constexpr (!is_char_v<type>) {
+	
+	// extended for `-` in procedure name, as it is the subtraction sybmol on its own
+	// tokenize_char_list should handle it being not appended as type `subtraction` but char `-`
+	if constexpr (!is_char_v<type> && !is_same_type<subtraction,type>) {
 		return Index;
 	} else {
 		return find_first_non_c< Index + 1 >(lambda);
@@ -48,17 +51,24 @@ constexpr auto find_end_of_list(Lambda lambda){
 		return find_end_of_list< Index + 1 , layer>(lambda);
 	}
 }
-  
+
+
+
 // only c_ is a character, ints are currently not even if they are in the same stream as the char list
 template <typename Lambda, size_t Index = 0, size_t end_of_char_list>
 constexpr auto tokenize_char_list(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
 	if constexpr (Index < end_of_char_list) {
 		using curr = decltype(deduce_token_type< str[Index] >());
-		
+
 		using second = decltype(tokenize_char_list< Lambda, Index + 1, end_of_char_list >(str_lambda));
 		
-		return make_c_list(curr{}, second{});
+		if constexpr (is_same_type<curr,subtraction>){ // special case for `-` in procedure name
+			return make_c_list(c_<'-'>{}, second{});
+		} else {
+			return make_c_list(curr{}, second{});
+		}
+		
 	} else {
 		return make_c_list();
 	}
@@ -138,7 +148,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 				return make_token_list(integer_type{}, second{});
 			
 			} else if constexpr (is_char_v<curr>) {
-				//if something starts with a character, find the next non character
+				// if something starts with a character, find the next non character
 				constexpr auto end_of_char_list = find_first_non_c< Index + 1 >(str_lambda);
 
 				constexpr auto one_char = Index == end_of_char_list - 1;

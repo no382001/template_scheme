@@ -56,7 +56,7 @@ auto constexpr eval_members(wrap<list<A,Args...>>){
     return eval_members<Env>(list<A,Args...>{});
 }
 
-// this helped solve a problem with the c_list bug
+// this helped solve a problem with the c_list bug (which?)
 template <typename A>
 auto constexpr define_var_name_helper_char(A){
     if constexpr (is_char_v<A> || is_c_list(A{})){
