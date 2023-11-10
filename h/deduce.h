@@ -23,6 +23,8 @@ constexpr auto deduce_token_type() {
 		return c_<C>{};
 	} else if constexpr (C >= 'A' && C <= 'Z') {
 		return c_<C>{};
+	} else if constexpr (C == '?') { // special character probably in a proc name
+		return c_<C>{};
 	} else if constexpr (C == '\'') {
 		return quote{};
 	} else if constexpr (C == '+') {
@@ -41,6 +43,8 @@ constexpr auto deduce_token_type() {
 		return more{};
 	} else if constexpr (C == '=') {
 		return equal{};
+	} else if constexpr (C == '\n') { // needed for multiline string compatibility like R"()" 
+		return whitespace{};
 	} else {
 		static_assert(DELAYED_FALSE,"symbol not supported");
 	}

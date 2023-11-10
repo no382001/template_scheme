@@ -62,8 +62,18 @@ constexpr auto demangle() -> std::string {
 void pretty_print(std::string str) {
 	// delete all instances of struct and any whitespace in the string
 	auto clean = std::regex_replace(str, std::regex(R"((struct )|( ))"), "");
-    std::cout << clean << '\n';
+
+    std::regex pattern(R"(c_<(\d+)>)"); // match all c_<...>
+    std::string result = clean;
+    std::smatch match;
+
+    while (std::regex_search(result, match, pattern)) {
+        char achar = static_cast<char>(std::stoi(match[1].str())); // conver mathed d to char
+        result.replace(match.position(), match.length(), 1, achar);
+    }
+
+    std::cout << result << '\n';
 }
 
 #include <string_view>
-#define constexpr_string(...) ([]() constexpr -> std::string_view { return __VA_ARGS__; })
+#define constexpr_string(str) ([]() constexpr -> std::string_view { return str; })
