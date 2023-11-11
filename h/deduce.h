@@ -7,10 +7,17 @@
 
 struct list_start {};
 struct list_end {};
+
+template <int I>
 struct whitespace {};
+
+template <typename T>
+constexpr inline bool is_whitespace_v = is_specific_templated_int_collection< T, whitespace >::value;
 
 
 // this could be replaced with the something like the KEYWORD in tokenizer.h
+// - special characters in procedure names that are used as other symbols, 
+//   are handled by tokenize_char_list and find_first_non_c
 template <int C>
 constexpr auto deduce_token_type() {
 	if constexpr (C == '(') {
@@ -36,7 +43,7 @@ constexpr auto deduce_token_type() {
 	} else if constexpr (C == '/') {
 		return division{};
 	} else if constexpr (C == ' ') {
-		return whitespace{};
+		return whitespace<C>{};
 	} else if constexpr (C == '<') {
 		return less{};
 	} else if constexpr (C == '>') {
@@ -44,7 +51,7 @@ constexpr auto deduce_token_type() {
 	} else if constexpr (C == '=') {
 		return equal{};
 	} else if constexpr (C == '\n') { // needed for multiline string compatibility like R"()" 
-		return whitespace{};
+		return whitespace<C>{};
 	} else {
 		static_assert(DELAYED_FALSE,"symbol not supported");
 	}

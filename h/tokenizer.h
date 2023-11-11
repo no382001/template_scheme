@@ -84,7 +84,7 @@ constexpr auto make_keyword_name(Lambda str_lambda) {
 
 template <typename... Args>
 constexpr auto deduce_keyword_type(c_list<Args...>) {
-	return whitespace{};	
+	return;	
 }
 
 #define KEYWORD(name,corresponding_type) 	                                                \
@@ -124,9 +124,9 @@ constexpr auto tokenize(Lambda str_lambda) {
 		// deduce the type of the current char
 		using curr = decltype(deduce_token_type< str[Index] >());
 
-		if constexpr (is_same_type<curr,whitespace>) {
-			// if its not a specially handled token
-			return tokenize< Lambda, Index + 1 >(str_lambda);
+		if constexpr (is_whitespace_v<curr>) {
+			using second = decltype(tokenize<Lambda, Index + 1>(str_lambda));
+			return make_token_list(curr{}, second{});
 		} else {
 			if constexpr (is_same_type<curr, list_start>) {
 				constexpr auto end_of_list = find_end_of_list< Index >(str_lambda);
@@ -165,7 +165,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 					using query_result = decltype(deduce_keyword_type(char_list{}));
 					
 					// check if the string is a keyword
-					if constexpr (!is_same_type<whitespace,query_result>){
+					if constexpr (!is_same_type<void,query_result>){
 						return make_token_list(query_result{}, second{});
 					} else {
 						return make_token_list(char_list{}, second{});
@@ -198,4 +198,97 @@ constexpr auto tokenizer(Lambda str_lambda) {
 	using result = decltype(tokenize<Lambda, Index>(str_lambda));
 	using clean_expression = typename replace_nested_list<result>::type; // convert list
 	return replace_wrapper(clean_expression{},tokenized{});
+}
+
+// ----THINGS TO HELP WITH CLEANING UP WHITESPACES
+
+// redundant
+template <typename List1, typename List2>
+struct concat;
+
+template <typename... Types1, typename... Types2>
+struct concat<list<Types1...>, list<Types2...>> {
+    using type = list<Types1..., Types2...>;
+};
+
+template <typename List1, typename List2>
+using concat_t = typename concat<List1, List2>::type;
+
+template <typename T, typename List>
+struct remove_type;
+
+template <typename T, typename First, typename... Rest>
+struct remove_type<T, list<First, Rest...>> {
+    using type = typename std::conditional<
+        std::is_same<T, First>::value,
+        typename remove_type<T, list<Rest...>>::type,
+        concat_t<list<First>, typename remove_type<T, list<Rest...>>::type>
+    >::type;
+};
+
+template <typename T>
+struct remove_type<T, list<>> {
+    using type = list<>;
+};
+
+template <typename T, typename List>
+using remove_type_t = typename remove_type<T, List>::type;
+
+using original_list = list<void, void, int, void>;
+using cleaned_list = remove_type_t<void, original_list>;
+static_assert(is_same_type<cleaned_list,list<int>>,"");
+static_assert(is_same_type<remove_type_t<void,list<>>,list<>>,"");
+
+
+namespace RemoveWhitespace {
+
+	// map
+
+	template <template <typename> class Func, typename List>
+	struct map;
+
+	template <template <typename> class Func>
+	struct map<Func, list<>> {
+		using type = list<>;
+	};
+
+	template <template <typename> class Func, typename First, typename... Rest>
+	// removes all void on sight, make something void with the function to remove it
+	struct map<Func, list<First, Rest...>> {
+		using transformed_first_type = typename Func<First>::type;
+		using first_type_list = typename std::conditional<
+			std::is_same<transformed_first_type, void>::value,
+			list<>,
+			list<transformed_first_type>
+    	>::type;
+
+		using rest_list = typename map<Func, list<Rest...>>::type;
+    	using type = typename concat<first_type_list, rest_list>::type;
+	};
+
+	template <template <typename> class Func, typename List>
+	using map_t = typename map<Func, List>::type;
+
+	// -- F(I) = I+1
+
+	template <typename A>
+	struct F;
+
+	template <int I>
+	struct F<integer<I>> {
+		using type = integer<I + 1>;
+	};
+
+	using intlist = list<integer<1>,integer<2>,integer<3>>;
+	using mapped = typename map<F,intlist>::type;
+	static_assert(is_same_type<mapped,list<integer<2>, integer<3>, integer<4>>>,"");
+
+	// remove all
+
+	template <typename A> struct remove_int { using type = A; };
+	 // if its int, return void so map omits the element
+	template <> struct remove_int<int> { using type = void; };
+
+	using l = list<int,char,int,char,char>;
+	using res = map<remove_int,l>::type;
 }

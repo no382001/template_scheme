@@ -1,4 +1,4 @@
-#include "tests.h"
+//#include "tests.h"
 #include "h/eval_apply.h"
 #include "h/tokenizer.h"
 
@@ -22,23 +22,20 @@ struct eval_result_helper<T, false> {
 };
 
 auto main_str = constexpr_string(R"(
-(define (list-of-values exps env)
-  (if (no-operands? exps)
-    '()
-    (cons (eval (first-operand exps) env)
-          (list-of-values (rest-operands exps) env))))
+(define a 1)
+(define b 2)
 )");
 
-using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
-using eval_result = typename eval_result_helper<tokenization_result>::type;
+using tokenization_result = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
+//using eval_result = typename eval_result_helper<tokenization_result>::type
 
 int main(){
-    std::cout << "-env----" << '\n';
-    pretty_print(demangle<init_env>());
-    std::cout << "-tokens-" << '\n';
+    std::cout << "-init----" << '\n';
     pretty_print(demangle<tokenization_result>());
+    std::cout << "-clean-" << '\n';
+    //pretty_print(demangle<cleaned_type>());
     std::cout << "-result-" << '\n';
-    pretty_print(demangle<eval_result>());
+    //pretty_print(demangle<eval_result>());
     return 0;
 }
 

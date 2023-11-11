@@ -59,6 +59,7 @@ constexpr auto demangle() -> std::string {
     return std::string(function.substr(start, size)).data();
 }
 
+
 void pretty_print(std::string str) {
 	// delete all instances of struct and any whitespace in the string
 	auto clean = std::regex_replace(str, std::regex(R"((struct )|( ))"), "");
@@ -72,7 +73,7 @@ void pretty_print(std::string str) {
         result.replace(match.position(), match.length(), 1, achar);
     }
 
-    std::cout << result << '\n';
+    std::cout << result << std::endl;
 }
 
 #include <string_view>
