@@ -184,6 +184,20 @@ auto constexpr eval_members(list<A,Args...>){
             }
         } else if constexpr (is_same_type<ev_curr,scm_list>){
             return eval_every_member_for_cons_list<Env>(Args{}...);
+        } else if constexpr (is_same_type<ev_curr,scm_car>){
+            if constexpr (sizeof...(Args) == 1){
+                using second = decltype(IReval<Env>(make_wrap(Args{}...)));
+                return car(second{});
+            } else {
+                static_assert(DELAYED_FALSE,"car applied with more or less than 1 arg");
+            }
+        } else if constexpr (is_same_type<ev_curr,scm_cdr>){
+            if constexpr (sizeof...(Args) == 1){
+                using second = decltype(IReval<Env>(make_wrap(Args{}...)));
+                return cdr(second{});
+            } else {
+                static_assert(DELAYED_FALSE,"cdr applied with less or more than 1 args");
+            }
         } else if constexpr (is_same_type<ev_curr,define_tag>){
             return eval_define_impl<Env>(list<A,Args...>{});
         } else {

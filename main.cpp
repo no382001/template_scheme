@@ -6,10 +6,15 @@
 #include <type_traits>
 #include <utility>
 
-
+/** /
 auto main_str = constexpr_string(R"(
-(list
-    1 (+ 1 2))
+(car (list
+    1 (+ 1 2)))
+)");
+/**/
+auto main_str = constexpr_string(R"(
+(cdr (list
+    1 (+ 1 2)))
 )");
 
 using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
