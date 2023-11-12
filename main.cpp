@@ -1,6 +1,7 @@
-//#include "tests.h"
+#include "tests.h"
 #include "h/eval_apply.h"
 #include "h/tokenizer.h"
+#include "h/pretty_print.h"
 
 #include <type_traits>
 #include <utility>
@@ -22,23 +23,39 @@ struct eval_result_helper<T, false> {
 };
 
 auto main_str = constexpr_string(R"(
-(define a 1)
-(define b 2)
+(+ 1 2)
 )");
 
-using tokenization_result = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
-//using eval_result = typename eval_result_helper<tokenization_result>::type
-
-//static_assert(is_same_type<clisss, token_list<list<token_list<scm_define, void, integer<1>>>, list<token_list<scm_define, void, integer<2>>>>>,"");
-
+using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
+// remove whitespaces
+using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
+// replace token_list<list<...>> with wrap<list<...>>
+using clean_expression = typename replace_nested_list<tokens>::type; // convert list
+// replace outer wrap<...> with tokenized<...>
+using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
+// evaluate expression
+using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
 
 int main(){
-    //std::cout << "-init----" << '\n';
-    pretty_print(demangle<faszom>());
-    //std::cout << "-clean-" << '\n';
-    //pretty_print(demangle<cleaned_type>());
-    //std::cout << "-result-" << '\n';
-    //pretty_print(demangle<eval_result>());
+    std::cout << ":::: string to parse ::::" << '\n';
+    std::cout << main_str() << '\n';
+    std::cout << '\n';
+
+
+    std::cout << ":::: tokenization_result_w_whitespaces ::::" << '\n';
+    pretty_print(demangle<tokenization_result_w_whitespaces>());
+    std::cout << '\n';
+
+    std::cout << ":::: formatted tokenization result ::::" << '\n';
+    std::cout << replaceWhitespace(demangle<tokenization_result_w_whitespaces>()) << std::endl;
+    std::cout << '\n';
+    
+    std::cout << ":::: cleaned ::::" << '\n';
+    pretty_print(demangle<tb_evaluated>());
+    std::cout << '\n';
+    
+    std::cout << ":::: eval res ::::" << '\n';
+    pretty_print(demangle<eval_result>());
     return 0;
 }
 
