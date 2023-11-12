@@ -6,13 +6,16 @@
 #include <type_traits>
 #include <utility>
 
-
 auto main_str = constexpr_string(R"(
 (
-    (define (add-two x)
-        (define y 2)
-        (+ x y))
-    (add-two 2)
+  (define (negative n) (- 0 n))
+  (define (remainder a b)
+    (- a (* (/ a b) b)))
+  (define (abs x)
+    (if (< x 0)
+      (- x (* 2 x))
+      x))
+  (negative 15)
 )
 )");
 
@@ -24,7 +27,7 @@ using clean_expression = typename replace_nested_list<tokens>::type; // convert 
 // replace outer wrap<...> with tokenized<...>
 using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
 // evaluate expression
-using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
+using eval_result = decltype(IReval<environment<>>(IRcar(tb_evaluated{})));
 
 
 int main(){

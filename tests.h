@@ -412,3 +412,32 @@ namespace define_test_double_define_in_same_scope {
 
 // so the outer scope of (...) works for any amount of defines
 // but for some reason if i define inside a scope of another define, the tag is considered a compound proc and fails
+
+
+namespace broken_syntax_for_inner_defines_but_works {
+    // define_var_name_helper_integer gets a list of things when it only expects one thing or a list which it takes the second element of
+    // so its not an easy fix
+
+    // this behaviour kind of similar to how i need to put an outer (...) to execute defines and expressions in one scope
+
+    auto main_str = constexpr_string(R"(
+    (
+        (define (add-two x)
+            (
+                (define y 2)
+                (+ x y)))
+        (add-two 2)
+    )
+    )");
+
+    using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
+    // remove whitespaces
+    using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
+    // replace token_list<list<...>> with wrap<list<...>>
+    using clean_expression = typename replace_nested_list<tokens>::type; // convert list
+    // replace outer wrap<...> with tokenized<...>
+    using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
+    // evaluate expression
+    using eval_result = decltype(IReval<environment<>>(IRcar(tb_evaluated{})));
+    static_assert(is_same_type<eval_result,integer<4>>,"");
+};

@@ -1,0 +1,53 @@
+:::: string to parse ::::
+
+(
+  (define (negative n) (- 0 n))
+  (negative 12)
+)
+
+
+:::: formatted tokenization result ::::
+token_list<
+list<token_list<
+  list<token_list<scm_define list<token_list<negative n>> list<token_list<subtraction integer<0> n>>>>
+  list<token_list<negative integer<12>>>
+>>
+>
+
+:::: eval res ::::
+integer<-1>
+
+while simply (- 0 12) is -12 ???  
+
+
+
+:::: string to parse ::::
+
+(
+  (define (negative n) (- 0 n))
+  (define (remainder a b)
+    (- a (* (/ a b) b)))
+  (define (abs x)
+    (if (< x 0)
+      (- x (* 2 x))
+      x))
+  (negative 15)
+)
+
+
+:::: formatted tokenization result ::::
+token_list<
+list<token_list<
+  list<token_list<scm_define list<token_list<negative n>> list<token_list<subtraction integer<0> n>>>>
+  list<token_list<scm_define list<token_list<remainder a b>>
+    list<token_list<subtraction a list<token_list<multiplication list<token_list<division a b>> b>>>>>>
+  list<token_list<scm_define list<token_list<abs x>>
+    list<token_list<scm_if list<token_list<less x integer<0>>>
+      list<token_list<subtraction x list<token_list<multiplication integer<2> x>>>>
+      x>>>>
+  list<token_list<negative integer<15>>>
+>>
+>
+
+:::: eval res ::::
+integer<-1>

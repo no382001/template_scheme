@@ -66,6 +66,16 @@ auto constexpr define_var_name_helper_char(A){
     }
 }
 
+/** / // define is broken so use an extra expression when doing more than one thing in the body()
+// list<
+//    wrap<list<scm_define, int, integer<2>>>,
+//    wrap<list<addition, int, int>>> 
+template <typename A,typename... Args> // in case of define under the scope of another
+auto constexpr define_var_name_helper_integer(list<A,Args...>){
+    return list<A,Args...>{};
+}
+/**/
+
 template <typename A>
 auto constexpr define_var_name_helper_integer(A){
     if constexpr (is_integer_v<A>){

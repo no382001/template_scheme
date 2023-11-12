@@ -53,6 +53,12 @@ using testaddev = decltype(apply_addition(list<integer<2>,integer<3>>{}));
 using testaddevres = decltype(integer<5>{});
 static_assert(is_same_type<testaddev,testaddevres>,"additon of two integers");
 
+namespace what_is_happening_with_this {
+	using testaddev = decltype(apply_subtraction(list<integer<2>,integer<3>>{}));
+	using testaddevres = decltype(integer<-1>{});
+	static_assert(is_same_type<testaddev,testaddevres>,"subtraction of two integers");
+};
+
 // since the constexpr discarded functions have to be syntactically correct
 // it still cant deduct two different types, in the preprocessor it works flawlessly
 // with me returning scm_false{} and integer<>{}, but the compioler will not allow that
