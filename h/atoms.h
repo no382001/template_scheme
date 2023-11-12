@@ -93,9 +93,3 @@ struct apply {};
 IS_SELF_EVALUATING(apply);
 struct eval {};
 IS_SELF_EVALUATING(eval);
-
-
-template <typename A,typename B>
-auto constexpr make_cons(A,B){
-	return cons<A,B>{};
-}

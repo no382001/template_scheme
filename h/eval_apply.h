@@ -165,6 +165,13 @@ auto constexpr eval_define_impl(list<A,Args...>){
     }
 }
 
+template <typename Env, typename A,typename B>
+auto constexpr make_cons(A,B){
+	using first = decltype(IReval<Env>(make_wrap(make_list(A{}))));
+	using second = decltype(IReval<Env>(make_wrap(make_list(A{}))));
+	return cons<first,second>{};
+}
+
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
     
@@ -179,7 +186,7 @@ auto constexpr eval_members(list<A,Args...>){
             if constexpr (sizeof...(Args) != 2){
                 static_assert(DELAYED_FALSE,"cons called with more or less than 2 args");
             } else {
-                return make_cons(Args{}...);
+                return make_cons<Env>(Args{}...);
             }
         } else if constexpr (is_same_type<ev_curr,define_tag>){
             return eval_define_impl<Env>(list<A,Args...>{});
