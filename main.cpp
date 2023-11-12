@@ -29,12 +29,15 @@ auto main_str = constexpr_string(R"(
 using tokenization_result = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
 //using eval_result = typename eval_result_helper<tokenization_result>::type
 
+//static_assert(is_same_type<clisss, token_list<list<token_list<scm_define, void, integer<1>>>, list<token_list<scm_define, void, integer<2>>>>>,"");
+
+
 int main(){
-    std::cout << "-init----" << '\n';
-    pretty_print(demangle<tokenization_result>());
-    std::cout << "-clean-" << '\n';
+    //std::cout << "-init----" << '\n';
+    pretty_print(demangle<faszom>());
+    //std::cout << "-clean-" << '\n';
     //pretty_print(demangle<cleaned_type>());
-    std::cout << "-result-" << '\n';
+    //std::cout << "-result-" << '\n';
     //pretty_print(demangle<eval_result>());
     return 0;
 }

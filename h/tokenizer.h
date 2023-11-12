@@ -219,6 +219,9 @@ struct concat<token_list<Types1...>, token_list<Types2...>> {
 template <typename List1, typename List2>
 using concat_t = typename concat<List1, List2>::type;
 
+
+// --------------------
+
 template <typename T, typename List>
 struct remove_type;
 
@@ -227,7 +230,9 @@ struct remove_type<T, list<First, Rest...>> {
     using type = typename std::conditional<
         std::is_same<T, First>::value,
         typename remove_type<T, list<Rest...>>::type,
-        concat_t<list<First>, typename remove_type<T, list<Rest...>>::type>
+        concat_t<
+			list<typename remove_type<T, First>::type>,
+			typename remove_type<T, list<Rest...>>::type>
     >::type;
 };
 
@@ -236,21 +241,11 @@ struct remove_type<T, token_list<First, Rest...>> {
     using type = typename std::conditional<
         std::is_same<T, First>::value,
         typename remove_type<T, token_list<Rest...>>::type,
-        concat_t<token_list<First>, typename remove_type<T, token_list<Rest...>>::type>
+        concat_t<
+			token_list<typename remove_type<T, First>::type>,
+			typename remove_type<T, token_list<Rest...>>::type>
     >::type;
 };
-
-template <typename T>
-struct remove_type<T, token_list<>> {
-    using type = token_list<>;
-};
-
-
-template <typename T>
-struct _is_token_list : std::false_type {};
-
-template <typename... Types>
-struct _is_token_list<token_list<Types...>> : std::true_type {};
 
 template <typename T, typename... Types, typename... Rest> // token list nested spec
 struct remove_type<T, token_list<token_list<Types...>, Rest...>> {
@@ -262,10 +257,27 @@ struct remove_type<T, list<list<Types...>, Rest...>> {
     using type = concat_t<list<typename remove_type<T, list<Types...>>::type>, typename remove_type<T, list<Rest...>>::type>;
 };
 
+template <typename T,typename A>
+struct remove_type {
+    using type = A;
+};
+
+template <typename T>
+struct remove_type<T, T> {
+    using type = void;
+};
+
+template <typename T>
+struct remove_type<T, token_list<>> {
+    using type = token_list<>;
+};
+
 template <typename T>
 struct remove_type<T, list<>> {
     using type = list<>;
 };
+
+// -------------------------
 
 template <typename T, typename List>
 using remove_type_t = typename remove_type<T, List>::type;
@@ -275,12 +287,6 @@ using cleaned_list = remove_type_t<void, original_list>;
 static_assert(is_same_type<cleaned_list,list<int>>,"");
 static_assert(is_same_type<remove_type_t<void,list<>>,list<>>,"");
 
-
-template <typename T>
-struct _is_list : std::false_type {};
-
-template <typename... Types>
-struct _is_list<list<Types...>> : std::true_type {};
 
 using oh_list = list<void, list<int, void>, int, void>;
 using clelist = remove_type_t<void, oh_list>;
@@ -294,6 +300,10 @@ static_assert(is_same_type<cl_list, list<list<int>,list<list<int>,int>,int,list<
 using tlissss = token_list<whitespace<10>, list<token_list<scm_define, whitespace<32>, void, whitespace<32>, integer<1>>>, whitespace<10>, list<token_list<scm_define, whitespace<32>, void, whitespace<32>, integer<2>>>, whitespace<10>>;
 using clisss = remove_type_t<whitespace<10>, tlissss>;
 static_assert(is_same_type<clisss, token_list<list<token_list<scm_define, whitespace<32>, void, whitespace<32>, integer<1>>>, list<token_list<scm_define, whitespace<32>, void, whitespace<32>, integer<2>>>>>,"");
+
+
+using faszom = remove_type_t<whitespace<32>, clisss>;
+static_assert(is_same_type<faszom, token_list<list<token_list<scm_define, void, integer<1>>>, list<token_list<scm_define, void, integer<2>>>>>,"");
 
 
 namespace RemoveWhitespace {
