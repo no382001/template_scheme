@@ -6,15 +6,14 @@
 #include <type_traits>
 #include <utility>
 
-/** /
+
 auto main_str = constexpr_string(R"(
-(car (list
-    1 (+ 1 2)))
-)");
-/**/
-auto main_str = constexpr_string(R"(
-(cdr (list
-    1 (+ 1 2)))
+(
+    (define (add-two x)
+        (define y 2)
+        (+ x y))
+    (add-two 2)
+)
 )");
 
 using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
@@ -35,7 +34,7 @@ int main(){
 
     /** /
     std::cout << ":::: tokenization_result_w_whitespaces ::::" << '\n';
-    std::cout << replace_chars(demangle<tokenization_result_w_whitespaces>()) << '\n';
+    std::cout << replace_chars(demangle<tb_evaluated>()) << '\n';
     std::cout << '\n';
     /**/
 
@@ -60,3 +59,17 @@ int main(){
 // eval wrap<list<...>>
 // eval quote<wrap<list<..>>>
 // eval wrap<list<..>>  quote does not matter here, probably eval is redundant when there is no quote
+
+/** /
+(
+    (define (add-2 x)
+        ((define y 2) (+ x y)))
+    (add-2 2)
+)
+
+i dont remember when it happened but it has to be inside the body to count
+its ptobably when i implemented compound procedures, and only did ones with one body, their 'body' is the expression itself
+so it must be an expression
+    i could make define an expression, 
+
+/**/

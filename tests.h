@@ -341,3 +341,74 @@ namespace EvalProper {
 };
 
 };
+
+namespace car_cdr_list_cons {
+    auto main_str = constexpr_string(R"(
+    (cons (car 
+        (list 1 
+            (cdr (list
+                1 (+ 1 2))))) 1)
+    )");
+
+    using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
+    // remove whitespaces
+    using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
+    // replace token_list<list<...>> with wrap<list<...>>
+    using clean_expression = typename replace_nested_list<tokens>::type; // convert list
+    // replace outer wrap<...> with tokenized<...>
+    using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
+    // evaluate expression
+    using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
+
+    static_assert(is_same_type<eval_result,cons<integer<1>,integer<1>>>,"");
+};
+
+namespace define_test_single {
+
+    auto main_str = constexpr_string(R"(
+    (
+    (define (remainder a b)
+        (- a (* (/ a b) b)))
+    (remainder 3 2)
+    )
+    )");
+
+    using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
+    // remove whitespaces
+    using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
+    // replace token_list<list<...>> with wrap<list<...>>
+    using clean_expression = typename replace_nested_list<tokens>::type; // convert list
+    // replace outer wrap<...> with tokenized<...>
+    using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
+    // evaluate expression
+    using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
+
+    static_assert(is_same_type<eval_result,integer<1>>,"");
+};
+
+namespace define_test_double_define_in_same_scope {
+
+    auto main_str = constexpr_string(R"(
+    (
+        (define y 2)
+        (define x 1)
+        (define (remainder a b)
+            (- a (* (/ a b) b)))
+        (+ x (remainder 3 2))
+    )
+    )");
+
+    using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
+    // remove whitespaces
+    using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
+    // replace token_list<list<...>> with wrap<list<...>>
+    using clean_expression = typename replace_nested_list<tokens>::type; // convert list
+    // replace outer wrap<...> with tokenized<...>
+    using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
+    // evaluate expression
+    using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
+    static_assert(is_same_type<eval_result,integer<2>>,"");
+};
+
+// so the outer scope of (...) works for any amount of defines
+// but for some reason if i define inside a scope of another define, the tag is considered a compound proc and fails
