@@ -175,6 +175,12 @@ auto constexpr eval_members(list<A,Args...>){
     } else {
         if constexpr (is_same_type<ev_curr,scm_define>) {
             return define_tag{};
+        } else if constexpr (is_same_type<ev_curr,scm_cons>){
+            if constexpr (sizeof...(Args) != 2){
+                static_assert(DELAYED_FALSE,"cons called with more or less than 2 args");
+            } else {
+                return make_cons(Args{}...);
+            }
         } else if constexpr (is_same_type<ev_curr,define_tag>){
             return eval_define_impl<Env>(list<A,Args...>{});
         } else {

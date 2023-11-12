@@ -6,24 +6,9 @@
 #include <type_traits>
 #include <utility>
 
-template<typename T, typename = void> // spec for SFINAE
-struct can_call_IReval : std::false_type {};
-
-template<typename T> // spec for ok
-struct can_call_IReval<T, std::void_t<decltype(IReval<environment<>>(std::declval<T>()))>> : std::true_type {};
-
-template<typename T, bool CanCall = can_call_IReval<T>::value> // isnt this basically std::enable_if?
-struct eval_result_helper {
-    using type = decltype(IReval<environment<>>(T{}));
-};
-
-template<typename T>
-struct eval_result_helper<T, false> {
-    using type = void;
-};
 
 auto main_str = constexpr_string(R"(
-(+ 1 2)
+(cons 1 2)
 )");
 
 using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
@@ -41,21 +26,24 @@ int main(){
     std::cout << main_str() << '\n';
     std::cout << '\n';
 
-
+    /** /
     std::cout << ":::: tokenization_result_w_whitespaces ::::" << '\n';
-    pretty_print(demangle<tokenization_result_w_whitespaces>());
+    std::cout << replace_chars(demangle<tokenization_result_w_whitespaces>()) << '\n';
     std::cout << '\n';
+    /**/
 
     std::cout << ":::: formatted tokenization result ::::" << '\n';
-    std::cout << replaceWhitespace(demangle<tokenization_result_w_whitespaces>()) << std::endl;
+    std::cout << (replaceWhitespace(replace_chars(demangle<tokenization_result_w_whitespaces>()))) << std::endl;
     std::cout << '\n';
     
+    /** /
     std::cout << ":::: cleaned ::::" << '\n';
-    pretty_print(demangle<tb_evaluated>());
+    std::cout << replace_chars(demangle<tb_evaluated>()) << '\n';
     std::cout << '\n';
-    
+    /**/
+
     std::cout << ":::: eval res ::::" << '\n';
-    pretty_print(demangle<eval_result>());
+    std::cout << replace_chars(demangle<eval_result>()) << '\n';
     return 0;
 }
 

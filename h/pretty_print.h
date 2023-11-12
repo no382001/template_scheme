@@ -191,7 +191,7 @@ namespace RemoveWhitespace {
 
 }
 
-void pretty_print(std::string str) {
+auto replace_chars(std::string str) {
 	// delete all instances of struct and any whitespace in the string
 	auto clean = std::regex_replace(str, std::regex(R"((struct )|( ))"), "");
 
@@ -204,7 +204,15 @@ void pretty_print(std::string str) {
         result.replace(match.position(), match.length(), 1, achar);
     }
 
-    std::cout << result << std::endl;
+    result.erase(std::remove(result.begin(), result.end(), ','), result.end());
+    
+    std::regex c_list_re("c_list<([^>]+)>");
+    std::string result2 = std::regex_replace(result, c_list_re, "$1");
+
+    //std::regex brackets_re("list<token_list<([^>]+)>>");
+    //std::string result3 = std::regex_replace(result2, brackets_re, "m $1 m");
+
+    return result2;
 }
 
 template <typename T>
