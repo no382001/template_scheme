@@ -131,3 +131,59 @@ auto constexpr if_proc(Predicate, Then, Else){
 		return IReval<Env>(wrap<Else>{});
 	}													
 }
+
+template <typename Env, typename A,typename B>
+auto constexpr make_cons(A,B){
+	using first = decltype(IReval<Env>(make_wrap(make_list(A{}))));
+	using second = decltype(IReval<Env>(make_wrap(make_list(A{}))));
+	return cons<first,second>{};
+}
+
+template <typename Env, typename A, typename... Args>
+auto constexpr eval_every_member_for_cons_list(A,Args...){
+    using curr = decltype(make_cons_list(IReval<Env>(make_wrap(A{}))));
+    if constexpr (sizeof...(Args) == 0){
+        return make_cons_list(curr{});
+    } else {
+        using second = decltype(IReval<Env>(make_wrap(Args{}...)));
+        return make_cons_list(curr{},second{});
+    }
+}
+
+
+template <typename A, typename B>
+auto constexpr car(cons<A,B>) -> A {}
+
+using cartest = decltype(car(cons<int,void>{}));
+static_assert(is_same_type<cartest,int>,"");
+
+
+template <typename A, typename B>
+auto constexpr cdr(cons<A,B>) -> B {}
+
+using cartest2 = decltype(cdr(cons<int,void>{}));
+static_assert(is_same_type<cartest2,void>,"");
+
+template <typename A, typename... Args>
+auto constexpr car(cons_list<A,Args...>){
+	if constexpr (sizeof...(Args) == 0){
+		static_assert(DELAYED_FALSE,"car called with 1 argument");
+	} else {
+		return A{};
+	}
+}
+
+using cartest3 = decltype(car(cons_list<int,void>{}));
+static_assert(is_same_type<cartest3,int>,"");
+
+template <typename A, typename... Args>
+auto constexpr cdr(cons_list<A,Args...>){
+	if constexpr (sizeof...(Args) == 0){
+		static_assert(DELAYED_FALSE,"car called with 1 argument");
+	} else {
+		return cons_list<Args...>{};
+	}
+}
+
+using cartest4 = decltype(cdr(cons_list<int,void>{}));
+static_assert(is_same_type<cartest4,cons_list<void>>,"");
