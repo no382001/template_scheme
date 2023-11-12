@@ -112,6 +112,7 @@ struct scm_define {};
 struct scm_let {};
 struct scm_lambda {};
 struct scm_cons {};
+struct scm_list {};
 
 IS_SELF_EVALUATING(scm_if);
 IS_SELF_EVALUATING(scm_true);
@@ -119,6 +120,7 @@ IS_SELF_EVALUATING(scm_false);
 IS_SELF_EVALUATING(scm_define);
 IS_SELF_EVALUATING(scm_lambda);
 IS_SELF_EVALUATING(scm_cons);
+IS_SELF_EVALUATING(scm_list);
 
 template <typename Env,typename Predicate, typename Then, typename Else>
 auto constexpr if_proc(Predicate, Then, Else){

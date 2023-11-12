@@ -8,7 +8,8 @@
 
 
 auto main_str = constexpr_string(R"(
-(cons 1 2)
+(list
+    1 (+ 1 2))
 )");
 
 using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
@@ -20,6 +21,7 @@ using clean_expression = typename replace_nested_list<tokens>::type; // convert 
 using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
 // evaluate expression
 using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
+
 
 int main(){
     std::cout << ":::: string to parse ::::" << '\n';

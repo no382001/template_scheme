@@ -173,6 +173,18 @@ auto constexpr make_cons(A,B){
 }
 
 template <typename Env, typename A, typename... Args>
+auto constexpr eval_every_member_for_cons_list(A,Args...){
+    using curr = decltype(make_cons_list(IReval<Env>(make_wrap(A{}))));
+    if constexpr (sizeof...(Args) == 0){
+        return make_cons_list(curr{});
+    } else {
+        using second = decltype(IReval<Env>(make_wrap(Args{}...)));
+        return make_cons_list(curr{},second{});
+    }
+}
+
+
+template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>){
     
     using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
@@ -188,6 +200,8 @@ auto constexpr eval_members(list<A,Args...>){
             } else {
                 return make_cons<Env>(Args{}...);
             }
+        } else if constexpr (is_same_type<ev_curr,scm_list>){
+            return eval_every_member_for_cons_list<Env>(Args{}...);
         } else if constexpr (is_same_type<ev_curr,define_tag>){
             return eval_define_impl<Env>(list<A,Args...>{});
         } else {
