@@ -1,9 +1,9 @@
 
-A rudimentary scheme interpreter made with C++ templates. After reaching chapter 4 in SICP while messing around in CPP i had this bright idea, since templates are Turing complete why not try to make the Scheme meta-circular evaluator all in constexpr time.
+A rudimentary scheme interpreter made with C++ templates.
 <br><br>
-I've seen some similar projects but they used metaprogramming techniques that were totally foreign to me then so the code is not uniform at all, sometimes i use `decltype` sometimes i dont, sometimes its <b>trailing type</b> sometimes its not, so that might make it hard to read (maybe I'll fix them sometime).
+I've seen some similar projects but they used metaprogramming techniques that were totally foreign to me then so the code is not uniform at all, sometimes i use `decltype` sometimes i dont, sometimes its <b>trailing type</b> sometimes its not, so that might make it hard to read.
 <br><br>
-So yeah, no meta-circular evaluator (yet?), but I've got to the first big milestone.<br>
+### mostly outdated idk
 ## goals
 ### [x] being able to evaluate Fibonacchi
 #### steps required:
@@ -14,6 +14,9 @@ So yeah, no meta-circular evaluator (yet?), but I've got to the first big milest
  - [x] implement a tokenizer from string to types in compile time
  - [x] implement `define`
  - [x] plug them together
+### [ ] language components for atleast a Scheme implementation of Newtons method
+ (this could be considered a complex program)
+ - [ ] fix bugs and move forward
 
 ## Table of Contents
 - the evaluator
