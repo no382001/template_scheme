@@ -8,10 +8,25 @@
 
 auto main_str = constexpr_string(R"(
 (
-  (define n (+ 22 22))
-  (+ n 1)
+  (define (negative x) (- 0 x))
+  (define (remainder a b)
+    (- a (* (/ a b) b)))
+  (define (abs x)
+    (if (< x 0)
+      (- x (* 2 x))
+      x))
+  (abs (negative 15))
 )
 )");
+
+// the templates intersect sometimes and give a wrong result???
+/*
+(define (neg x) (- 0 x))
+(neg 2) ; is fine
+
+(define (neg n) (- 0 n))
+(neg 2) ; is not
+*/
 
 using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
 // remove whitespaces
@@ -21,7 +36,7 @@ using clean_expression = typename replace_nested_list<tokens>::type; // convert 
 // replace outer wrap<...> with tokenized<...>
 using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
 // evaluate expression
-using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
+using eval_result = decltype(IReval<environment<>>(IRcar(tb_evaluated{})));
 
 
 int main(){
@@ -49,3 +64,5 @@ int main(){
     std::cout << replace_chars(demangle<eval_result>()) << '\n';
     return 0;
 }
+
+
