@@ -8,7 +8,7 @@
 #include "env.h"
 
 // fwd declare, bc recursively included
-template <typename Env = init_env, typename A, typename... Args>
+template <typename Env, typename A, typename... Args>
 auto constexpr list_of_values(A,Args...);
 
 template <typename Env, typename Exp>
@@ -395,7 +395,7 @@ auto constexpr list_of_values(A,Args...){
         return only_operand{};
     } else {
         using first_operand = decltype(IReval<Env>(wrap<A>{}));
-        using second = decltype(list_of_values(Args{}...));
+        using second = decltype(list_of_values<Env>(Args{}...));
         return make_list(first_operand{},second{});
     }
 }
