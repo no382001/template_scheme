@@ -76,8 +76,10 @@ auto constexpr define_var_name_helper_integer(list<A,Args...>){
 }
 /**/
 
+
 template <typename A>
 auto constexpr define_var_name_helper_integer(A){
+// probably pass the operands so it can evaluate in the context of the define, it its a define_tag
     if constexpr (is_integer_v<A>){
         return A{};
     } else {

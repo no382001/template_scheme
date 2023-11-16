@@ -1,28 +1,17 @@
-:::: string to parse ::::
-
+; 1.) defined procedures with any primitive procedure dont evaluate properly, they are either 1 or -1 depending on parity
 (
   (define (negative n) (- 0 n))
-  (negative 12)
+  (define (positive n) (+ 0 n))
+  (negative 12) ; -1
+  (positive 12) ; 1
+)
+; even this
+(
+  (define n (+ 22 22))
+  (+ n 1)
 )
 
-
-:::: formatted tokenization result ::::
-token_list<
-list<token_list<
-  list<token_list<scm_define list<token_list<negative n>> list<token_list<subtraction integer<0> n>>>>
-  list<token_list<negative integer<12>>>
->>
->
-
-:::: eval res ::::
-integer<-1>
-
-while simply (- 0 12) is -12 ???  
-
-
-
-:::: string to parse ::::
-
+; found by trying to evaluate
 (
   (define (negative n) (- 0 n))
   (define (remainder a b)
@@ -34,20 +23,21 @@ while simply (- 0 12) is -12 ???
   (negative 15)
 )
 
+; 2.) comments inside the string would be nice
 
-:::: formatted tokenization result ::::
-token_list<
-list<token_list<
-  list<token_list<scm_define list<token_list<negative n>> list<token_list<subtraction integer<0> n>>>>
-  list<token_list<scm_define list<token_list<remainder a b>>
-    list<token_list<subtraction a list<token_list<multiplication list<token_list<division a b>> b>>>>>>
-  list<token_list<scm_define list<token_list<abs x>>
-    list<token_list<scm_if list<token_list<less x integer<0>>>
-      list<token_list<subtraction x list<token_list<multiplication integer<2> x>>>>
-      x>>>>
-  list<token_list<negative integer<15>>>
->>
->
+; 3.) a keyword that returns the content of the current env in scope would be nice
 
-:::: eval res ::::
-integer<-1>
+; 4.) define in body of define only works if in expression so
+; might be easy to fix by wrapping and evaling again but messy
+(
+  (define (return-n-plus-two n)
+   (define x 2)
+   (+ n x))
+) ; results in an error, the body is just (define x 2) the (+ n x) is just gone
+
+(
+  (define (return-n-plus-two n)
+   (
+    (define x 2)
+    (+ n x)))
+) ; works

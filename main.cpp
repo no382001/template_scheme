@@ -8,14 +8,8 @@
 
 auto main_str = constexpr_string(R"(
 (
-  (define (negative n) (- 0 n))
-  (define (remainder a b)
-    (- a (* (/ a b) b)))
-  (define (abs x)
-    (if (< x 0)
-      (- x (* 2 x))
-      x))
-  (negative 15)
+  (define n (+ 22 22))
+  (+ n 1)
 )
 )");
 
@@ -27,7 +21,7 @@ using clean_expression = typename replace_nested_list<tokens>::type; // convert 
 // replace outer wrap<...> with tokenized<...>
 using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
 // evaluate expression
-using eval_result = decltype(IReval<environment<>>(IRcar(tb_evaluated{})));
+using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
 
 
 int main(){
@@ -55,24 +49,3 @@ int main(){
     std::cout << replace_chars(demangle<eval_result>()) << '\n';
     return 0;
 }
-
-
-// lambda is also missing
-
-// eval wrap<list<...>>
-// eval quote<wrap<list<..>>>
-// eval wrap<list<..>>  quote does not matter here, probably eval is redundant when there is no quote
-
-/** /
-(
-    (define (add-2 x)
-        ((define y 2) (+ x y)))
-    (add-2 2)
-)
-
-i dont remember when it happened but it has to be inside the body to count
-its ptobably when i implemented compound procedures, and only did ones with one body, their 'body' is the expression itself
-so it must be an expression
-    i could make define an expression, 
-
-/**/
