@@ -86,7 +86,7 @@ namespace lists {
     static_assert(is_same_type<listtest5,listres5>,"3 list<obj> in list constructor and empty list inbetween them, collapses into 3 list<obj> in list");
 
     // (apply addtion '(1 2 3))
-    using appltest1 = decltype(IRapply(addition{},wrap<list<integer<1>,integer<2>,integer<3>>>{}));
+    using appltest1 = decltype(IRapply<environment<>>(addition{},wrap<list<integer<1>,integer<2>,integer<3>>>{}));
 
     using map_pair_test = decltype(map_pair(list<integer<1>>{},list<integer<1>>{}));
     static_assert(is_same_type<map_pair_test,environment<table_entry<integer<1>,variable,integer<1>>>>,"map_pair_test");
@@ -243,7 +243,7 @@ namespace fibonacchi {
     using asdasdasdasd3 = decltype(make_list(make_list(integer<2>{}, integer<1>{}),integer<2>{}));
 
     // this isnt valid but this is what it gets, and it can still eval (what?)
-    using asd0asidas = decltype(IRapply(lesseq{},wrap<list<list<subtraction, integer<3>, integer<2>>, integer<2>>>{}));
+    using asd0asidas = decltype(IRapply<environment<>>(lesseq{},wrap<list<list<subtraction, integer<3>, integer<2>>, integer<2>>>{}));
     using asd0asidasasa = decltype(make_list(asd0asidas{}));
 
     using fibonacchi_case = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<3>>>>{}));

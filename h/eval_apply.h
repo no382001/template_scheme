@@ -14,7 +14,7 @@ auto constexpr list_of_values(A,Args...);
 template <typename Env, typename Exp>
 auto constexpr IReval(wrap<Exp>);
 
-template < typename Proc, typename Args >
+template <typename Env, typename Proc, typename Args >
 auto constexpr IRapply(Proc,wrap<Args>);
 
 // temp location for map_pair
@@ -104,11 +104,11 @@ struct delayed_application_helper;
 // if ev_curr is scm_apply
 template <>
 struct delayed_application_helper<scm_apply> {
-    template <typename A,typename... Args>
+    template <typename Env, typename A,typename... Args>
     static auto apply(A,quote,wrap<list<Args...>>) {
-        return IRapply(A{},wrap<list<Args...>>{});
+        return IRapply<Env>(A{},wrap<list<Args...>>{});
     }
-    template <typename A,typename... Args>
+    template <typename Env, typename A,typename... Args>
     static auto apply(A,wrap<list<Args...>>) {
         static_assert(DELAYED_FALSE,"(apply procedure '(list ...)) QUOTE IS MISSING FROM LIST");
     }
@@ -117,15 +117,16 @@ struct delayed_application_helper<scm_apply> {
 // if ev_curr is anything else
 template <typename T>
 struct delayed_application_helper {
-    template <typename... Args>
+    template <typename Env,typename... Args>
     static auto apply(Args... args) {
         return;
     }
 };
 
-template <typename T, typename... Args>
+template <typename Env, typename T, typename... Args>
 auto constexpr delayed_application(Args... args) {
-    return delayed_application_helper<T>::apply(args...);
+    return delayed_application_helper<T>::template apply<Env>(args...);
+    // wth? `template indicates a template method`
 }
 // -- 
 
@@ -216,7 +217,7 @@ auto constexpr eval_members(list<A,Args...>){
             using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
             
             // if ev_curr is an explicit call to apply
-            using delayed_app_res = decltype(delayed_application<ev_curr>(Args{}...));
+            using delayed_app_res = decltype(delayed_application<Env,ev_curr>(Args{}...));
 
             if constexpr (!is_same_type<void,delayed_app_res>){
                 return delayed_app_res{};
@@ -248,10 +249,10 @@ auto constexpr eval_members(wrap<templated_int<a>>){
 
 
 
-template < typename Proc, typename Args >
+template <typename Env, typename Proc, typename Args >
 auto constexpr IRapply(Proc,wrap<Args>) {
 
-    using evaluated_operands = decltype(IReval<init_env>(wrap<Args>{}));
+    using evaluated_operands = decltype(IReval<Env>(wrap<Args>{}));
 	using prim_proc = decltype(apply_primitve_procedure(Proc{},evaluated_operands{}));
     
     // cant instantiate void, so:
@@ -312,7 +313,7 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     } else {
         using op = decltype(IRcar(result{}));
         using opnds = decltype(IRcdr(result{})); 
-        return IRapply(op{},wrap<opnds>{});
+        return IRapply<Env>(op{},wrap<opnds>{});
     }
 }
 
@@ -353,15 +354,15 @@ auto constexpr IReval(wrap<Exp>) {
                 if constexpr (is_prim_proc(IRcar(app_operands{}))){
 
                     using evaluated_just_in_case = decltype(IReval<Env>(wrap<app_operands>{}));
-                    using proc_res = decltype(IRapply(indicator{},wrap<evaluated_just_in_case>{}));
+                    using proc_res = decltype(IRapply<Env>(indicator{},wrap<evaluated_just_in_case>{}));
                     return proc_res{};
                 } else {
 
-                    using proc_res = decltype(IRapply(indicator{},wrap<app_operands>{}));
+                    using proc_res = decltype(IRapply<Env>(indicator{},wrap<app_operands>{}));
                     return proc_res{};
                 }
             } else {
-                using proc_res = decltype(IRapply(indicator{},wrap<app_operands>{}));
+                using proc_res = decltype(IRapply<Env>(indicator{},wrap<app_operands>{}));
                 return proc_res{};
             }
 
