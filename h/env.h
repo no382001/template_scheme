@@ -35,6 +35,7 @@ auto constexpr list_search(candidate,T<A,Args...>){
 	} else if constexpr (sizeof...(Args) > 0) { // if there are still entries left to search
         return list_search(candidate{},T<Args...>{});
     } else {
+        //static_assert(DELAYED_FALSE,"not found");
         return;
     }
 }

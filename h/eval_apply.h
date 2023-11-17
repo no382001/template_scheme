@@ -7,6 +7,32 @@
 #include "primitive_operations.h"
 #include "env.h"
 
+// -- contains
+
+// non template type
+template <typename T, typename... Types>
+struct contains_type : std::disjunction<std::is_same<T, Types>...> {};
+
+// nested
+template <typename T, template <typename...> class TT, typename... Types>
+struct contains_type<T, TT<Types...>> : std::disjunction<contains_type<T, Types>...> {};
+
+// base case recursion
+template <typename T>
+struct contains_type<T> : std::false_type {};
+
+// helper
+template <typename T, typename List>
+using contains_type_t = contains_type<T, List>;
+
+using my_list = token_list<list<int, token_list<list<float, double>, char>>>;
+static_assert(contains_type_t<int, my_list>::value, "list should contain int");
+static_assert(!contains_type_t<long, my_list>::value, "list should not contain long");
+static_assert(contains_type_t<float, my_list>::value, "list should contain float");
+static_assert(contains_type_t<double, my_list>::value, "list should contain double");
+
+// -- !contains
+
 // fwd declare, bc recursively included
 template <typename Env, typename A, typename... Args>
 auto constexpr list_of_values(A,Args...);
@@ -152,9 +178,19 @@ auto constexpr eval_define_impl(list<A,Args...>){
     using body = decltype(IRcddr(without_wrapper{}));
     using extracted_body = decltype(define_var_name_helper_integer(body{}));
 
+
     // if there is no argument, only a name, then its a variable, otherwise a procedure
     using name = decltype(define_var_name_helper_char(params{}));
     
+    // recursively defined
+
+    // i dont get it, it supposedly dies when it tries to search for the definition of the recursive procedure but does not find it
+    // so it would make sense for me to, find out, beforehand, that its recursive or not
+    // so that i can pass an env to it that already has the definition which is the unevaluated body
+    // but isnt that what this whole function does?
+
+    // in ir eval, var_res
+
     if constexpr (is_c_list(params{}) || is_char_v<params>){ // variable
 
         // whenever a variable gets replaced the expression gets passed back to this layer
@@ -173,8 +209,7 @@ auto constexpr eval_define_impl(list<A,Args...>){
 
         using extended_environment = decltype(extend_environment<Env>(entry{}));
         return eval_members<extended_environment>(make_wrap(make_list(Args{}...)));
-        
-        // maybe i should return a result line by line? could be good for debugging
+        // this goes void bc operation cant be made on define_tag?
     }
 }
 
@@ -188,6 +223,10 @@ auto constexpr eval_members(list<A,Args...>){
         return ev_curr{};
     } else {
         if constexpr (is_same_type<ev_curr,scm_define>) {
+            // maybe check recursion from here?
+            // extract the name of the proc
+            // check if it the body contains it or not if yes return recusively_define_tag
+            // otherwise this
             return define_tag{};
         } else if constexpr (is_same_type<ev_curr,scm_cons>){
             if constexpr (sizeof...(Args) != 2){
@@ -305,7 +344,7 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     // handle pairing differently
     using single_pair = decltype(apply_compund_proc_pair_helper(helped_arglist{},evald_opnds{}));
     // extend env with argument a operand pair
-    using temp_ext_env = decltype(extend_environment<init_env>(single_pair{}));
+    using temp_ext_env = decltype(single_pair{});
     using result = decltype(IReval<temp_ext_env>(expression{}));
 
     if constexpr (is_integer_v<result>) { // TODO: add all self evaluating types
@@ -325,6 +364,17 @@ auto constexpr IReval(wrap<Exp>) {
     if constexpr (is_char_v<Exp> || is_c_list(Exp{})){
         // look it up in env
         using var_res = decltype(list_search(Exp{},Env{}));
+        
+        // not found in env, but searched for, could indicate that its a recursive definition
+        // in which case if it is, extend env with the definition
+        if constexpr (is_same_type<var_res,void>
+            && contains_type_t<var_res, extracted_body>::value){
+            // maybe pass back a recursive_definition tag?
+            // and catch it outside? like define_tag
+            // getting more and more disjointed
+        }
+
+
         // get the type of expression
         using tag = decltype(IRcadr(var_res{}));
 

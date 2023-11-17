@@ -1,4 +1,4 @@
-#include "tests.h"
+//#include "tests.h"
 #include "h/eval_apply.h"
 #include "h/tokenizer.h"
 #include "h/pretty_print.h"
@@ -8,17 +8,42 @@
 
 auto main_str = constexpr_string(R"(
 (
-  (define (negative x) (- 0 x))
-  (define (remainder a b)
+  (define (func x) (if (< x 1) 1 (+ (func (- x 1) 1))))
+  (func 3)
+)
+)");
+
+/*
+
+(define (negative x) (- 0 x))
+  
+  (define (quotient a b)
     (- a (* (/ a b) b)))
+  
   (define (abs x)
     (if (< x 0)
       (- x (* 2 x))
       x))
-  (abs (negative 15))
-)
-)");
+    
+  (define precision 1000)
 
+  (define (improve n guess)
+    (/ (+ guess (/ (* n precision) guess)) 2))
+
+  (define (good-enough? n guess)
+    (< (abs (- (* guess guess) (* n precision))) precision))
+
+  (define (sqrt-iter n guess)
+    (if (good-enough? n guess)
+        guess
+        (sqrt-iter n (improve n guess))))
+
+  (define (sqrt-newton n)
+    (sqrt-iter n (* n precision)))
+  
+  (sqrt-newton 25)
+
+*/
 // the templates intersect sometimes and give a wrong result???
 /*
 (define (neg x) (- 0 x))
