@@ -190,6 +190,9 @@ auto constexpr eval_define_impl(list<A,Args...>){
     // but isnt that what this whole function does?
 
     // in ir eval, var_res
+    
+    // i dont understand how i would not be able to find it from here
+    // it didnt work tho, maybe contains_t is fucked as it is
 
     if constexpr (is_c_list(params{}) || is_char_v<params>){ // variable
 

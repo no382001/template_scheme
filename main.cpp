@@ -63,6 +63,7 @@ using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
 // evaluate expression
 using eval_result = decltype(IReval<environment<>>(IRcar(tb_evaluated{})));
 
+//auto constexpr vcalu = contains_type_t<scm_if,tokens>::value;
 
 int main(){
     std::cout << ":::: string to parse ::::" << '\n';
