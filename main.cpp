@@ -8,12 +8,26 @@
 
 auto main_str = constexpr_string(R"(
 (
-  (define (func x) (if (< x 1) 1 (+ (func (- x 1) 1))))
-  (func 3)
+  (define (sum-up-to n)
+  (if (= n 0)
+      0
+      (+ n (sum-up-to (- n 1)))))
+  (sum-up-to 2)
 )
 )");
 
+
+
 /*
+the problem might be that i want to bind a value to a variable but at the same time during the expansion of the expression
+the same value comes up and list_search never can find the right one, hence the infinite loop, since append puts it in front
+  option 1: search from left side
+  option 2: append from head, creating a kind of stack of same name variables
+  
+  ...
+  table_entry<n, variable, integer<2> >, 
+	table_entry<n, variable, integer<1> > >
+  ...
 
 (define (negative x) (- 0 x))
   

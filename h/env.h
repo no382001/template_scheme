@@ -29,7 +29,9 @@ auto constexpr extend_environment(Entry){
 // returns void if entry was not found
 template <typename candidate,template <class,class> typename T, typename A, typename... Args>
 auto constexpr list_search(candidate,T<A,Args...>){
+
     using car_of_entry = decltype(IRcar(A{}));
+
     if constexpr (is_same_type<candidate,car_of_entry>){
         return A{};
 	} else if constexpr (sizeof...(Args) > 0) { // if there are still entries left to search

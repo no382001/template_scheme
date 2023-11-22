@@ -178,21 +178,8 @@ auto constexpr eval_define_impl(list<A,Args...>){
     using body = decltype(IRcddr(without_wrapper{}));
     using extracted_body = decltype(define_var_name_helper_integer(body{}));
 
-
     // if there is no argument, only a name, then its a variable, otherwise a procedure
     using name = decltype(define_var_name_helper_char(params{}));
-    
-    // recursively defined
-
-    // i dont get it, it supposedly dies when it tries to search for the definition of the recursive procedure but does not find it
-    // so it would make sense for me to, find out, beforehand, that its recursive or not
-    // so that i can pass an env to it that already has the definition which is the unevaluated body
-    // but isnt that what this whole function does?
-
-    // in ir eval, var_res
-    
-    // i dont understand how i would not be able to find it from here
-    // it didnt work tho, maybe contains_t is fucked as it is
 
     if constexpr (is_c_list(params{}) || is_char_v<params>){ // variable
 
@@ -212,6 +199,7 @@ auto constexpr eval_define_impl(list<A,Args...>){
 
         using extended_environment = decltype(extend_environment<Env>(entry{}));
         return eval_members<extended_environment>(make_wrap(make_list(Args{}...)));
+        //return IReval<extended_environment>(make_wrap(return_value{}));
         // this goes void bc operation cant be made on define_tag?
     }
 }
@@ -226,10 +214,6 @@ auto constexpr eval_members(list<A,Args...>){
         return ev_curr{};
     } else {
         if constexpr (is_same_type<ev_curr,scm_define>) {
-            // maybe check recursion from here?
-            // extract the name of the proc
-            // check if it the body contains it or not if yes return recusively_define_tag
-            // otherwise this
             return define_tag{};
         } else if constexpr (is_same_type<ev_curr,scm_cons>){
             if constexpr (sizeof...(Args) != 2){
@@ -347,7 +331,9 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     // handle pairing differently
     using single_pair = decltype(apply_compund_proc_pair_helper(helped_arglist{},evald_opnds{}));
     // extend env with argument a operand pair
-    using temp_ext_env = decltype(single_pair{});
+
+    using temp_ext_env = decltype(extend_environment<Env>(single_pair{}));
+    static_assert(DELAYED_FALSE,"");
     using result = decltype(IReval<temp_ext_env>(expression{}));
 
     if constexpr (is_integer_v<result>) { // TODO: add all self evaluating types
@@ -368,16 +354,6 @@ auto constexpr IReval(wrap<Exp>) {
         // look it up in env
         using var_res = decltype(list_search(Exp{},Env{}));
         
-        // not found in env, but searched for, could indicate that its a recursive definition
-        // in which case if it is, extend env with the definition
-        if constexpr (is_same_type<var_res,void>
-            && contains_type_t<var_res, extracted_body>::value){
-            // maybe pass back a recursive_definition tag?
-            // and catch it outside? like define_tag
-            // getting more and more disjointed
-        }
-
-
         // get the type of expression
         using tag = decltype(IRcadr(var_res{}));
 
