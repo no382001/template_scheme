@@ -13,6 +13,8 @@ auto main_str = constexpr_string(R"(
 )
 )");
 
+auto constexpr r = _log(2,8);
+
 /*
   (define (negative x) (- 0 x))
   

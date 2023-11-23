@@ -218,49 +218,6 @@ namespace prim_procedures {
     static_assert(is_same_type<testr22elv22,void>,"not prim proc");
 };
 
-// ---------------FIBONACCHI RELATED----------------
-// in init env
-/*
-(define (fib x)
-    (if (<= x 2)
-    1
-    (+ (fib (- x 1)) (fib (- x 2))))))
-*/
-/** /
-namespace fibonacchi {
-    using fibonacchi_base_case = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<1>>>>{}));
-    static_assert(is_same_type<fibonacchi_base_case,integer<1>>,"fib 1");
-
-    using fibonacchi_base_case2 = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<2>>>>{}));
-    static_assert(is_same_type<fibonacchi_base_case2,integer<1>>,"fib 2");
-
-    using resfib = decltype(make_list(fibonacchi_base_case{}));
-
-    using resfibasd = decltype(IReval<init_env>(wrap<list<lesseq,c_<110>,integer<2>>>{}));
-    using resfibasdsa = decltype(make_list(resfibasd{}));
-
-    using asdasdasdasd = decltype(list<list<integer<2>, integer<1> >, integer<2> >{});
-    using asdasdasdasd2 = decltype(make_list(list<integer<2>, integer<1>>{},integer<2>{}));
-    using asdasdasdasd3 = decltype(make_list(make_list(integer<2>{}, integer<1>{}),integer<2>{}));
-
-    // this isnt valid but this is what it gets, and it can still eval (what?)
-    using asd0asidas = decltype(IRapply<environment<>>(lesseq{},wrap<list<list<subtraction, integer<3>, integer<2>>, integer<2>>>{}));
-    using asd0asidasasa = decltype(make_list(asd0asidas{}));
-
-    using fibonacchi_case = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<3>>>>{}));
-    static_assert(is_same_type<fibonacchi_case,integer<2>>,"fib 3");
-
-    using fibonacchi_case2 = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<4>>>>{}));
-    static_assert(is_same_type<fibonacchi_case2,integer<3>>,"fib 4");
-
-    using fibonacchi_case3 = decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<6>>>>{}));
-    static_assert(is_same_type<fibonacchi_case3,integer<8>>,"fib 6");
-
-    using fibonacchi_case4 =
-        decltype(IReval<init_env>(wrap<list<fib_name,wrap<integer<30>>>>{}));
-    static_assert(is_same_type<fibonacchi_case4,integer<832040>>,"fib 30");
-};
-/**/
 
 namespace replace_nested_list {
     // token_list -> wrap

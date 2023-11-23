@@ -1,5 +1,3 @@
-; 2.) comments inside the string would be nice
-
 ; 3.) a keyword that returns the content of the current env in scope would be nice
 
 ; 4.) define in body of define only works if in expression so

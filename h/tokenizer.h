@@ -67,7 +67,7 @@ constexpr auto find_end_of_list(Lambda lambda){
 
 
 
-// only c_ is a character, ints are currently not even if they are in the same stream as the char list
+// only c_ is a character, ints are currently not, even if they are in the same stream as the char list
 template <typename Lambda, size_t Index = 0, size_t end_of_char_list>
 constexpr auto tokenize_char_list(Lambda str_lambda) {
 	constexpr auto str = str_lambda();
@@ -95,6 +95,8 @@ constexpr auto make_keyword_name(Lambda str_lambda) {
 	return tokenize_char_list<Lambda,0,end>(str_lambda);
 }
 
+// check somewhere if the comp proc is a keyword
+// expect void for return
 template <typename... Args>
 constexpr auto deduce_keyword_type(c_list<Args...>) {
 	return;	
@@ -109,7 +111,6 @@ constexpr auto deduce_keyword_type(keyword_##corresponding_type) { 	            
 
 KEYWORD("if",scm_if);
 KEYWORD("define",scm_define);
-//KEYWORD("let",scm_let);
 KEYWORD("cons",scm_cons);
 KEYWORD("list",scm_list);
 KEYWORD("car",scm_car);
