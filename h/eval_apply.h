@@ -332,8 +332,7 @@ auto constexpr apply_compund_proc(Op,Evaluated_opnds) {
     using single_pair = decltype(apply_compund_proc_pair_helper(helped_arglist{},evald_opnds{}));
     // extend env with argument a operand pair
 
-    using temp_ext_env = decltype(extend_environment<Env>(single_pair{}));
-    static_assert(DELAYED_FALSE,"");
+    using temp_ext_env = decltype(extend_environment_front<Env>(single_pair{}));
     using result = decltype(IReval<temp_ext_env>(expression{}));
 
     if constexpr (is_integer_v<result>) { // TODO: add all self evaluating types

@@ -25,6 +25,11 @@ auto constexpr extend_environment(Entry){
     return Env::append(Entry{});
 }
 
+template <typename Env, typename Entry>
+auto constexpr extend_environment_front(Entry){
+    return Entry::append(Env{});
+}
+
 // search a list of lists, where the car of entry list is the identifier
 // returns void if entry was not found
 template <typename candidate,template <class,class> typename T, typename A, typename... Args>
