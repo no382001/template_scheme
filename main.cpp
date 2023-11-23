@@ -1,4 +1,4 @@
-//#include "tests.h"
+#include "tests.h"
 #include "h/eval_apply.h"
 #include "h/tokenizer.h"
 #include "h/pretty_print.h"

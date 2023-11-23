@@ -312,7 +312,7 @@ namespace double_define {
     using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
     static_assert(is_same_type<eval_result,integer<22>>);
 };
-/** /
+/**/
 namespace FullyEvaldFib {
     auto main_str = constexpr_string("((define (fib x) (if (< x 3) 1 (+ (fib (- x 1)) (fib (- x 2))))) (fib 3))");
     using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper

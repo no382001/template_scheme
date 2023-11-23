@@ -20,11 +20,14 @@ template <typename... columns>
 struct table_entry {};
 IS_X_LIST(table_entry);
 
+// push back
 template <typename Env, typename Entry>
 auto constexpr extend_environment(Entry){
     return Env::append(Entry{});
 }
 
+
+// push front
 template <typename Env, typename Entry>
 auto constexpr extend_environment_front(Entry){
     return Entry::append(Env{});
