@@ -442,3 +442,45 @@ namespace broken_syntax_for_inner_defines_but_works {
     using eval_result = decltype(IReval<environment<>>(IRcar(tb_evaluated{})));
     static_assert(is_same_type<eval_result,integer<4>>,"");
 };
+
+namespace sum_up_to_n {
+
+    auto main_str = constexpr_string(R"(
+(
+  (define (sum-up-to n)
+  (if (= n 0)
+      0
+      (+ n (sum-up-to (- n 1)))))
+  (sum-up-to 2)
+)
+    )");
+
+    using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
+    // remove whitespaces
+    using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
+    // replace token_list<list<...>> with wrap<list<...>>
+    using clean_expression = typename replace_nested_list<tokens>::type; // convert list
+    // replace outer wrap<...> with tokenized<...>
+    using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
+    // evaluate expression
+    using eval_result = decltype(IReval<environment<>>(IRcar(tb_evaluated{})));
+    static_assert(is_same_type<eval_result,integer<3>>,"");
+};
+
+namespace comments {
+
+    auto main_str = constexpr_string(R"(
+(
+  ;this is a comment within the midst of tokens
+  (+ 1 1)
+  ; this is also a comment, until its a newline
+)
+)");
+
+    using tokenization_result_w_whitespaces = decltype(tokenize(main_str));
+    using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
+    using clean_expression = typename replace_nested_list<tokens>::type; // convert list
+    using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
+    using eval_result = decltype(IReval<environment<>>(IRcar(tb_evaluated{})));
+    static_assert(is_same_type<eval_result,integer<2>>,"");
+};

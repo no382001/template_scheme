@@ -52,6 +52,10 @@ constexpr auto deduce_token_type() {
 		return equal{};
 	} else if constexpr (C == '\n') { // needed for multiline string compatibility like R"()" 
 		return whitespace<C>{};
+	} else if constexpr (C == ';') {
+		return comment_start{};
+	} else if constexpr (C == ',') { // probably in comments
+		return whitespace<C>{};
 	} else {
 		static_assert(DELAYED_FALSE,"symbol not supported");
 	}

@@ -93,3 +93,5 @@ struct apply {};
 IS_SELF_EVALUATING(apply);
 struct eval {};
 IS_SELF_EVALUATING(eval);
+
+struct comment_start{};

@@ -35,6 +35,18 @@ constexpr auto find_first_non_c(Lambda lambda) {
 	}
 }
 
+template < int Index, typename Lambda >
+constexpr auto find_first_newline(Lambda lambda) {
+	constexpr auto str = lambda();
+	using type = decltype(deduce_token_type< str[Index] >());
+	if constexpr (is_same_type<type,whitespace<'\n'>>) {
+		return Index;
+	} else {
+		return find_first_newline< Index + 1 >(lambda);
+	}
+}
+
+
 // returns the index of the end of the list, layer safe
 template < int Index, int layer = 0, typename Lambda>
 constexpr auto find_end_of_list(Lambda lambda){
@@ -128,7 +140,11 @@ constexpr auto tokenize(Lambda str_lambda) {
 		// deduce the type of the current char
 		using curr = decltype(deduce_token_type< str[Index] >());
 
-		if constexpr (is_whitespace_v<curr>) {
+		if constexpr (is_same_type<curr,comment_start>){ // skip comments
+			auto constexpr next_newline = find_first_newline<Index>(str_lambda);
+			using second = decltype(tokenize<Lambda, next_newline>(str_lambda));
+			return make_token_list(second{});
+		} else if constexpr (is_whitespace_v<curr>) { // include whitespaces for later formatting	
 			using second = decltype(tokenize<Lambda, Index + 1>(str_lambda));
 			return make_token_list(curr{}, second{});
 		} else {
