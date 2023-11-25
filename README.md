@@ -61,9 +61,8 @@ static_assert(
 lets pretend that the next code is inside the `constexpr_string` function for syntax highlighting reasons
 
 ```scheme
-;you do have to use an extra quote for the body of the define whenever there are more than one things are in the body (this comment also works)
 (define (add-two x)
-    ((define y 2)
+    ((define y 2) ; extra quote on the body, kind of like begin
         (+ x y)))
 (add-two 2)
 ```
@@ -81,7 +80,6 @@ static_assert(
     >::value,"");
 ```
 ### demonstration of recursion
-lets pretend again... but also note that `(...)` is kind of like `begin`
 ```scheme
 (
     (define (fib x)
@@ -100,7 +98,7 @@ using tokenization_result = decltype(IRcar(tokenizer(input)));
 using res = decltype(IReval<environment<>>(tokenization_result{}));
 
 static_assert(
-    std::same<
+    std::is_same<
         res,
         integer<55>
     >::value);
@@ -111,38 +109,4 @@ static_assert(
 - The environment and other necessary elements are represented within the type system of C++ templates.
 
 ## Working with templates
-
-
-### Basics
-If we want to work in `constexpr` time, we could start with this but its not that exciting
-```cpp
-auto constexpr i = 1;
-```
-this is going to evaluate in compile time, so basically every occurrence of `i` is getting replaced by `1` but its done one layer after the preprocessor so its not like a macro
-
-knowing that you can put `constexpr` near a return type, you could write any algorithm in `purely functional` form (technically)
-```cpp
-constexpr int _log(int b, int n) {
-	return n < b ? 0 : _log(b, n / b) + 1;
-}
-
-auto constexpr r = _log(2,8); // 3
-```
-okay, now we know this. lets talk about `template arguments`, you can store `typenames` in them with no problem, let me show you an example
-
-<i>(still restricted to compile time)</i>
-```cpp
-template <int T>
-struct atom {};
-
-// after declaring this i could say
-using a = atom<int>;
-```
-yeah cool i can store types, but how do i make meaningful arthimetric with those? with `non-type templates` that must be of `integral type`
-
-```cpp
-template <int T>
-struct atom {};
-
-using a = atom<1>;
-```
+...
