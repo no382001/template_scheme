@@ -76,7 +76,7 @@ using res = decltype(IReval<environment<>>(tokenization_result{}));
 static_assert(
     std::is_same<
         res,
-        integer<2>>
+        integer<4>>
     >::value,"");
 ```
 ### demonstration of recursion
@@ -107,6 +107,36 @@ static_assert(
 
 - Scheme expressions are transformed into specialized C++ template structures.
 - The environment and other necessary elements are represented within the type system of C++ templates.
+
+## Running the project
+
+run `make && ./build/a.out` in the root directory, if your code is valid you should see the debug utilities writing something like this to the console:
+```
+:::: string to parse ::::
+(
+  (define (sum-up-to n)
+  (if (= n 0) ;this is a comment
+      0
+      (+ n (sum-up-to (- n 1)))))
+  (sum-up-to 2)
+)
+
+:::: formatted tokenization result ::::
+
+token_list<
+list<token_list<
+  list<token_list<scm_define list<token_list<sum-up-to n>>
+  list<token_list<scm_if list<token_list<equal n integer<0>>> 
+      integer<0>
+      list<token_list<addition n list<token_list<sum-up-to list<token_list<subtraction n integer<1>>>>>>>>>>>
+  list<token_list<sum-up-to integer<2>>>
+>>
+>
+
+:::: eval result ::::
+
+integer<3>
+```
 
 ## Working with templates
 ...
