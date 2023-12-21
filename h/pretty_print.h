@@ -133,63 +133,8 @@ using clisss = remove_type_t<whitespace<10>, tlissss>;
 static_assert(is_same_type<clisss, token_list<list<token_list<scm_define, whitespace<32>, void, whitespace<32>, integer<1>>>, list<token_list<scm_define, whitespace<32>, void, whitespace<32>, integer<2>>>>>,"");
 
 
-using faszom = remove_type_t<whitespace<32>, clisss>;
-static_assert(is_same_type<faszom, token_list<list<token_list<scm_define, void, integer<1>>>, list<token_list<scm_define, void, integer<2>>>>>,"");
-
-// i dont use this
-namespace RemoveWhitespace {
-
-	// map
-
-	template <template <typename> class Func, typename List>
-	struct map;
-
-	template <template <typename> class Func>
-	struct map<Func, list<>> {
-		using type = list<>;
-	};
-
-	template <template <typename> class Func, typename First, typename... Rest>
-	// removes all void on sight, make something void with the function to remove it
-	struct map<Func, list<First, Rest...>> {
-		using transformed_first_type = typename Func<First>::type;
-		using first_type_list = typename std::conditional<
-			std::is_same<transformed_first_type, void>::value,
-			list<>,
-			list<transformed_first_type>
-    	>::type;
-
-		using rest_list = typename map<Func, list<Rest...>>::type;
-    	using type = typename concat<first_type_list, rest_list>::type;
-	};
-
-	template <template <typename> class Func, typename List>
-	using map_t = typename map<Func, List>::type;
-
-	// -- F(I) = I+1
-
-	template <typename A>
-	struct F;
-
-	template <int I>
-	struct F<integer<I>> {
-		using type = integer<I + 1>;
-	};
-
-	using intlist = list<integer<1>,integer<2>,integer<3>>;
-	using mapped = typename map<F,intlist>::type;
-	static_assert(is_same_type<mapped,list<integer<2>, integer<3>, integer<4>>>,"");
-
-	// remove all
-
-	template <typename A> struct remove_int { using type = A; };
-	 // if its int, return void so map omits the element
-	template <> struct remove_int<int> { using type = void; };
-
-	using l = list<int,char,int,char,char>;
-	using res = map<remove_int,l>::type;
-
-}
+using fss = remove_type_t<whitespace<32>, clisss>;
+static_assert(is_same_type<fss, token_list<list<token_list<scm_define, void, integer<1>>>, list<token_list<scm_define, void, integer<2>>>>>,"");
 
 auto replace_chars(std::string str) {
 	// delete all instances of struct and any whitespace in the string

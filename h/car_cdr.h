@@ -1,31 +1,6 @@
 #pragma once
 #include "lists.h"
 
-
-struct not_found {};
-
-template <int N,int Acc,typename A,typename... Args>
-auto constexpr impl_return_nth_element(list<A,Args...>){
-    if constexpr (N == Acc){
-        return A{};
-    } else if constexpr (sizeof...(Args) == 0){
-       return not_found{};
-    } else {
-        return impl_return_nth_element<N,Acc +1>(list<Args...>{});
-    }
-}
-
-
-template <int N,typename... Args>
-auto constexpr return_nth_element(list<Args...>){
-    static_assert(sizeof...(Args) > 0,"return_nth_element on empty list!");
-    return impl_return_nth_element<N,1>(list<Args...>{});
-}
-
-using second_retn = decltype(return_nth_element<2>(list<void,int,char>{}));
-using second_retn2 = decltype(return_nth_element<2>(list<void>{}));
-//using second_retn3 = decltype(return_nth_element<2>(list<>{}));
-
 // -----------------------------------------------------------------------
 // for IR use only, accepts any type
 

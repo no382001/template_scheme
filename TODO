@@ -1,16 +1,2 @@
-; 3.) a keyword that returns the content of the current env in scope would be nice
-
-; 4.) define in body of define only works if in expression so
-; might be easy to fix by wrapping and evaling again but messy
-(
-  (define (return-n-plus-two n)
-   (define x 2)
-   (+ n x))
-) ; results in an error, the body is just (define x 2) the (+ n x) is just gone
-
-(
-  (define (return-n-plus-two n)
-   (
-    (define x 2)
-    (+ n x)))
-) ; works
+; floating point arithmetic
+; heavy refactor, mostly the defered instantiation parts

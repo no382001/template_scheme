@@ -6,6 +6,34 @@
 #include "h/eval_apply.h"
 #include "h/tokenizer.h"
 
+// moved from the end of env.h
+
+// (define (inc a) (+ a 1))
+// (inc 1) ; 2
+
+// c_list<c_<105>, c_<110>, c_<99>>
+using inc_c_list = decltype(c_list<c_<'i'>,c_<'n'>,c_<'c'>>{});
+using sum_of_2 = decltype(c_list<c_<'s'>,c_<'u'>,c_<'m'>>{});
+using sub_c_list = decltype(c_list<c_<'s'>,c_<'u'>,c_<'b'>>{});
+
+using fib_name = decltype(c_list<c_<'f'>,c_<'i'>,c_<'b'>>{});
+using fib_proc_body = decltype(
+    wrap<list<scm_if,
+        wrap<list<lesseq,c_<'x'>,integer<2>>>,
+        integer<1>,
+            list<addition,
+                list<fib_name,wrap<list<subtraction,c_<'x'>,integer<1>>>>,
+                list<fib_name,wrap<list<subtraction,c_<'x'>,integer<2>>>>>>>{});
+
+using init_env = decltype(
+    make_environment(table_entry<c_<110>,variable,integer<1>>{},  //));
+                    table_entry<inc_c_list,procedure,c_<'a'>,wrap<list<addition,c_<'a'>,integer<1>>>>{},
+                    table_entry<sub_c_list,procedure,c_<'a'>,wrap<list<subtraction,c_<'a'>,integer<1>>>>{},
+                    table_entry<sum_of_2,procedure,list<c_<'a'>,c_<'b'>>,wrap<list<addition,c_<'a'>,c_<'b'>>>>{},
+                    table_entry<fib_name,procedure,c_<'x'>,fib_proc_body>{}));
+
+// --------
+
 namespace Tests {
 
 struct testobj {};

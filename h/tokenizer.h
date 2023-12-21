@@ -9,6 +9,8 @@
 #include "car_cdr.h"
 #include "pretty_print.h"
 
+
+// REFACTOR
 // its a templated int so refactor later
 template < int Index, typename Lambda>
 constexpr auto find_first_non_integer(Lambda lambda) {
@@ -21,6 +23,7 @@ constexpr auto find_first_non_integer(Lambda lambda) {
 	}
 }
 
+// REFACTOR
 template < int Index, typename Lambda >
 constexpr auto find_first_non_c(Lambda lambda) {
 	constexpr auto str = lambda();
@@ -35,6 +38,7 @@ constexpr auto find_first_non_c(Lambda lambda) {
 	}
 }
 
+// REFACTOR
 template < int Index, typename Lambda >
 constexpr auto find_first_newline(Lambda lambda) {
 	constexpr auto str = lambda();
@@ -46,7 +50,7 @@ constexpr auto find_first_newline(Lambda lambda) {
 	}
 }
 
-
+// REFACTOR, this is basically find_first_occurence
 // returns the index of the end of the list, layer safe
 template < int Index, int layer = 0, typename Lambda>
 constexpr auto find_end_of_list(Lambda lambda){

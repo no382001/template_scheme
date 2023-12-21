@@ -92,28 +92,3 @@ template<typename T> struct replace_nested_list<list<T>> {
 template<typename... Args> struct replace_nested_list<token_list<Args...>> {
     using type = list<typename replace_nested_list<Args>::type...>;
 };
-
-
-template <typename A, typename... Args>
-auto constexpr count_list_helper(A,Args...){
-    if constexpr (sizeof...(Args) == 0){
-        return 0;
-    } else {
-        return count_list_helper(Args{}...) + 1;
-    }
-}
-
-template <template <class> typename T, typename... Args>
-auto constexpr count_list(T<Args...>){
-    return count_list_helper(Args{}...);
-}
-
-
-template <template <class> typename A, typename... Rest>
-bool constexpr is_empty_list(A<Rest...>){
-	if constexpr (sizeof...(Rest) > 0) {
-        return false;
-    } else {
-        return true;
-    }
-}

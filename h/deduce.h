@@ -11,6 +11,7 @@ struct list_end {};
 template <int I>
 struct whitespace {};
 
+// whitespace is a special _c<...>
 template <typename T>
 constexpr inline bool is_whitespace_v = is_specific_templated_int_collection< T, whitespace >::value;
 

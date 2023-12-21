@@ -7,31 +7,6 @@
 #include "primitive_operations.h"
 #include "env.h"
 
-// -- contains
-
-// non template type
-template <typename T, typename... Types>
-struct contains_type : std::disjunction<std::is_same<T, Types>...> {};
-
-// nested
-template <typename T, template <typename...> class TT, typename... Types>
-struct contains_type<T, TT<Types...>> : std::disjunction<contains_type<T, Types>...> {};
-
-// base case recursion
-template <typename T>
-struct contains_type<T> : std::false_type {};
-
-// helper
-template <typename T, typename List>
-using contains_type_t = contains_type<T, List>;
-
-using my_list = token_list<list<int, token_list<list<float, double>, char>>>;
-static_assert(contains_type_t<int, my_list>::value, "list should contain int");
-static_assert(!contains_type_t<long, my_list>::value, "list should not contain long");
-static_assert(contains_type_t<float, my_list>::value, "list should contain float");
-static_assert(contains_type_t<double, my_list>::value, "list should contain double");
-
-// -- !contains
 
 // fwd declare, bc recursively included
 template <typename Env, typename A, typename... Args>

@@ -28,9 +28,8 @@ struct non_integer {};
 template <int Value>
 struct integer{
 	template < int A >
-	static constexpr auto merge(integer<A>)->integer< _pow((Value * 10), (_log(10, A) + 1)) + A >; // int concatenation
-	static constexpr auto merge(non_integer)->integer<Value>;
-	auto constexpr get_value() {return Value;};
+	static constexpr auto merge(integer<A>) -> integer< _pow((Value * 10), (_log(10, A) + 1)) + A >; // int concatenation
+	static constexpr auto merge(non_integer) -> integer<Value>;
 };
 
 
