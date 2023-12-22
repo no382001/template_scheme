@@ -19,7 +19,7 @@ template <typename Env, typename Proc, typename Args >
 auto constexpr IRapply(Proc,wrap<Args>);
 
 // temp location for map_pair
-LIST(pair);
+CRTP_LIST(pair);
 
 
 template <template <class,class> typename One, typename A, typename... Args, template <class,class> typename Two, typename B, typename... Brgs>

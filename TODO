@@ -1,4 +1,11 @@
 ; floating point arithmetic
 ; heavy refactor, mostly the defered instantiation parts
 ; use fold expressions for _inner_ operations
+; 
 ; Curiously Recurring Template Pattern on list class if possible
+;   - replace all occurences of make_* with its factory counterpart
+;       - wont this be more unreadable?
+;       - make_* used on 87 lines
+;       make_*() -> ListType::make 
+
+; maybe only replace the macro part, thats the worst

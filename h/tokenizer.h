@@ -216,7 +216,7 @@ constexpr auto replace_wrapper(T<Args...>,Replacement<Brgs...>){
 	return Replacement<Args...>{};
 }
 
-LIST(tokenized);
+CRTP_LIST(tokenized);
 
 template <typename Lambda, size_t Index = 0>
 constexpr auto tokenizer(Lambda str_lambda) {

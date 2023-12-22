@@ -88,28 +88,31 @@ static_assert(is_same_type<cadrtest,testobj>,"(cdr '(test test2)) ; test2");
 
 // LIST behaviour tests
 namespace lists {
-    using listtest1 = decltype(make_list());
-    using listres1 = decltype(list<>{});
+
+    CRTP_LIST(test_list);
+
+    using listtest1 = decltype(make_test_list());
+    using listres1 = decltype(test_list<>{});
     static_assert(is_same_type<listtest1,listres1>,"empty list constructor");
 
-    using listtest2 = decltype(make_list(make_list()));
-    using listres2 = decltype(list<>{});
+    using listtest2 = decltype(make_test_list(make_test_list()));
+    using listres2 = decltype(test_list<>{});
     static_assert(is_same_type<listtest2,listres2>,"empty list in list constructor, collapses into empty list");
 
-    using listtest3 = decltype(make_list(make_list(testobj{})));
-    using listres3 = decltype(list<testobj>{});
+    using listtest3 = decltype(make_test_list(make_test_list(testobj{})));
+    using listres3 = decltype(test_list<testobj>{});
     static_assert(is_same_type<listtest3,listres3>,"obj in list constructor, collapses into obj in list");
 
-    using listtest4 = decltype(make_list(make_list(testobj{}),make_list()));
-    using listres4 = decltype(list<testobj>{});
+    using listtest4 = decltype(make_test_list(make_test_list(testobj{}),make_test_list()));
+    using listres4 = decltype(test_list<testobj>{});
     static_assert(is_same_type<listtest4,listres4>,"obj in list constructor and empty list, collapses into obj in list");
 
-    using listtest41 = decltype(make_list(make_list(),make_list(testobj{}),make_list()));
-    using listres41 = decltype(list<testobj>{});
+    using listtest41 = decltype(make_test_list(make_test_list(),make_test_list(testobj{}),make_test_list()));
+    using listres41 = decltype(test_list<testobj>{});
     static_assert(is_same_type<listtest41,listres41>,"obj in list constructor and empty list on either side, collapses into obj in list");
 
-    using listtest5 = decltype(make_list(list<testobj>{},list<>{},list<testobj>{},list<testobj>{}));
-    using listres5 = decltype(list<testobj,testobj,testobj>{});
+    using listtest5 = decltype(make_test_list(test_list<testobj>{},test_list<>{},test_list<testobj>{},test_list<testobj>{}));
+    using listres5 = decltype(test_list<testobj,testobj,testobj>{});
     static_assert(is_same_type<listtest5,listres5>,"3 list<obj> in list constructor and empty list inbetween them, collapses into 3 list<obj> in list");
 
     // (apply addtion '(1 2 3))
