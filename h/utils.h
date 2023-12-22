@@ -3,19 +3,6 @@
 
 #include "atoms.h"
 
-// REFACTOR, this is retarded
-template <template <class> typename A, template <class> typename B, typename... First, typename... Second>
-bool constexpr is_same_list_t(A<First...> a,B<Second...> b){ 
-	using derivedA = decltype(A{});
-	using derivedB = decltype(B{});
-	
-	if constexpr (is_same_type<derivedA,derivedB>){
-		return true;
-	} else {
-		return false;
-	}
-}
-
 // for static asserts that need delayed constexpr evaluation
 //  - static assert willl always fail with a constexpr konw value during template generation
 //  - even when the branch is not used and will be omitted

@@ -1,2 +1,4 @@
 ; floating point arithmetic
 ; heavy refactor, mostly the defered instantiation parts
+; use fold expressions for _inner_ operations
+; Curiously Recurring Template Pattern on list class if possible

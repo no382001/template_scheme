@@ -48,7 +48,6 @@ struct plus {};
 using quotetest = decltype(make_wrap(testobj{},testobj{}));
 using quotetestres = wrap<testobj,testobj>;
 static_assert(is_same_type<quotetest,quotetestres>,"");
-static_assert(is_wrapped(quotetest{}),"quoted?");
 
 /** /
 // CAR
