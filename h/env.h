@@ -11,7 +11,7 @@ struct variable {};
 struct procedure {};
 
 // environment table is a list of lists, or pairs
-LIST(environment);
+CRTP_LIST(environment);
 
 template <typename... columns>
 struct table_entry {};
