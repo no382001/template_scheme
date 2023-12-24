@@ -6,43 +6,18 @@
 #include <type_traits>
 #include <utility>
 
-auto main_str = constexpr_string(R"(
-(
-  ;this is a comment within the midst of tokens
-  (+ 1 1)
-)
-)");
+/*
+(define (remainder a b)
+  (if (< a b)
+    a
+    (remainder (- a b) b)))
+*/
 
-auto constexpr r = _log(2,8);
+auto main_str = constexpr_string(R"((
+  (if (#f) 1 2)
+))");
 
 /*
-  (define (negative x) (- 0 x))
-  
-  (define (quotient a b)
-    (- a (* (/ a b) b)))
-  
-  (define (abs x)
-    (if (< x 0)
-      (- x (* 2 x))
-      x))
-    
-  (define precision 1000)
-
-  (define (improve n guess)
-    (/ (+ guess (/ (* n precision) guess)) 2))
-
-  (define (good-enough? n guess)
-    (< (abs (- (* guess guess) (* n precision))) precision))
-
-  (define (sqrt-iter n guess)
-    (if (good-enough? n guess)
-        guess
-        (sqrt-iter n (improve n guess))))
-
-  (define (sqrt-newton n)
-    (sqrt-iter n (* n precision)))
-  
-  (sqrt-newton 25)
 
 */
 

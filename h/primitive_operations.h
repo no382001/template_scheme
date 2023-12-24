@@ -121,6 +121,9 @@ struct scm_cons {};
 struct scm_list {};
 struct scm_car {};
 struct scm_cdr {};
+struct scm_and {};
+struct scm_or {};
+struct scm_not {};
 
 IS_SELF_EVALUATING(scm_if);
 IS_SELF_EVALUATING(scm_true);
@@ -131,6 +134,9 @@ IS_SELF_EVALUATING(scm_cons);
 IS_SELF_EVALUATING(scm_list);
 IS_SELF_EVALUATING(scm_car);
 IS_SELF_EVALUATING(scm_cdr);
+IS_SELF_EVALUATING(scm_and);
+IS_SELF_EVALUATING(scm_or);
+IS_SELF_EVALUATING(scm_not);
 
 template <typename Env,typename Predicate, typename Then, typename Else>
 auto constexpr if_proc(Predicate, Then, Else){

@@ -10,8 +10,6 @@
 #include "pretty_print.h"
 
 
-// REFACTOR
-// its a templated int so refactor later
 template < int Index, typename Lambda>
 constexpr auto find_first_non_integer(Lambda lambda) {
 	constexpr auto str = lambda();
@@ -23,7 +21,6 @@ constexpr auto find_first_non_integer(Lambda lambda) {
 	}
 }
 
-// REFACTOR
 template < int Index, typename Lambda >
 constexpr auto find_first_non_c(Lambda lambda) {
 	constexpr auto str = lambda();
@@ -38,7 +35,6 @@ constexpr auto find_first_non_c(Lambda lambda) {
 	}
 }
 
-// REFACTOR
 template < int Index, typename Lambda >
 constexpr auto find_first_newline(Lambda lambda) {
 	constexpr auto str = lambda();
@@ -50,7 +46,6 @@ constexpr auto find_first_newline(Lambda lambda) {
 	}
 }
 
-// REFACTOR, this is basically find_first_occurence
 // returns the index of the end of the list, layer safe
 template < int Index, int layer = 0, typename Lambda>
 constexpr auto find_end_of_list(Lambda lambda){
@@ -113,6 +108,7 @@ constexpr auto deduce_keyword_type(keyword_##corresponding_type) { 	            
 	return corresponding_type{};			                                                \
 }
 
+
 KEYWORD("if",scm_if);
 KEYWORD("define",scm_define);
 KEYWORD("cons",scm_cons);
@@ -122,7 +118,7 @@ KEYWORD("cdr",scm_cdr);
 KEYWORD("apply",scm_apply);
 KEYWORD("eval",scm_eval);
 
-// KEYWORDS ----
+// END KEYWORDS ----
 
 
 
@@ -152,6 +148,18 @@ constexpr auto tokenize(Lambda str_lambda) {
 		} else if constexpr (is_whitespace_v<curr>) { // include whitespaces for later formatting	
 			using second = decltype(tokenize<Lambda, Index + 1>(str_lambda));
 			return make_token_list(curr{}, second{});
+		} else if constexpr (is_same_type<curr,boolean_start>) { // get the next character thats either `t` or `f`	
+			// this is outside of the control flow, bad practice
+			using boolean_value = decltype(deduce_token_type< str[Index + 1] >());
+			// launch next layer
+			using second = decltype(tokenize<Lambda, Index + 2>(str_lambda));
+			if constexpr (is_same_type<c_<'t'>,boolean_value>){
+				return make_token_list(scm_true{}, second{});
+			} else if constexpr (is_same_type<c_<'f'>,boolean_value>){
+				return make_token_list(scm_false{}, second{});
+			} else {
+				static_assert(DELAYED_FALSE,"invalid boolean value after `#` in declaration");
+			}
 		} else {
 			if constexpr (is_same_type<curr, list_start>) {
 				constexpr auto end_of_list = find_end_of_list< Index >(str_lambda);

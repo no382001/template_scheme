@@ -57,6 +57,8 @@ constexpr auto deduce_token_type() {
 		return comment_start{};
 	} else if constexpr (C == ',') { // probably in comments
 		return whitespace<C>{};
+	} else if constexpr (C == '#') { // probably in comments
+		return boolean_start{};
 	} else {
 		static_assert(DELAYED_FALSE,"symbol not supported");
 	}
