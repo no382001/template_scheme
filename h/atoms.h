@@ -14,9 +14,6 @@ constexpr int _log(int b, int n) {
 template <typename A, typename B>
 struct cons {};
 
-struct scm_false {};
-struct scm_true {};
-
 template <int Value>
 struct c_ {};
 
@@ -30,9 +27,19 @@ struct integer{
 	template < int A >
 	static constexpr auto merge(integer<A>) -> integer< _pow((Value * 10), (_log(10, A) + 1)) + A >; // int concatenation
 	static constexpr auto merge(non_integer) -> integer<Value>;
+	static constexpr auto value() {return Value; }
 };
 
-
+struct scm_false {
+	// conversion operator to target type
+	//operator integer<0>() const { return {}; }
+	static constexpr int value() { return 0; }
+};
+struct scm_true {
+	// conversion operator to target type
+	//operator integer<1>() const { return {}; }
+	static constexpr int value() { return 1; }
+};
 
 // overload for specifics
 template< typename Test, template < int... > class Type >
