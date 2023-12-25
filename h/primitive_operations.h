@@ -41,6 +41,7 @@ PRIMITIVE_ARITHMETIC_OP(subtraction,-);
 PRIMITIVE_ARITHMETIC_OP(multiplication,*);
 PRIMITIVE_ARITHMETIC_OP(division,/);
 
+// -----------------------------------------------
 
 #define PRIMITIVE_RELATIONAL_OP(name,sign)												\
 																						\
@@ -80,6 +81,70 @@ PRIMITIVE_RELATIONAL_OP(more,>);
 PRIMITIVE_RELATIONAL_OP(lesseq,<=);
 
 // --------------------------------------
+
+/*
+1 ]=> (and #t #f)
+;Value: #f
+1 ]=> (and 1 0)
+;Value: 0
+*/
+
+#define PRIMITIVE_BOOLEAN_OP(name,sign)													\
+																						\
+struct name {}; /* identifying name, "quoted" name */									\
+IS_SELF_EVALUATING(name);																\
+template <>																				\
+constexpr bool is_prim_proc(name){														\
+	return true;																		\
+}																						\
+																						\
+template <typename Arguments> /* apply_primitve_procedure overload */					\
+auto constexpr apply_primitve_procedure(name,Arguments){								\
+	return apply_##name(Arguments{});													\
+}																						\
+																						\
+template <typename... Xs>						                                    	\
+constexpr auto apply_##name(list<Xs...>) {                     							\
+	auto constexpr result =  (Xs::value() && ...);										\
+	using first_type = decltype(IRcar(list<Xs...>{}));									\
+	if constexpr (result) {																\
+		if constexpr (is_integer_v<first_type>){										\
+			return integer<1>{};														\
+		} else {																		\
+			return scm_true{};															\
+		}																				\
+	} else {																			\
+		if constexpr (is_integer_v<first_type>){										\
+			return integer<0>{};														\
+		} else {																		\
+			return scm_false{};															\
+		}																				\
+	}																					\
+}
+
+PRIMITIVE_BOOLEAN_OP(_and,&&);
+PRIMITIVE_BOOLEAN_OP(_or,||);
+PRIMITIVE_BOOLEAN_OP(_xor,^);
+PRIMITIVE_BOOLEAN_OP(_not,!=);
+
+// ------------------------
+
+using andddd = decltype(apply__and(list<integer<1>,integer<1>>{}));
+static_assert(is_same_type<andddd,integer<1>>,"");
+using andddd2 = decltype(apply__and(list<integer<0>,integer<1>>{}));
+static_assert(is_same_type<andddd2,integer<0>>,"");
+
+using anddddf = decltype(apply__or(list<integer<1>,integer<1>>{}));
+static_assert(is_same_type<anddddf,integer<1>>,"");
+using andddd2f = decltype(apply__or(list<integer<0>,integer<1>>{}));
+static_assert(is_same_type<andddd2f,integer<0>>,"");
+
+using anddddff = decltype(apply__or(list<scm_true,scm_true>{}));
+static_assert(is_same_type<anddddff,scm_true>,"");
+using andddd2ff = decltype(apply__or(list<scm_false,scm_true>{}));
+static_assert(is_same_type<andddd2ff,scm_false>,"");
+
+// -----------------------------------------------
 
 struct scm_if {};
 struct scm_define {};
@@ -171,64 +236,3 @@ auto constexpr cdr(cons_list<A,Args...>){
 
 using cartest4 = decltype(cdr(cons_list<int,void>{}));
 static_assert(is_same_type<cartest4,cons_list<void>>,"");
-
-
-
-struct MyStruct {
-    int value;
-
-    constexpr MyStruct(int v) : value(v) {}
-
-    constexpr MyStruct operator+(const MyStruct& other) const {
-        return MyStruct{ value + other.value };
-    }
-};
-
-template<typename... Args>
-constexpr auto sump(Args... args) {
-    return (args + ...);
-}
-
-constexpr MyStruct a{1}, b{2}, c{3};
-
-constexpr MyStruct result = sump(a, b, c);
-
-template<int... Nums>
-constexpr int ands() {
-    return (... && Nums);
-}
-
-constexpr int ressult = ands<1, 0, 3, 4, 5>();
-
-auto constexpr resullll = 1 && 0;
-
-// take either #t or #f in the pack
-// or a pack of integers, either way
-// convert them to 1s and 0s, and return the result according to what they were
-
-template <typename... Args>
-constexpr bool and_proc(list<Args...>) {
-    return (Args::value() && ...);
-}
-
-constexpr bool result2 = and_proc(list<integer<1>, integer<1>, integer<1>>{});
-constexpr bool result22 = and_proc(list<integer<1>>{});
-constexpr bool result222 = and_proc(list<integer<1>, integer<0>, integer<3>>{});
-    
-constexpr bool result1 = and_proc(list<scm_true,scm_true,scm_true>{});
-constexpr bool result11 = and_proc(list<scm_true>{});
-constexpr bool result111 = and_proc(list<scm_true,scm_false,scm_false>{});
-
-static_assert(result1 == result2,"");
-static_assert(result11 == result22,"");
-static_assert(result111 == result222,"");
-/*
-1 ]=> (and #t #f)
-
-;Value: #f
-
-1 ]=> (and 1 0)
-
-;Value: 0
-
-*/

@@ -117,6 +117,8 @@ KEYWORD("car",scm_car);
 KEYWORD("cdr",scm_cdr);
 KEYWORD("apply",scm_apply);
 KEYWORD("eval",scm_eval);
+KEYWORD("and",_and);
+KEYWORD("or",_or);
 
 // END KEYWORDS ----
 

@@ -14,7 +14,7 @@
 */
 
 auto main_str = constexpr_string(R"((
-  (if (#f) 1 2)
+  (and #f #t)
 ))");
 
 /*

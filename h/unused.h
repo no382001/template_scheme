@@ -104,3 +104,53 @@ namespace RemoveWhitespace {
 // a compile time warning, problem wont come up until the branch is preprocessed
 #define COMPILE_TIME_WARNING "Compile time warning"
 // struct COMPILE_TIME_WARNING {};
+
+
+struct MyStruct {
+    int value;
+
+    constexpr MyStruct(int v) : value(v) {}
+
+    constexpr MyStruct operator+(const MyStruct& other) const {
+        return MyStruct{ value + other.value };
+    }
+};
+
+template<typename... Args>
+constexpr auto sump(Args... args) {
+    return (args + ...);
+}
+
+constexpr MyStruct a{1}, b{2}, c{3};
+
+constexpr MyStruct result = sump(a, b, c);
+
+template<int... Nums>
+constexpr int ands() {
+    return (... && Nums);
+}
+
+constexpr int ressult = ands<1, 0, 3, 4, 5>();
+
+auto constexpr resullll = 1 && 0;
+
+// take either #t or #f in the pack
+// or a pack of integers, either way
+// convert them to 1s and 0s, and return the result according to what they were
+
+template <typename... Args>
+constexpr bool and_proc(list<Args...>) {
+    return (Args::value() && ...);
+}
+
+constexpr bool result2 = and_proc(list<integer<1>, integer<1>, integer<1>>{});
+constexpr bool result22 = and_proc(list<integer<1>>{});
+constexpr bool result222 = and_proc(list<integer<1>, integer<0>, integer<3>>{});
+    
+constexpr bool result1 = and_proc(list<scm_true,scm_true,scm_true>{});
+constexpr bool result11 = and_proc(list<scm_true>{});
+constexpr bool result111 = and_proc(list<scm_true,scm_false,scm_false>{});
+
+static_assert(result1 == result2,"");
+static_assert(result11 == result22,"");
+static_assert(result111 == result222,"");
