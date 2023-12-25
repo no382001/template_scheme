@@ -246,6 +246,17 @@ namespace prim_procedures {
 
     using testr22elv22 = decltype(apply_primitve_procedure(int{},list<integer<2>,integer<3>,integer<4>>{}));
     static_assert(is_same_type<testr22elv22,void>,"not prim proc");
+
+    using testaddev = decltype(apply_addition(list<integer<2>,integer<3>>{}));
+    using testaddevres = decltype(integer<5>{});
+    static_assert(is_same_type<testaddev,testaddevres>,"additon of two integers");
+
+    // not relevant anymore 
+    namespace what_is_happening_with_this { 
+        using testaddev = decltype(apply_subtraction(list<integer<2>,integer<3>>{}));
+        using testaddevres = decltype(integer<-1>{});
+        static_assert(is_same_type<testaddev,testaddevres>,"subtraction of two integers");
+    };
 };
 
 

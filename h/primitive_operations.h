@@ -3,7 +3,7 @@
 #include "car_cdr.h"
 #include "utils.h"
 #include "atoms.h"
-
+#include <algorithm>
 
 template <typename T>
 constexpr bool is_prim_proc(T){
@@ -41,20 +41,7 @@ PRIMITIVE_ARITHMETIC_OP(subtraction,-);
 PRIMITIVE_ARITHMETIC_OP(multiplication,*);
 PRIMITIVE_ARITHMETIC_OP(division,/);
 
-using testaddev = decltype(apply_addition(list<integer<2>,integer<3>>{}));
-using testaddevres = decltype(integer<5>{});
-static_assert(is_same_type<testaddev,testaddevres>,"additon of two integers");
 
-namespace what_is_happening_with_this {
-	using testaddev = decltype(apply_subtraction(list<integer<2>,integer<3>>{}));
-	using testaddevres = decltype(integer<-1>{});
-	static_assert(is_same_type<testaddev,testaddevres>,"subtraction of two integers");
-};
-
-// since the constexpr discarded functions have to be syntactically correct
-// it still cant deduct two different types, in the preprocessor it works flawlessly
-// with me returning scm_false{} and integer<>{}, but the compioler will not allow that
-// so i will have to establish and use integer edge cases, in this case number 99999 for a false return
 #define PRIMITIVE_RELATIONAL_OP(name,sign)												\
 																						\
 struct name {}; /* identifying name, "quoted" name */									\
@@ -69,33 +56,22 @@ auto constexpr apply_primitve_procedure(name,Arguments){								\
 	return apply_##name(Arguments{});													\
 }																						\
 																						\
-template <int A, typename... Rest>														\
-auto constexpr sub_apply_##name(list<integer<A>,Rest...>){								\
-	if constexpr (sizeof...(Rest) == 0) {												\
-		return A;																		\
-	} else {																			\
-		auto constexpr second = sub_apply_##name(list<Rest...>{});						\
-		if constexpr (second == 99999){													\
-			return 99999;																\
-		} else if constexpr (A sign second){											\
-			return A;																	\
-		} else {																		\
-			return 99999;																\
-		}																				\
-	}																					\
-}																						\
+template <int A, int B>																	\
+struct op_##name {																		\
+    static constexpr bool value = A sign B;												\
+};																						\
 																						\
-template <int A, typename... Rest>														\
-auto constexpr apply_##name(list<integer<A>,Rest...>){									\
-	static_assert((sizeof...(Rest) > 0),"no second operand, for relational operation"); \
-	auto constexpr second = sub_apply_##name(list<Rest...>{});							\
-	if constexpr (second == 99999){														\
-		return scm_false{};																\
-	} else if constexpr (A sign second){												\
+template <int X, int... Xs> /* thank you C++20 */                                     	\
+constexpr auto apply_##name(list<integer<X>, integer<Xs>...>) {                     	\
+    constexpr bool results[] = 															\
+		{ op_##name<integer<X>::value(), integer<Xs>::value()>::value... };    			\
+    if constexpr (																		\
+		std::all_of(																	\
+			std::begin(results),std::end(results),[](bool v) { return v; })){			\
 		return scm_true{};																\
 	} else {																			\
 		return scm_false{};																\
-	}																					\
+	}                                                        							\
 }
 
 PRIMITIVE_RELATIONAL_OP(equal,==);
