@@ -26,6 +26,9 @@ This project utilizes C++ template metaprogramming to interpret Scheme code. <b>
     =       (= ... )    equality
     <       (< ... )    less than
     >       (> ... )    more than
+    
+    and     (and ... )  and
+    or      (or  ... )  or
 
     BUILT IN PROCEDURES:
 
@@ -33,8 +36,8 @@ This project utilizes C++ template metaprogramming to interpret Scheme code. <b>
     list    (list ... )
     car     (car {1} {2} ... )
     cdr     (cdr {1} {2} ... )
-    if      (if pred then else)
-    apply   (apply proc args)
+    if      (if {pred} {then} {else})
+    apply   (apply {proc} {args})
     eval    (eval 'proc) ;still lacks an env, in my implementation
 
 ## Some Examples
