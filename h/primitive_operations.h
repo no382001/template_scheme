@@ -31,18 +31,10 @@ auto constexpr apply_primitve_procedure(name,Arguments){								\
 	return apply_##name(Arguments{});													\
 }																						\
 																						\
-template <int A, typename... Rest>                                                  	\
-auto constexpr sub_apply_##name(list<integer<A>, Rest...>) {                            \
-	if constexpr (sizeof...(Rest) > 0)                                              	\
-		return A sign sub_apply_##name(list<Rest...>{});                                \
-	else{ return A; }                                                               	\
-}                                                                                   	\
-																						\
-template <int A, typename... Rest>                                                  	\
-auto constexpr apply_##name(list<integer<A>,Rest...>) {                                 \
-        static_assert((sizeof...(Rest) > 0), #name); /* no operands */              	\
-		return integer<A sign sub_apply_##name(list<Rest...>{})>{};                     \
-}                                                                                   	\
+template <int X, int... Xs>                                                  			\
+auto constexpr apply_##name(list<integer<X>, integer<Xs>...>) {                   		\
+	return integer<X sign (... sign Xs)>{};                                           	\
+}
 
 PRIMITIVE_ARITHMETIC_OP(addition,+);
 PRIMITIVE_ARITHMETIC_OP(subtraction,-);
