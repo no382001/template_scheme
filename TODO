@@ -1,5 +1,2 @@
 ; implement floating point arithmetic
-; implement scm_boolean, so it accepts #t #f
-; implement binary ops for booleans
-; work your way up complexity to newtons method
 ; function to extract environment

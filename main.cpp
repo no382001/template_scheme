@@ -6,15 +6,16 @@
 #include <type_traits>
 #include <utility>
 
-/*
-(define (remainder a b)
-  (if (< a b)
-    a
-    (remainder (- a b) b)))
-*/
 
 auto main_str = constexpr_string(R"((
-  (and #f #t)
+  
+  (define (pascal r c)
+    (if (or (= c 1) (= c r))
+      1
+      (+ (pascal (- r 1) (- c 1)) (pascal (- r 1) c))))
+  
+  (pascal 3 2)
+
 ))");
 
 /*

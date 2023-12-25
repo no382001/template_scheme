@@ -105,7 +105,7 @@ auto constexpr apply_primitve_procedure(name,Arguments){								\
 																						\
 template <typename... Xs>						                                    	\
 constexpr auto apply_##name(list<Xs...>) {                     							\
-	auto constexpr result =  (Xs::value() && ...);										\
+	auto constexpr result =  (Xs::value() sign ...);										\
 	using first_type = decltype(IRcar(list<Xs...>{}));									\
 	if constexpr (result) {																\
 		if constexpr (is_integer_v<first_type>){										\
@@ -137,12 +137,12 @@ static_assert(is_same_type<andddd2,integer<0>>,"");
 using anddddf = decltype(apply__or(list<integer<1>,integer<1>>{}));
 static_assert(is_same_type<anddddf,integer<1>>,"");
 using andddd2f = decltype(apply__or(list<integer<0>,integer<1>>{}));
-static_assert(is_same_type<andddd2f,integer<0>>,"");
+static_assert(is_same_type<andddd2f,integer<1>>,"");
 
 using anddddff = decltype(apply__or(list<scm_true,scm_true>{}));
 static_assert(is_same_type<anddddff,scm_true>,"");
 using andddd2ff = decltype(apply__or(list<scm_false,scm_true>{}));
-static_assert(is_same_type<andddd2ff,scm_false>,"");
+static_assert(is_same_type<andddd2ff,scm_true>,"");
 
 // -----------------------------------------------
 
@@ -154,9 +154,6 @@ struct scm_cons {};
 struct scm_list {};
 struct scm_car {};
 struct scm_cdr {};
-struct scm_and {};
-struct scm_or {};
-struct scm_not {};
 
 IS_SELF_EVALUATING(scm_if);
 IS_SELF_EVALUATING(scm_true);
@@ -167,14 +164,11 @@ IS_SELF_EVALUATING(scm_cons);
 IS_SELF_EVALUATING(scm_list);
 IS_SELF_EVALUATING(scm_car);
 IS_SELF_EVALUATING(scm_cdr);
-IS_SELF_EVALUATING(scm_and);
-IS_SELF_EVALUATING(scm_or);
-IS_SELF_EVALUATING(scm_not);
 
 template <typename Env,typename Predicate, typename Then, typename Else>
 auto constexpr if_proc(Predicate, Then, Else){
-	using res = decltype(IReval<Env>(Predicate{}));
-	if constexpr (is_same_type<scm_true,res>){
+	using res = decltype(IReval<Env>(make_wrap(Predicate{}))); // make_wrap so it handles not wrapped predicates too
+	if constexpr (is_same_type<scm_true,res> || is_same_type<integer<1>,res>){
 		return IReval<Env>(wrap<Then>{});
 	} else {
 		return IReval<Env>(wrap<Else>{});
