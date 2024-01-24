@@ -411,14 +411,14 @@ auto main_str = CSTRING(R"((
 
     using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
     // remove whitespaces
-    //using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
+    using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
     // replace token_list<list<...>> with wrap<list<...>>
-    //using clean_expression = typename replace_nested_list<tokens>::type; // convert list
+    using clean_expression = typename replace_nested_list<tokens>::type; // convert list
     // replace outer wrap<...> with tokenized<...>
-    //using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
+    using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
     // evaluate expression
-    //using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
-    //static_assert(is_same_type<eval_result,integer<2>>,"");
+    using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
+    static_assert(is_same_type<eval_result,integer<2>>,"");
 };
 
 /*

@@ -5,6 +5,9 @@
 #include "atoms.h"
 #include <algorithm>
 
+template <typename Env, typename Exp>
+auto constexpr IReval(wrap<Exp>);
+
 template <typename T>
 constexpr bool is_prim_proc(T){
 	return false;

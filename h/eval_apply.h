@@ -7,6 +7,8 @@
 #include "primitive_operations.h"
 #include "env.h"
 
+template <typename Env, typename Op, typename Evaluated_opnds >
+auto constexpr apply_compund_proc(Op,Evaluated_opnds);
 
 // fwd declare, bc recursively included
 template <typename Env, typename A, typename... Args>
