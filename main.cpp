@@ -1,3 +1,4 @@
+#include "h/string.h"
 #include "tests.h"
 #include "h/eval_apply.h"
 #include "h/tokenizer.h"
@@ -58,6 +59,6 @@ int main(){
 
     std::cout << ":::: eval res ::::" << '\n';
     std::cout << replace_chars(demangle<eval_result>()) << '\n';
-
+    
     return 0;
 }

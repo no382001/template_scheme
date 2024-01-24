@@ -22,12 +22,31 @@ namespace  variadic_toolbox
  
 namespace  compile_time
 {
+
   template<char...  str>
   struct  string
   {
-    static  constexpr  const char  chars[] = { str..., '\0' };
+    static constexpr const char chars[] = { str..., '\0' };
+
+    template <int N, char X, char... Xs>
+    static constexpr auto nth_element() {
+      if constexpr (N == 0) {
+        return X;
+      } else {
+        return nth_element<N-1,Xs...>();
+      }
+    }
+    
+    template <int N>
+    static constexpr char get() {
+        static_assert(N < sizeof...(str), "index out of bounds");
+        return nth_element<N, str...>();
+    }
+    
   };
- 
+
+
+
   template<char...  str>
   constexpr  const char string<str...>::chars[];
  
@@ -40,12 +59,6 @@ namespace  compile_time
       typedef  string<lambda_str_type {}.chars[indices]...>  result;
     };
   };
- 
-  template<char...  str0, char...  str1>
-  string<str0..., str1...>  operator+(string<str0...>, string<str1...>)
-  {
-    return {};
-  }
 }
  
 #define  CSTRING(string_literal)                                                        \
@@ -54,6 +67,16 @@ namespace  compile_time
         return  variadic_toolbox::apply_range<sizeof(string_literal)-1,                 \
             compile_time::string_builder<constexpr_string_type>::produce>::result{};    \
     }()
+
+namespace testing {
+
+  auto constexpr str_hello = CSTRING("hello");
+  auto constexpr str_world = CSTRING(" world");
+  using t = decltype(str_world);
+  auto constexpr char_w = t::get<2>();
+  static_assert(char_w == 111);
+
+};
 
 /*
 auto constexpr str_hello = CSTRING("hello");
