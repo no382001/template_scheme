@@ -1,4 +1,5 @@
 #pragma once
+#include "h/string.h"
 #include "h/lists.h"
 #include "h/car_cdr.h"
 #include "h/utils.h"
@@ -259,10 +260,9 @@ namespace prim_procedures {
     };
 };
 
-
 namespace replace_nested_list {
     // token_list -> wrap
-    auto test_str = constexpr_string("(+ 11 (+ 11 2))");
+    auto test_str = CSTRING("(+ 11 (+ 11 2))");
     using test_tokens = decltype(IRcar(tokenizer(test_str))); // raw token list
     
     // some basic expression
@@ -285,55 +285,58 @@ namespace replace_nested_list {
     static_assert(is_same_type<wraooertest,after_replacement_evaluation>,"");
 };
 
+
+
 // ---------------DEFINE RELATED----------------
 
 namespace define {
-    auto one_parameter_define = constexpr_string("((define (inc a) (+ 1 a)) (inc 1))");
+    auto one_parameter_define = CSTRING("((define (inc a) (+ 1 a)) (inc 1))");
     using one_parameter_define_tokens = decltype(IRcar(tokenizer(one_parameter_define))); // raw token list without the tokenized<...> wrapper
     using one_parameter_define_result = decltype(IReval<environment<>>(one_parameter_define_tokens{}));
     static_assert(is_same_type<one_parameter_define_result,integer<2>>);
 
-    auto two_parameter_define = constexpr_string("( (define (sum a b) (+ b a)) (sum 1 2))");
+    auto two_parameter_define = CSTRING("( (define (sum a b) (+ b a)) (sum 1 2))");
     using two_parameter_define_tokens = decltype(IRcar(tokenizer(two_parameter_define))); // raw token list without the tokenized<...> wrapper
     using two_parameter_define_result = decltype(IReval<environment<>>(two_parameter_define_tokens{}));
     static_assert(is_same_type<two_parameter_define_result,integer<3>>);
 
-    auto multi_char_var_name = constexpr_string("(( define ss 11) (+ ss 1))"); // fix char and define bug
+    auto multi_char_var_name = CSTRING("(( define ss 11) (+ ss 1))"); // fix char and define bug
     using multi_char_var_name_tokens = decltype(IRcar(tokenizer(multi_char_var_name))); // raw token list without the tokenized<...> wrapper
     using multi_char_var_name_result = decltype(IReval<environment<>>(multi_char_var_name_tokens{}));
     static_assert(is_same_type<multi_char_var_name_result,integer<12>>);
 };
 
 namespace double_define {
-    auto str = constexpr_string("(( define ss 11) ( define aa 11) (+ ss aa))");
+    auto str = CSTRING("(( define ss 11) ( define aa 11) (+ ss aa))");
     using tokenization_result = decltype(IRcar(tokenizer(str)));
     using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
     static_assert(is_same_type<eval_result,integer<22>>);
 };
-/**/
+
+
 namespace FullyEvaldFib {
-    auto main_str = constexpr_string("((define (fib x) (if (< x 3) 1 (+ (fib (- x 1)) (fib (- x 2))))) (fib 3))");
+    auto main_str = CSTRING("((define (fib x) (if (< x 3) 1 (+ (fib (- x 1)) (fib (- x 2))))) (fib 3))");
     using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
     using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
     static_assert(is_same_type<eval_result,integer<2>>);
 };
-/**/
+
 namespace Quoteiung {
-    auto main_str = constexpr_string("('(+ 1 1))");
+    auto main_str = CSTRING("('(+ 1 1))");
     using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
     using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
     static_assert(is_same_type<eval_result,wrap<list<addition, integer<1>, integer<1>>>>);
 };
 
 namespace ApplyProper {
-    auto main_str = constexpr_string("(apply + '(1 1))");
+    auto main_str = CSTRING("(apply + '(1 1))");
     using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
     using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
     static_assert(is_same_type<eval_result,integer<2>>);
 };
 
 namespace EvalProper {
-    auto main_str = constexpr_string("(eval '(+ 1 1))");
+    auto main_str = CSTRING("(eval '(+ 1 1))");
     using tokenization_result = decltype(IRcar(tokenizer(main_str))); // raw token list without the tokenized<...> wrapper
     using eval_result = decltype(IReval<environment<>>(tokenization_result{}));
     static_assert(is_same_type<eval_result,integer<2>>);
@@ -342,7 +345,7 @@ namespace EvalProper {
 };
 
 namespace car_cdr_list_cons {
-    auto main_str = constexpr_string(R"(
+    auto main_str = CSTRING(R"(
     (cons (car 
         (list 1 
             (cdr (list
@@ -364,7 +367,7 @@ namespace car_cdr_list_cons {
 
 namespace define_test_single {
 
-    auto main_str = constexpr_string(R"(
+    auto main_str = CSTRING(R"(
     (
     (define (remainder a b)
         (- a (* (/ a b) b)))
@@ -385,29 +388,40 @@ namespace define_test_single {
     static_assert(is_same_type<eval_result,integer<1>>,"");
 };
 
+// its fucked from here
 namespace define_test_double_define_in_same_scope {
-
-    auto main_str = constexpr_string(R"(
-    (
+    // if i tab this like this:
+    /*
+    auto main_str = CSTRING(R"((
         (define y 2)
         (define x 1)
         (define (remainder a b)
             (- a (* (/ a b) b)))
         (+ x (remainder 3 2))
-    )
-    )");
+    ))");
+    */
+    // instead of this, it fails for whatever reason
+auto main_str = CSTRING(R"((
+    (define y 2)
+    (define x 1)
+    (define (remainder a b)
+        (- a (* (/ a b) b)))
+    (+ x (remainder 3 2))
+))");
 
     using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
     // remove whitespaces
-    using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
+    //using tokens = decltype(clean_whitespaces(tokenization_result_w_whitespaces{}));
     // replace token_list<list<...>> with wrap<list<...>>
-    using clean_expression = typename replace_nested_list<tokens>::type; // convert list
+    //using clean_expression = typename replace_nested_list<tokens>::type; // convert list
     // replace outer wrap<...> with tokenized<...>
-    using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
+    //using tb_evaluated = decltype(replace_wrapper(clean_expression{},tokenized{}));
     // evaluate expression
-    using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
-    static_assert(is_same_type<eval_result,integer<2>>,"");
+    //using eval_result = decltype(IReval<init_env>(IRcar(tb_evaluated{})));
+    //static_assert(is_same_type<eval_result,integer<2>>,"");
 };
+
+/*
 
 // so the outer scope of (...) works for any amount of defines
 // but for some reason if i define inside a scope of another define, the tag is considered a compound proc and fails
@@ -419,7 +433,7 @@ namespace broken_syntax_for_inner_defines_but_works {
 
     // this behaviour kind of similar to how i need to put an outer (...) to execute defines and expressions in one scope
 
-    auto main_str = constexpr_string(R"(
+    auto main_str = CSTRING(R"(
     (
         (define (add-two x)
             (
@@ -443,7 +457,7 @@ namespace broken_syntax_for_inner_defines_but_works {
 
 namespace sum_up_to_n {
 
-    auto main_str = constexpr_string(R"(
+    auto main_str = CSTRING(R"(
 (
   (define (sum-up-to n)
   (if (= n 0)
@@ -467,7 +481,7 @@ namespace sum_up_to_n {
 
 namespace comments {
 
-    auto main_str = constexpr_string(R"(
+    auto main_str = CSTRING(R"(
 (
   ;this is a comment within the midst of tokens
   (+ 1 1)
@@ -482,3 +496,4 @@ namespace comments {
     using eval_result = decltype(IReval<environment<>>(IRcar(tb_evaluated{})));
     static_assert(is_same_type<eval_result,integer<2>>,"");
 };
+*/

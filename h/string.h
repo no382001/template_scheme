@@ -1,4 +1,5 @@
 #pragma once
+#include <type_traits>
 
 // C++17 constexpr string, to replace C++20 constexpr lambda solution
 // https://stackoverflow.com/questions/15858141/conveniently-declaring-compile-time-strings-in-c
@@ -19,33 +20,17 @@ namespace  variadic_toolbox
     typedef  typename meta_functor<indices...>::result  result;
   };
 }
- 
+
+
 namespace  compile_time
 {
 
   template<char...  str>
   struct  string
   {
-    static constexpr const char chars[] = { str..., '\0' };
-
-    template <int N, char X, char... Xs>
-    static constexpr auto nth_element() {
-      if constexpr (N == 0) {
-        return X;
-      } else {
-        return nth_element<N-1,Xs...>();
-      }
-    }
-    
-    template <int N>
-    static constexpr char get() {
-        static_assert(N < sizeof...(str), "index out of bounds");
-        return nth_element<N, str...>();
-    }
+    static constexpr const char chars[] = { str...,'\0' };
     
   };
-
-
 
   template<char...  str>
   constexpr  const char string<str...>::chars[];
@@ -59,8 +44,31 @@ namespace  compile_time
       typedef  string<lambda_str_type {}.chars[indices]...>  result;
     };
   };
+
 }
- 
+
+  template <int N, char X, char... Xs>
+  constexpr auto nth_element() {
+    if constexpr (N == 0) {
+      return X;
+    } else {
+      return nth_element<N-1,Xs...>();
+    }
+  }
+
+  template <int N, char... Cs>
+  constexpr auto get_index(compile_time::string<Cs...>) {
+    static_assert(N < sizeof...(Cs), "index out of bounds");
+    return nth_element<N,Cs...>();
+  }
+
+  template <char... Cs>
+  constexpr char get_size(compile_time::string<Cs...>) {
+      return sizeof...(Cs);
+  }
+
+
+
 #define  CSTRING(string_literal)                                                        \
     []{                                                                                 \
         struct  constexpr_string_type { const char * chars = string_literal; };         \
@@ -73,8 +81,9 @@ namespace testing {
   auto constexpr str_hello = CSTRING("hello");
   auto constexpr str_world = CSTRING(" world");
   using t = decltype(str_world);
-  auto constexpr char_w = t::get<2>();
-  static_assert(char_w == 111);
+  auto constexpr ssss = get_size<>(t{});
+  auto constexpr char_w = get_index<ssss-1>(t{});
+  static_assert(char_w == 'd');
 
 };
 

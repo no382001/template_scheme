@@ -51,7 +51,7 @@ constexpr auto deduce_token_type() {
 		return more{};
 	} else if constexpr (C == '=') {
 		return equal{};
-	} else if constexpr (C == '\n') { // needed for multiline string compatibility like R"()" 
+	} else if constexpr (C == '\n' || C == '\012') { // needed for multiline string compatibility like R"()" 
 		return whitespace<C>{};
 	} else if constexpr (C == ';') {
 		return comment_start{};
@@ -59,6 +59,8 @@ constexpr auto deduce_token_type() {
 		return whitespace<C>{};
 	} else if constexpr (C == '#') {
 		return boolean_start{};
+	} else if constexpr (C == '\0') {
+		static_assert(DELAYED_FALSE,"this is the end, \0");
 	} else {
 		static_assert(DELAYED_FALSE,"symbol not supported");
 	}

@@ -12,8 +12,7 @@
 
 template < int Index, typename Lambda>
 constexpr auto find_first_non_integer(Lambda lambda) {
-	constexpr auto str = lambda();
-	using type = decltype(deduce_token_type< str[Index] >());
+	using type = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
 	if constexpr (!is_integer_v<type>) {
 		return Index;
 	} else {
@@ -23,8 +22,7 @@ constexpr auto find_first_non_integer(Lambda lambda) {
 
 template < int Index, typename Lambda >
 constexpr auto find_first_non_c(Lambda lambda) {
-	constexpr auto str = lambda();
-	using type = decltype(deduce_token_type< str[Index] >());
+	using type = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
 	
 	// extended for `-` in procedure name, as it is the subtraction sybmol on its own
 	// tokenize_char_list should handle it being not appended as type `subtraction` but char `-`
@@ -37,8 +35,7 @@ constexpr auto find_first_non_c(Lambda lambda) {
 
 template < int Index, typename Lambda >
 constexpr auto find_first_newline(Lambda lambda) {
-	constexpr auto str = lambda();
-	using type = decltype(deduce_token_type< str[Index] >());
+	using type = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
 	if constexpr (is_same_type<type,whitespace<'\n'>>) {
 		return Index;
 	} else {
@@ -46,11 +43,11 @@ constexpr auto find_first_newline(Lambda lambda) {
 	}
 }
 
+
 // returns the index of the end of the list, layer safe
 template < int Index, int layer = 0, typename Lambda>
 constexpr auto find_end_of_list(Lambda lambda){
-	constexpr auto str = lambda();
-	using type = decltype(deduce_token_type< str[Index] >());
+	using type = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
 	if constexpr (is_same_type<type,list_start>){
 		return find_end_of_list<Index+1, layer+1>(lambda);
 	} else if constexpr (is_same_type<type,list_end>) {
@@ -67,11 +64,10 @@ constexpr auto find_end_of_list(Lambda lambda){
 
 
 // only c_ is a character, ints are currently not, even if they are in the same stream as the char list
-template <typename Lambda, size_t Index = 0, size_t end_of_char_list>
+template <typename Lambda, int Index = 0, int end_of_char_list>
 constexpr auto tokenize_char_list(Lambda str_lambda) {
-	constexpr auto str = str_lambda();
 	if constexpr (Index < end_of_char_list) {
-		using curr = decltype(deduce_token_type< str[Index] >());
+		using curr = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
 
 		using second = decltype(tokenize_char_list< Lambda, Index + 1, end_of_char_list >(str_lambda));
 		
@@ -90,7 +86,7 @@ constexpr auto tokenize_char_list(Lambda str_lambda) {
 
 template <typename Lambda>
 constexpr auto make_keyword_name(Lambda str_lambda) {
-    auto constexpr end = str_lambda().size();
+    auto constexpr end = get_size<>(Lambda{});
 	return tokenize_char_list<Lambda,0,end>(str_lambda);
 }
 
@@ -101,11 +97,17 @@ constexpr auto deduce_keyword_type(c_list<Args...>) {
 	return;	
 }
 
-#define KEYWORD(name,corresponding_type) 	                                                \
-using keyword_##corresponding_type = decltype(make_keyword_name(constexpr_string(name)));   \
-template <> 				                                                                \
-constexpr auto deduce_keyword_type(keyword_##corresponding_type) { 	                        \
-	return corresponding_type{};			                                                \
+template <>
+constexpr auto deduce_keyword_type(c_list<>) {
+	return;	
+}
+
+#define KEYWORD(name,corresponding_type) 	                                                		\
+static constexpr auto keyword_o_##corresponding_type = CSTRING(name);								\
+using keyword_##corresponding_type = decltype(make_keyword_name(keyword_o_##corresponding_type));   \
+template <> 				                                                                		\
+constexpr auto deduce_keyword_type(keyword_##corresponding_type) { 	                        		\
+	return corresponding_type{};			                                                		\
 }
 
 
@@ -126,9 +128,8 @@ KEYWORD("or",_or);
 
 template < int Start, int End, typename Lambda >
 constexpr auto make_integer(Lambda str_lambda) {
-	constexpr auto str = str_lambda();
 	if constexpr (Start < End) {
-		constexpr auto value = str[Start] - '0';
+		constexpr auto value = get_index<Start>(Lambda{}) - '0';
 		return integer< value >::merge(make_integer< Start + 1, End >(str_lambda));
 	} else {
 		return non_integer{};
@@ -137,11 +138,9 @@ constexpr auto make_integer(Lambda str_lambda) {
 
 template <typename Lambda, size_t Index = 0>
 constexpr auto tokenize(Lambda str_lambda) {
-	constexpr auto str = str_lambda();
-
-	if constexpr (Index < str.size()) {
+	if constexpr (Index < get_size<>(Lambda{})) {
 		// deduce the type of the current char
-		using curr = decltype(deduce_token_type< str[Index] >());
+		using curr = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
 
 		if constexpr (is_same_type<curr,comment_start>){ // skip comments
 			auto constexpr next_newline = find_first_newline<Index>(str_lambda);
@@ -152,7 +151,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 			return make_token_list(curr{}, second{});
 		} else if constexpr (is_same_type<curr,boolean_start>) { // get the next character thats either `t` or `f`	
 			// this is outside of the control flow, bad practice
-			using boolean_value = decltype(deduce_token_type< str[Index + 1] >());
+			using boolean_value = decltype(deduce_token_type< get_index<Index+1>(Lambda{}) >());
 			// launch next layer
 			using second = decltype(tokenize<Lambda, Index + 2>(str_lambda));
 			if constexpr (is_same_type<c_<'t'>,boolean_value>){

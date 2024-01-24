@@ -1,6 +1,7 @@
 #pragma once
 #include <type_traits>
 
+#include "string.h"
 #include "atoms.h"
 
 // for static asserts that need delayed constexpr evaluation
