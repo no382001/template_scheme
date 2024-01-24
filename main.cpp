@@ -7,19 +7,15 @@
 #include <utility>
 
 auto main_str = CSTRING(R"(
-  (+ 1 1)
+(define (pascal r c)
+  (if (or (= c 1) (= c r))
+    1
+    (+ (pascal (- r 1) (- c 1)) (pascal (- r 1) c))))
+
+(pascal 3 2)
 )");
 
 // tabs seem to fuck some things up, idk why
-
-/*
-(define (pascal r c)
-    (if (or (= c 1) (= c r))
-      1
-      (+ (pascal (- r 1) (- c 1)) (pascal (- r 1) c))))
-  
-  (pascal 3 2)
-*/
 
 using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
 // remove whitespaces

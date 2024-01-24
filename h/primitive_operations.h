@@ -60,22 +60,19 @@ auto constexpr apply_primitve_procedure(name,Arguments){								\
 	return apply_##name(Arguments{});													\
 }																						\
 																						\
-template <int A, int B>																	\
-struct op_##name {																		\
-    static constexpr bool value = A sign B;												\
-};																						\
+template <int X, int... Xs>																\
+auto constexpr all_##name(list<integer<X>, integer<Xs>...>) {							\
+	return (... && (X sign Xs));														\
+}																						\
 																						\
-template <int X, int... Xs> /* thank you C++20 */                                     	\
-constexpr auto apply_##name(list<integer<X>, integer<Xs>...>) {                     	\
-    constexpr bool results[] = 															\
-		{ op_##name<integer<X>::value(), integer<Xs>::value()>::value... };    			\
-    if constexpr (																		\
-		std::all_of(																	\
-			std::begin(results),std::end(results),[](bool v) { return v; })){			\
+template <int X, int... Xs>	/* need another overload for scm_true and scm_false */		\
+auto constexpr apply_##name(list<integer<X>, integer<Xs>...>) {							\
+	auto constexpr all = all_##name(list<integer<X>, integer<Xs>...>{});				\
+	if constexpr (all){																	\
 		return scm_true{};																\
 	} else {																			\
 		return scm_false{};																\
-	}                                                        							\
+	} 																					\
 }
 
 PRIMITIVE_RELATIONAL_OP(equal,==);

@@ -421,7 +421,7 @@ auto main_str = CSTRING(R"((
     static_assert(is_same_type<eval_result,integer<2>>,"");
 };
 
-/*
+
 
 // so the outer scope of (...) works for any amount of defines
 // but for some reason if i define inside a scope of another define, the tag is considered a compound proc and fails
@@ -433,15 +433,15 @@ namespace broken_syntax_for_inner_defines_but_works {
 
     // this behaviour kind of similar to how i need to put an outer (...) to execute defines and expressions in one scope
 
-    auto main_str = CSTRING(R"(
-    (
-        (define (add-two x)
-            (
-                (define y 2)
-                (+ x y)))
-        (add-two 2)
-    )
-    )");
+auto main_str = CSTRING(R"(
+(
+    (define (add-two x)
+        (
+            (define y 2)
+            (+ x y)))
+    (add-two 2)
+)
+)");
 
     using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
     // remove whitespaces
@@ -457,15 +457,15 @@ namespace broken_syntax_for_inner_defines_but_works {
 
 namespace sum_up_to_n {
 
-    auto main_str = CSTRING(R"(
+auto main_str = CSTRING(R"(
 (
-  (define (sum-up-to n)
-  (if (= n 0)
-      0
-      (+ n (sum-up-to (- n 1)))))
-  (sum-up-to 2)
+(define (sum-up-to n)
+(if (= n 0)
+    0
+    (+ n (sum-up-to (- n 1)))))
+(sum-up-to 2)
 )
-    )");
+)");
 
     using tokenization_result_w_whitespaces = decltype(tokenize(main_str)); // raw token list without the tokenized<...> wrapper
     // remove whitespaces
@@ -481,11 +481,11 @@ namespace sum_up_to_n {
 
 namespace comments {
 
-    auto main_str = CSTRING(R"(
+auto main_str = CSTRING(R"(
 (
-  ;this is a comment within the midst of tokens
-  (+ 1 1)
-  ; this is also a comment, until its a newline
+;this is a comment within the midst of tokens
+(+ 1 1)
+; this is also a comment, until its a newline
 )
 )");
 
@@ -496,4 +496,3 @@ namespace comments {
     using eval_result = decltype(IReval<environment<>>(IRcar(tb_evaluated{})));
     static_assert(is_same_type<eval_result,integer<2>>,"");
 };
-*/
