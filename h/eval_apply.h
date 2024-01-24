@@ -144,6 +144,10 @@ auto constexpr scm_eval_helper(wrap<list<Args...>>) {
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_members(list<A,Args...>);
 
+// this should be extended for more than one list<...>
+// possibly to wrap<list<...>,...> in which case the 2nd ... could be a list or not
+// but in any case, the last procedure is the return thing
+// without it having to be wrapped in something else like, right now.
 template <typename Env, typename A, typename... Args>
 auto constexpr eval_define_impl(list<A,Args...>){
     // handle define and extend env here
@@ -213,7 +217,16 @@ auto constexpr eval_members(list<A,Args...>){
                 static_assert(DELAYED_FALSE,"cdr applied with less or more than 1 args");
             }
         } else if constexpr (is_same_type<ev_curr,define_tag>){
+            // the tag returns so i can catch it here
+            // i should also check if there are nested defines here, shouldnt i
+            // i could enforce a `begin` type thing, where the last procedure
+            // should always return something that is not a definiton
             return eval_define_impl<Env>(list<A,Args...>{});
+            // it should apply itself to each next member until it returns
+            // so each member really should be evaluated and then return here to extend_env
+            // and do this until i can return without a define_tag
+            // -- i could enforce, procedures to always end in returns,
+            //    and that no define body can exist without a return
         } else {
             using ev_curr = decltype(IReval<Env>(make_wrap(A{})));
             

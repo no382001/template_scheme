@@ -1,2 +1,6 @@
 ; implement floating point arithmetic
 ; function to extract environment
+
+; i added some comments near define_tag and define shit in general
+; so i can refine it to have `begin` automatically in the defineiotn
+
