@@ -6,7 +6,7 @@ This project utilizes C++ template metaprogramming to interpret Scheme code. <b>
 
 ### 1. Parsing (Lexical Analysis)
 
-- The input Scheme program is encapsulated in a constexpr lambda for compile-time availability.
+- The input Scheme program is streamed into a variable template parameter character by character 
 - A template-based recursive tokenizer processes each character, skipping whitespaces (in cases where they are not needed anymore) and categorizing tokens.
 - These tokens are used to construct an AST, represented using variadic template classes to model Scheme's list structures.
 
@@ -43,7 +43,7 @@ This project utilizes C++ template metaprogramming to interpret Scheme code. <b>
 ## Some Examples
 ### a complex looking expression, taken from `tests.h`
 ```cpp
-auto input = constexpr_string(R"(
+auto input = CSTRING(R"(
     (cons (car 
         (list 1 
             (cdr (list
@@ -61,7 +61,7 @@ static_assert(
 ```
 ### demonstration of `define` and `comments`
 
-lets pretend that the next code is inside the `constexpr_string` function for syntax highlighting reasons
+lets pretend that the next code is inside the `CSTRING` function for syntax highlighting reasons
 
 ```scheme
 (define (add-two x)
@@ -71,7 +71,7 @@ lets pretend that the next code is inside the `constexpr_string` function for sy
 ```
 
 ```cpp
-auto input = constexpr_string(prev_code);
+auto input = CSTRING(prev_code);
 
 using tokenization_result = decltype(IRcar(tokenizer(input)));
 using res = decltype(IReval<environment<>>(tokenization_result{}));
@@ -96,7 +96,7 @@ static_assert(
 ```
 
 ```cpp
-auto input = constexpr_string(prev_code);
+auto input = CSTRING(prev_code);
 using tokenization_result = decltype(IRcar(tokenizer(input)));
 using res = decltype(IReval<environment<>>(tokenization_result{}));
 

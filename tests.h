@@ -2,7 +2,6 @@
 #include "h/string.h"
 #include "h/lists.h"
 #include "h/car_cdr.h"
-#include "h/utils.h"
 #include "h/env.h"
 #include "h/eval_apply.h"
 #include "h/tokenizer.h"

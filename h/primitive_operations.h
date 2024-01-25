@@ -1,7 +1,6 @@
 #pragma once
 #include "lists.h"
 #include "car_cdr.h"
-#include "utils.h"
 #include "atoms.h"
 #include <algorithm>
 

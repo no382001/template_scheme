@@ -2,7 +2,6 @@
 
 #include "lists.h"
 #include "car_cdr.h"
-#include "utils.h"
 #include "atoms.h"
 #include "primitive_operations.h"
 #include "env.h"

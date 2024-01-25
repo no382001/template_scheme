@@ -1,6 +1,12 @@
 #pragma once
 #include <type_traits>
 
+// for static asserts that need delayed constexpr evaluation
+//  - static assert willl always fail with a constexpr konw value during template generation
+//  - even when the branch is not used and will be omitted
+//  - delay the evaluation of the false value to throw a static assert only when the branch is evaluated
+#define DELAYED_FALSE !is_same_type<int,int>
+
 // C++17 constexpr string, to replace C++20 constexpr lambda solution
 // https://stackoverflow.com/questions/15858141/conveniently-declaring-compile-time-strings-in-c
 // https://ideone.com/8Ft2xu

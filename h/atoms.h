@@ -1,5 +1,4 @@
 #pragma once
-#include "utils.h"
 #include "lists.h"
 
 constexpr int _pow(int base, int exp, int result = 1) {

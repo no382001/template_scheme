@@ -3,7 +3,6 @@
 #include <type_traits>
 #include <cmath>
 #include "atoms.h"
-#include "utils.h"
 #include "lists.h"
 #include "deduce.h"
 #include "car_cdr.h"
