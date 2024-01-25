@@ -5,17 +5,17 @@
 template <template <typename...> class ListType, typename... Content>
 struct ListBehavior {
     static constexpr auto append(ListType<>)
-      -> ListType< Content... >;
+      -> ListType< Content... > {}
     static constexpr auto append(ListType<>,ListType<>)
-      -> ListType< Content... >;
+      -> ListType< Content... > {}
     
     template < typename A >
     static constexpr auto append(A)
-      -> ListType< Content..., A >;
+      -> ListType< Content..., A > {}
     
     template < typename A > // merge list<...> with list<1>
     static constexpr auto append(ListType< A >)
-      -> decltype(ListBehavior::append(A{}));
+      -> decltype(ListBehavior::append(A{})) {}
     
     template < typename A, typename B, typename ...Args >
     static constexpr auto append(ListType< A, B, Args... >) {
@@ -30,28 +30,28 @@ struct ListOf {
 
   // base
   template <typename X >
-  static auto constexpr make(X) -> ListType<X>;
+  static auto constexpr make(X) -> ListType<X> {}
   
   // rec
   template < typename X, typename ...Xs>
   static auto constexpr make(X, Xs...)
-    -> decltype(ListType< X >::append(ListType< Xs... >{}));
+    -> decltype(ListType< X >::append(ListType< Xs... >{})) {}
 
   // list<1> w/ ... elements
   template <typename X, typename... Ys> 
   static auto constexpr make(ListType< X >, Ys...)
-    -> decltype(ListType< X >::append(ListType< Ys... >{}));
+    -> decltype(ListType< X >::append(ListType< Ys... >{})) {}
 
   // list<> w/ ... elements
   template <typename... Xs>
   static auto constexpr make(ListType<>, Xs...)
-    -> decltype(make(Xs{}...));
+    -> decltype(make(Xs{}...)) {}
   
   // void
-  static auto constexpr make() -> ListType<>;
+  static auto constexpr make() -> ListType<> {}
 
   // empty ListType
-  static auto constexpr make(ListType<>) -> ListType<>;
+  static auto constexpr make(ListType<>) -> ListType<>{}
   
   // i might need these for whatever reason
   template <typename... Xs>

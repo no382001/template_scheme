@@ -1,7 +1,7 @@
 CFLAGS = -Wall -Wextra
 VERSION = -std=c++17
 EXTENDED_LIMITS = -ftemplate-backtrace-limit=100 -ftemplate-depth=10000 -fconstexpr-depth=800
-SUPPRESS_WARNING = -w
+SUPPRESS_WARNING = -Wno-comment -Wno-unused-parameter -Wno-unused-local-typedefs -Wno-return-type
 GPP = g++
 
 make :

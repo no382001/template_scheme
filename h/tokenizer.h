@@ -10,9 +10,9 @@
 #include "pretty_print.h"
 
 
-template < int Index, typename Lambda>
-constexpr auto find_first_non_integer(Lambda lambda) {
-	using type = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
+template < int Index, typename Text_t>
+constexpr auto find_first_non_integer(Text_t lambda) {
+	using type = decltype(deduce_token_type< get_index<Index>(Text_t{}) >());
 	if constexpr (!is_integer_v<type>) {
 		return Index;
 	} else {
@@ -20,9 +20,9 @@ constexpr auto find_first_non_integer(Lambda lambda) {
 	}
 }
 
-template < int Index, typename Lambda >
-constexpr auto find_first_non_c(Lambda lambda) {
-	using type = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
+template < int Index, typename Text_t >
+constexpr auto find_first_non_c(Text_t lambda) {
+	using type = decltype(deduce_token_type< get_index<Index>(Text_t{}) >());
 	
 	// extended for `-` in procedure name, as it is the subtraction sybmol on its own
 	// tokenize_char_list should handle it being not appended as type `subtraction` but char `-`
@@ -33,9 +33,9 @@ constexpr auto find_first_non_c(Lambda lambda) {
 	}
 }
 
-template < int Index, typename Lambda >
-constexpr auto find_first_newline(Lambda lambda) {
-	using type = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
+template < int Index, typename Text_t >
+constexpr auto find_first_newline(Text_t lambda) {
+	using type = decltype(deduce_token_type< get_index<Index>(Text_t{}) >());
 	if constexpr (is_same_type<type,whitespace<'\n'>>) {
 		return Index;
 	} else {
@@ -45,9 +45,9 @@ constexpr auto find_first_newline(Lambda lambda) {
 
 
 // returns the index of the end of the list, layer safe
-template < int Index, int layer = 0, typename Lambda>
-constexpr auto find_end_of_list(Lambda lambda){
-	using type = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
+template < int Index, int layer = 0, typename Text_t>
+constexpr auto find_end_of_list(Text_t lambda){
+	using type = decltype(deduce_token_type< get_index<Index>(Text_t{}) >());
 	if constexpr (is_same_type<type,list_start>){
 		return find_end_of_list<Index+1, layer+1>(lambda);
 	} else if constexpr (is_same_type<type,list_end>) {
@@ -64,12 +64,12 @@ constexpr auto find_end_of_list(Lambda lambda){
 
 
 // only c_ is a character, ints are currently not, even if they are in the same stream as the char list
-template <typename Lambda, int Index = 0, int end_of_char_list>
-constexpr auto tokenize_char_list(Lambda str_lambda) {
+template <typename Text_t, int Index = 0, int end_of_char_list>
+constexpr auto tokenize_char_list(Text_t str) {
 	if constexpr (Index < end_of_char_list) {
-		using curr = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
+		using curr = decltype(deduce_token_type< get_index<Index>(Text_t{}) >());
 
-		using second = decltype(tokenize_char_list< Lambda, Index + 1, end_of_char_list >(str_lambda));
+		using second = decltype(tokenize_char_list< Text_t, Index + 1, end_of_char_list >(str));
 		
 		if constexpr (is_same_type<curr,subtraction>){ // special case for `-` in procedure name
 			return make_c_list(c_<'-'>{}, second{});
@@ -84,10 +84,10 @@ constexpr auto tokenize_char_list(Lambda str_lambda) {
 
 // KEYWORDS ----
 
-template <typename Lambda>
-constexpr auto make_keyword_name(Lambda str_lambda) {
-    auto constexpr end = get_size<>(Lambda{});
-	return tokenize_char_list<Lambda,0,end>(str_lambda);
+template <typename Text_t>
+constexpr auto make_keyword_name(Text_t str) {
+    auto constexpr end = get_size<>(Text_t{});
+	return tokenize_char_list<Text_t,0,end>(str);
 }
 
 // check somewhere if the comp proc is a keyword
@@ -126,34 +126,34 @@ KEYWORD("or",_or);
 
 
 
-template < int Start, int End, typename Lambda >
-constexpr auto make_integer(Lambda str_lambda) {
+template < int Start, int End, typename Text_t >
+constexpr auto make_integer(Text_t str) {
 	if constexpr (Start < End) {
-		constexpr auto value = get_index<Start>(Lambda{}) - '0';
-		return integer< value >::merge(make_integer< Start + 1, End >(str_lambda));
+		constexpr auto value = get_index<Start>(Text_t{}) - '0';
+		return integer< value >::merge(make_integer< Start + 1, End >(str));
 	} else {
 		return non_integer{};
 	}
 }
 
-template <typename Lambda, size_t Index = 0>
-constexpr auto tokenize(Lambda str_lambda) {
-	if constexpr (Index < get_size<>(Lambda{})) {
+template <typename Text_t, int Index = 0>
+constexpr auto tokenize(Text_t str) {
+	if constexpr (Index < get_size<>(Text_t{})) {
 		// deduce the type of the current char
-		using curr = decltype(deduce_token_type< get_index<Index>(Lambda{}) >());
+		using curr = decltype(deduce_token_type< get_index<Index>(Text_t{}) >());
 
 		if constexpr (is_same_type<curr,comment_start>){ // skip comments
-			auto constexpr next_newline = find_first_newline<Index>(str_lambda);
-			using second = decltype(tokenize<Lambda, next_newline>(str_lambda));
+			auto constexpr next_newline = find_first_newline<Index>(str);
+			using second = decltype(tokenize<Text_t, next_newline>(str));
 			return make_token_list(second{});
 		} else if constexpr (is_whitespace_v<curr>) { // include whitespaces for later formatting	
-			using second = decltype(tokenize<Lambda, Index + 1>(str_lambda));
+			using second = decltype(tokenize<Text_t, Index + 1>(str));
 			return make_token_list(curr{}, second{});
 		} else if constexpr (is_same_type<curr,boolean_start>) { // get the next character thats either `t` or `f`	
 			// this is outside of the control flow, bad practice
-			using boolean_value = decltype(deduce_token_type< get_index<Index+1>(Lambda{}) >());
+			using boolean_value = decltype(deduce_token_type< get_index<Index+1>(Text_t{}) >());
 			// launch next layer
-			using second = decltype(tokenize<Lambda, Index + 2>(str_lambda));
+			using second = decltype(tokenize<Text_t, Index + 2>(str));
 			if constexpr (is_same_type<c_<'t'>,boolean_value>){
 				return make_token_list(scm_true{}, second{});
 			} else if constexpr (is_same_type<c_<'f'>,boolean_value>){
@@ -163,10 +163,10 @@ constexpr auto tokenize(Lambda str_lambda) {
 			}
 		} else {
 			if constexpr (is_same_type<curr, list_start>) {
-				constexpr auto end_of_list = find_end_of_list< Index >(str_lambda);
+				constexpr auto end_of_list = find_end_of_list< Index >(str);
 				// tokenize the contents of the list and return it in a wrapper
-				using l = decltype(make_list(tokenize< Lambda, Index + 1>(str_lambda)));
-				using second = decltype(tokenize<Lambda, end_of_list + 1>(str_lambda));
+				using l = decltype(make_list(tokenize< Text_t, Index + 1>(str)));
+				using second = decltype(tokenize<Text_t, end_of_list + 1>(str));
 
 				return make_token_list(l{}, second{});
 
@@ -176,26 +176,26 @@ constexpr auto tokenize(Lambda str_lambda) {
 			
 			} else if constexpr (is_integer_v<curr>) {
 				// make a multi character integer if possible
-				constexpr auto first_non_integer = find_first_non_integer< Index + 1 >(str_lambda);
-				using integer_type = decltype(make_integer< Index, first_non_integer >(str_lambda));
-				using second = decltype(tokenize< Lambda, first_non_integer >(str_lambda));
+				constexpr auto first_non_integer = find_first_non_integer< Index + 1 >(str);
+				using integer_type = decltype(make_integer< Index, first_non_integer >(str));
+				using second = decltype(tokenize< Text_t, first_non_integer >(str));
 				return make_token_list(integer_type{}, second{});
 			
 			} else if constexpr (is_char_v<curr>) {
 				// if something starts with a character, find the next non character
-				constexpr auto end_of_char_list = find_first_non_c< Index + 1 >(str_lambda);
+				constexpr auto end_of_char_list = find_first_non_c< Index + 1 >(str);
 
 				constexpr auto one_char = Index == end_of_char_list - 1;
 
 				// the tokeniser does not know anything about
 
 				if constexpr (one_char){
-					using second = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
+					using second = decltype(tokenize< Text_t, Index + 1 >(str));
 					return make_token_list(curr{}, second{});
 				} else {
-					using second = decltype(tokenize< Lambda, end_of_char_list >(str_lambda));
+					using second = decltype(tokenize< Text_t, end_of_char_list >(str));
 					
-					using char_list = decltype(tokenize_char_list< Lambda, Index, end_of_char_list >(str_lambda));
+					using char_list = decltype(tokenize_char_list< Text_t, Index, end_of_char_list >(str));
 					using query_result = decltype(deduce_keyword_type(char_list{}));
 					
 					// check if the string is a keyword
@@ -208,7 +208,7 @@ constexpr auto tokenize(Lambda str_lambda) {
 
 			} else {
 				// if its not a specially handled token
-				using next = decltype(tokenize< Lambda, Index + 1 >(str_lambda));
+				using next = decltype(tokenize< Text_t, Index + 1 >(str));
 				return make_token_list(curr{}, next{});
 			}
 		}
@@ -227,9 +227,9 @@ constexpr auto replace_wrapper(T<Args...>,Replacement<Brgs...>){
 
 CRTP_LIST(tokenized);
 
-template <typename Lambda, size_t Index = 0>
-constexpr auto tokenizer(Lambda str_lambda) {
-	using result = decltype(tokenize<Lambda, Index>(str_lambda));
+template <typename Text_t, size_t Index = 0>
+constexpr auto tokenizer(Text_t str) {
+	using result = decltype(tokenize<Text_t, Index>(str));
 	using tokens = decltype(clean_whitespaces(result{}));
 	using clean_expression = typename replace_nested_list<tokens>::type; // convert list
 	return replace_wrapper(clean_expression{},tokenized{});
