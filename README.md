@@ -1,6 +1,6 @@
 # Compile-Time Scheme Interpreter in C++
 
-This project utilizes C++ template metaprogramming to interpret Scheme code. <b>It is by no means complete, or claims to be.</b> The process is executed entirely at compile-time, transforming Scheme code into an AST and then evaluating it, all within the C++ template system.
+This project utilizes C++ template metaprogramming to interpret Scheme code. The process is executed entirely at compile-time, transforming Scheme code into an AST and then evaluating it, all within the C++ template system.
 
 ## Structure
 
@@ -37,8 +37,11 @@ This project utilizes C++ template metaprogramming to interpret Scheme code. <b>
     car     (car {1} {2} ... )
     cdr     (cdr {1} {2} ... )
     if      (if {pred} {then} {else})
+    
     apply   (apply {proc} {args})
-    eval    (eval 'proc) ;still lacks an env, in my implementation
+    eval    (eval 'proc)
+    define  (define {name} {body})
+    quote   (quote {expr})
 
 ## Some Examples
 ### a complex looking expression, taken from `tests.h`
@@ -140,6 +143,3 @@ list<token_list<
 
 integer<3>
 ```
-
-## Working with templates
-...
